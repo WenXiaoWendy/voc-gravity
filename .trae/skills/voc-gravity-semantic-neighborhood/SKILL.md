@@ -11,8 +11,8 @@ React/TS/Vite/Tailwind 前端三层气泡视图与交互闭环
 
 ## 1. Project Identity
 
-**Project Name**: Voc Gravity (Vocabulary Gravity)  
-**Type**: Vocabulary learning tool powered by *semantic neighborhood exploration* (not a generic chatbot).  
+**Project Name**: Voc Gravity (Vocabulary Gravity)
+**Type**: Vocabulary learning tool powered by *semantic neighborhood exploration* (not a generic chatbot).
 **Core Idea**: Model vocabulary as an explorable semantic neighborhood. A query word becomes the **center node**; the system retrieves TopK semantic neighbors and uses an LLM to generate **structured relationships, distinctions, knowledge points, and examples**, supporting continuous exploration via center switching.
 
 ---
@@ -138,8 +138,8 @@ LLM MUST output JSON matching a stable schema, e.g.:
 
 ## 1. Project Identity
 
-**Project Name**: Voc Gravity (Vocabulary Gravity)  
-**Type**: Vocabulary learning tool powered by *semantic neighborhood exploration* (not a generic chatbot).  
+**Project Name**: Voc Gravity (Vocabulary Gravity)
+**Type**: Vocabulary learning tool powered by *semantic neighborhood exploration* (not a generic chatbot).
 **Core Idea**: Model vocabulary as an explorable semantic neighborhood. A query word becomes the **center node**; the system retrieves TopK semantic neighbors and uses an LLM to generate **structured relationships, distinctions, knowledge points, and examples**, supporting continuous exploration via center switching.
 
 ---
@@ -371,3 +371,21 @@ LLM MUST output JSON matching a stable schema, e.g.:
   * dev: SentenceTransformer embeddings
   * prod: OpenAI embeddings (3072-d)
 * Prioritize correctness, reproducibility, and controllable outputs over aesthetic perfection.
+
+# UI 渲染规则（必须遵守）
+
+* 禁止使用 && / ?: null / return null 进行显示隐藏（会导致节点挂载/卸载）。
+
+* 必须让 DOM 节点保持稳定：组件始终渲染，隐藏用 hidden 或 class 切换（opacity/max-height/overflow）。
+
+* 仅允许在“真正需要卸载以释放资源”的场景使用条件渲染（例如：大型图表、WebGL、视频解码器），并需在代码注释写明原因：// intentional unmount for resource cleanup。
+
+* 所有隐藏内容必须同步处理可访问性：aria-hidden、必要时 tabIndex={-1}，避免隐藏内容可聚焦。
+
+
+当你在写/改 React + Tailwind 的 UI（尤其是顶栏、导航、表单控件、卡片等）时，如果出现以下任意情况，就必须调用  [tailwind.md](tailwind.md) 来决定“直接写 Tailwind 还是封装抽象”，并按规则重构代码：
+* 发现 Tailwind class 变得很长（utility ≥ 12 或明显影响可读性），或同一串 class 在多个地方复制粘贴
+* 组件存在多种变体（size / intent / tone）或多种交互状态（hover / focus / disabled / selected / loading）需要统一
+* 布局对齐要求严格（例如：左右贴边、搜索框必须以屏幕中心对齐、宽屏不留空、小屏不挤爆）
+* 需要避免 DOM 节点频繁挂载/卸载（显示隐藏优先切 class/hidden，而不是条件渲染）
+* UI 需要长期维护或准备沉淀为组件库/规范（希望把样式收敛到 ui/ 组件、@apply、或 cva 变体体系）

@@ -75,6 +75,12 @@ const generateRelationType = (centerWord: string, neighborWord: string): string 
 // 莫兰迪低饱和渐变彩质感
 // 深色背景 + 毛玻璃效果 + 克制设计
 
+const TOP_BAR_CLASSES = 'fixed top-0 left-0 right-0 z-30 bg-black/30 backdrop-blur-xl p-4 border-b border-white/10';
+const TOP_BAR_GRID_CLASSES = 'grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4';
+const SELECT_CLASSES = 'w-40 px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 appearance-none focus:outline-none focus:border-blue-500';
+const SELECT_ARROW_CLASSES = 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60';
+const BOTTOM_BAR_CLASSES = 'fixed bottom-0 left-0 right-0 z-20 bg-black/20 backdrop-blur-lg p-3 text-center text-sm text-white/60 border-t border-white/5';
+
 export const VocabularyGravityScreen: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
@@ -96,7 +102,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     bubbleItems.push({
       id: 'center',
       word: centerWord,
-      pos: centerWordDetails?.pos?.replace('.', '') || 'n',
+      pos: centerWordDetails?.pos || 'n.',
       brief_gloss: centerWordDetails?.meaning || `Definition for ${centerWord}`,
       chinese_gloss: centerWordDetails?.meaning || `${centerWord}的中文释义`,
       source: 'retriever',
@@ -126,7 +132,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         bubbleItems.push({
           id: `word-${wordIndex}`,
           word: word,
-          pos: wordDetails?.pos?.replace('.', '') || 'n',
+          pos: wordDetails?.pos || 'n.',
           brief_gloss: wordDetails?.meaning || `Definition for ${word}`,
           chinese_gloss: wordDetails?.meaning || `${word}的中文释义`,
           source: 'retriever',
@@ -187,9 +193,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   }, [isLoading]);
 
   const handleSelectItem = useCallback((item: BubbleItem) => {
-    setSelectedItem(item);
-
-    // 点击气泡时重新搜索该词
+    // 如果点击的是新词，直接搜索（搜索完成后会自动设置选中项）
     if (item.word !== currentQueryRef.current) {
       handleSearch(item.word);
     }
@@ -201,51 +205,47 @@ export const VocabularyGravityScreen: React.FC = () => {
       style={{ backgroundColor: BACKGROUND_COLOR }}
     >
       {/* 顶部状态栏 - 毛玻璃效果 */}
-      <div className="
-        fixed top-0 left-0 right-0 z-30
-        bg-black/30 backdrop-blur-xl p-4
-        border-b border-white/10
-      ">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          {/* 左侧：标题 + 词书选择 */}
-          <div className="flex items-center gap-6">
-            <div>
+      <div className={TOP_BAR_CLASSES}>
+        {/* 关键：全宽 + 1fr auto 1fr，保证搜索框以屏幕中心居中 */}
+        <div className={TOP_BAR_GRID_CLASSES}>
+          {/* 左 */}
+          <div className="justify-self-start flex items-center gap-6 min-w-0">
+            <div className="leading-tight">
               <h1 className="text-2xl font-semibold text-white/95">Voc Gravity</h1>
               <p className="text-sm text-white/60">语义邻域探索工具</p>
             </div>
 
-            {/* 词书选择框 */}
             <div className="relative">
               <select
-                className="
-                  px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700
-                  focus:outline-none focus:border-blue-500 appearance-none
-                  w-40
-                "
+                className={SELECT_CLASSES}
                 defaultValue="ielts"
               >
-                {VOCABULARY_BOOKS.map(book => (
+                {VOCABULARY_BOOKS.map((book) => (
                   <option key={book.key} value={book.key}>
                     {book.name}
                   </option>
                 ))}
               </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+
+              <svg
+                className={SELECT_ARROW_CLASSES}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
           </div>
 
-          {/* 中间：搜索框 */}
-          <div className="flex-1 max-w-md mx-8">
+          {/* 中：永远屏幕中心 */}
+          <div className="justify-self-center w-[min(32rem,calc(100vw-2rem))]">
             <SearchBar onSearch={handleSearch} />
           </div>
 
-          {/* 右侧：状态信息 */}
-          <div className="text-sm text-white/60">
-            {isLoading ? '搜索中...' : `当前: ${selectedItem?.word || '无'} • 共 ${currentWords.length + 1} 个词`}
+          {/* 右 */}
+          <div className="justify-self-end text-sm text-white/60 whitespace-nowrap">
+            {isLoading ? "搜索中..." : `当前: ${selectedItem?.word || "无"} • 共 ${currentWords.length + 1} 个词`}
           </div>
         </div>
       </div>
@@ -260,23 +260,18 @@ export const VocabularyGravityScreen: React.FC = () => {
         />
 
         {/* 加载状态覆盖层 */}
-        {isLoading && (
+        {/* {isLoading && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
             <div className="text-white/80 text-lg font-medium">加载中...</div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* 右侧信息抽屉 */}
       <BottomSheet selectedItem={selectedItem} />
 
       {/* 底部信息栏 - 半透明 */}
-      <div className="
-        fixed bottom-0 left-0 right-0 z-20
-        bg-black/20 backdrop-blur-lg p-3
-        text-center text-sm text-white/60
-        border-t border-white/5
-      ">
+      <div className={BOTTOM_BAR_CLASSES}>
         点击气泡探索语义邻域 • 支持近义词、对比词、易混淆词等多种关系类型
       </div>
     </div>
