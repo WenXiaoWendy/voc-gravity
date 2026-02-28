@@ -62,7 +62,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble: React.FC<BubbleProps> = ({ item, layout, isSelected, onClick }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick }) => {
   const theme = getBubbleTheme(item);
 
   // 计算合适的字体大小，确保文字不超出边界
@@ -184,4 +184,4 @@ export const Bubble: React.FC<BubbleProps> = ({ item, layout, isSelected, onClic
       </div>
     </div>
   );
-};
+});

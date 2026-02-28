@@ -53,6 +53,24 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts'): P
   }
 };
 
+// 简单的字符串哈希函数，用于生成确定性值
+const simpleHash = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // 转换为32位整数
+  }
+  return Math.abs(hash);
+};
+
+// 确定性关系类型生成，基于中心词和邻居词
+const generateRelationType = (centerWord: string, neighborWord: string): string => {
+  const relationTypes = ['near-synonym', 'contrast', 'confusable', 'topic-cluster', 'usage', 'formal', 'literary', 'noun-form', 'general'];
+  const hash = simpleHash(centerWord + '_' + neighborWord);
+  return relationTypes[hash % relationTypes.length];
+};
+
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
 // 深色背景 + 毛玻璃效果 + 克制设计
@@ -62,6 +80,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const currentQueryRef = useRef<string>('');
+  const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
   // 挂载后默认搜索abandon
   useEffect(() => {
@@ -102,8 +121,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         if (word === centerWord) continue; // 跳过中心词
 
         const wordDetails = getWordDetails(word);
-        const relationTypes = ['near-synonym', 'contrast', 'confusable', 'topic-cluster', 'usage', 'formal', 'literary', 'noun-form', 'general'];
-        const relationType = relationTypes[Math.floor(Math.random() * relationTypes.length)];
+        const relationType = generateRelationType(centerWord, word);
 
         bubbleItems.push({
           id: `word-${wordIndex}`,
@@ -134,6 +152,15 @@ export const VocabularyGravityScreen: React.FC = () => {
     currentQueryRef.current = query;
 
     try {
+      // 检查缓存
+      const cachedBubbleItems = bubbleCache.current.get(query);
+      if (cachedBubbleItems) {
+        // 使用缓存数据
+        setCurrentWords(cachedBubbleItems);
+        setSelectedItem(cachedBubbleItems[0]);
+        return;
+      }
+
       // 调用后端检索接口
       const similarWords = await retrieveSimilarWords(query);
 
@@ -144,6 +171,9 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       // 生成气泡数据（同步函数）
       const bubbleItems = generateBubbleItems(similarWords, query);
+
+      // 存入缓存
+      bubbleCache.current.set(query, bubbleItems);
 
       // 更新状态
       setCurrentWords(bubbleItems);
@@ -221,17 +251,19 @@ export const VocabularyGravityScreen: React.FC = () => {
       </div>
 
       {/* 气泡场 */}
-      <div className="pt-20">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-96">
-            <div className="text-white/60 text-lg">加载中...</div>
+      <div className="pt-20 relative">
+        {/* 始终渲染气泡场，保持组件挂载 */}
+        <BubbleField
+          items={currentWords}
+          selectedItem={selectedItem}
+          onSelectItem={handleSelectItem}
+        />
+
+        {/* 加载状态覆盖层 */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+            <div className="text-white/80 text-lg font-medium">加载中...</div>
           </div>
-        ) : (
-          <BubbleField
-            items={currentWords}
-            selectedItem={selectedItem}
-            onSelectItem={handleSelectItem}
-          />
         )}
       </div>
 
