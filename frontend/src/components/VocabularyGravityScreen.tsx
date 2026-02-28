@@ -6,6 +6,11 @@ import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
 import { SearchBar } from './SearchBar';
 
+// 词书配置
+const VOCABULARY_BOOKS = [
+  { key: 'ielts', name: '雅思词汇真经', description: '权威雅思词汇库' }
+];
+
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
 // 深色背景 + 毛玻璃效果 + 克制设计
@@ -82,11 +87,43 @@ export const VocabularyGravityScreen: React.FC = () => {
         border-b border-white/10
       ">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div>
-            <h1 className="text-2xl font-semibold text-white/95">Voc Gravity</h1>
-            <p className="text-sm text-white/60">语义邻域探索工具</p>
+          {/* 左侧：标题 + 词书选择 */}
+          <div className="flex items-center gap-6">
+            <div>
+              <h1 className="text-2xl font-semibold text-white/95">Voc Gravity</h1>
+              <p className="text-sm text-white/60">语义邻域探索工具</p>
+            </div>
+
+            {/* 词书选择框 */}
+            <div className="relative">
+              <select
+                className="
+                  px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700
+                  focus:outline-none focus:border-blue-500 appearance-none
+                  w-40
+                "
+                defaultValue="ielts"
+              >
+                {VOCABULARY_BOOKS.map(book => (
+                  <option key={book.key} value={book.key}>
+                    {book.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                <svg className="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <SearchBar onSearch={handleSearch} />
+
+          {/* 中间：搜索框 */}
+          <div className="flex-1 max-w-md mx-8">
+            <SearchBar onSearch={handleSearch} />
+          </div>
+
+          {/* 右侧：状态信息 */}
           <div className="text-sm text-white/60">
             当前: {selectedItem?.word} • 共 {currentWords.length} 个词
           </div>

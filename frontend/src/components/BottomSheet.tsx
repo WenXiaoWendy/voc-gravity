@@ -47,26 +47,36 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
         </div>
       </div>
 
-      {/* 简要释义 */}
+      {/* 中文释义 */}
+      {selectedItem.chinese_gloss && (
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-white/60 mb-2">中文释义</h4>
+          <p className="text-white/90 leading-relaxed">{selectedItem.chinese_gloss}</p>
+        </div>
+      )}
+
+      {/* 英文释义
       {selectedItem.brief_gloss && (
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-white/60 mb-2">释义</h4>
+          <h4 className="text-sm font-medium text-white/60 mb-2">英文释义</h4>
           <p className="text-white/90 leading-relaxed">{selectedItem.brief_gloss}</p>
         </div>
-      )}
+      )} */}
 
-      {/* 关系说明 */}
-      {selectedItem.why && (
+      {/* 例句 */}
+      {selectedItem.example && (
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-white/60 mb-2">关系说明</h4>
-          <p className="text-white/80 leading-relaxed">{selectedItem.why}</p>
+          <h4 className="text-sm font-medium text-white/60 mb-2">例句</h4>
+          <p className="text-white/80 text-sm leading-relaxed italic">
+            "{selectedItem.example}"
+          </p>
         </div>
       )}
 
-      {/* 用法说明 */}
-      {selectedItem.usage_notes && selectedItem.usage_notes.length > 0 && (
+      {/* 额外信息 */}
+      {selectedItem.usage_notes && selectedItem.usage_notes.length > 0 && selectedItem.usage_notes[0] !== 'Common usage' && (
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-white/60 mb-2">用法说明</h4>
+          <h4 className="text-sm font-medium text-white/60 mb-2">额外信息</h4>
           <ul className="space-y-2">
             {selectedItem.usage_notes.map((note, index) => (
               <li key={index} className="text-white/80 text-sm leading-relaxed">
@@ -77,17 +87,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
         </div>
       )}
 
-      {/* 例句 */}
-      {(selectedItem as any).example_sentences && (selectedItem as any).example_sentences.length > 0 && (
+      {/* 关系说明 */}
+      {selectedItem.why && selectedItem.relation_type !== 'center' && (
         <div>
-          <h4 className="text-sm font-medium text-white/60 mb-2">例句</h4>
-          <ul className="space-y-3">
-            {(selectedItem as any).example_sentences.map((sentence: string, index: number) => (
-              <li key={index} className="text-white/80 text-sm leading-relaxed italic">
-                "{sentence}"
-              </li>
-            ))}
-          </ul>
+          <h4 className="text-sm font-medium text-white/60 mb-2">关系说明</h4>
+          <p className="text-white/80 text-sm leading-relaxed">{selectedItem.why}</p>
         </div>
       )}
     </div>
