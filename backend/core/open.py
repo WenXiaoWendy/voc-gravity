@@ -98,13 +98,50 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
             parsed_response = json.loads(response.content)
             print(f"=== 解析后的JSON ===")
             print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
+
+            # 将关系代码映射为前端可用的关系类型
+            # 关系代码到关系类型的映射
+            relation_mapping = {
+                "syn": "near-synonym",
+                "ant": "contrast",
+                "hyper": "topic-cluster",
+                "hypo": "topic-cluster",
+                "sib": "topic-cluster",
+                "coll": "usage",
+                "frame": "usage",
+                "reg": "formal",
+                "int": "formal",
+                "poly": "confusable",
+                "noise": "general"
+            }
+
+            # 转换关系类型，确保与输入顺序一致
+            converted_response = {}
+
+            # 按照输入顺序处理每个单词
+            for word in neighbor_words:
+                if word in parsed_response:
+                    relations = parsed_response[word]
+                    if relations and relations[0] != "noise":  # 使用第一个关系类型
+                        converted_response[word] = [relation_mapping.get(relations[0], "general")]
+                    else:
+                        converted_response[word] = ["general"]
+                else:
+                    # 如果OpenAI没有返回该单词的关系，使用默认值
+                    converted_response[word] = ["general"]
+
+            print(f"=== 转换后的关系类型（按输入顺序） ===")
+            print(json.dumps(converted_response, indent=2, ensure_ascii=False))
+
+            return json.dumps(converted_response)
+
         except json.JSONDecodeError as e:
             print(f"JSON解析错误: {e}")
             print(f"原始响应内容: {response.content}")
-            # 如果JSON解析失败，返回默认的noise响应
+            # 如果JSON解析失败，返回默认的general响应
             error_response = {}
             for word in neighbor_words:
-                error_response[word] = ["noise"]
+                error_response[word] = ["general"]
             return json.dumps(error_response)
 
         return response.content

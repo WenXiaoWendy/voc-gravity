@@ -12,7 +12,7 @@ export interface WordEntry {
 export interface BubbleItem extends WordEntry {
   layer: 'center' | 'inner' | 'middle' | 'outer';
   score: number;
-  relation_type?: string;
+  relation_type?: string | string[];
   why?: string;
   usage_notes?: string[];
   example?: string;

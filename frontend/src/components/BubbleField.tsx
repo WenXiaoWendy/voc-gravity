@@ -7,10 +7,11 @@ interface BubbleFieldProps {
   items: BubbleItem[];
   selectedItem: BubbleItem | null;
   onSelectItem: (item: BubbleItem) => void;
+  selectedRelationTypes?: string[];
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [] }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -39,6 +40,13 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
         const layout = layouts.get(item.id);
         if (!layout) return null;
 
+        // 判断气泡是否应该模糊（中心词始终可见，支持多选）
+        const isBlurred = selectedRelationTypes.length > 0 && item.layer !== 'center' && item.relation_type ?
+          (Array.isArray(item.relation_type) ?
+            !item.relation_type.some(relation => selectedRelationTypes.includes(relation)) :
+            !selectedRelationTypes.includes(item.relation_type)
+          ) : false;
+
         return (
           <Bubble
             key={item.id}
@@ -46,6 +54,7 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             layout={layout}
             isSelected={selectedItem?.id === item.id}
             onClick={onSelectItem}
+            isBlurred={isBlurred}
           />
         );
       })}

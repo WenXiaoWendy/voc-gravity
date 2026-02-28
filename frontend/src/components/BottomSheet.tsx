@@ -40,7 +40,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighbor
     <div
       ref={sheetRef}
       className={`
-        fixed right-4 top-1/2 transform -translate-y-1/2 z-50
+        fixed right-4 bottom-4 z-50
         bg-white/10 backdrop-blur-xl rounded-2xl
         border border-white/10 shadow-2xl
         transition-all duration-300 linear
@@ -101,9 +101,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighbor
                 {selectedItem.pos && (
                   <span className="text-sm font-medium">{selectedItem.pos}</span>
                 )}
-                {selectedItem.relation_type && (
+                {/* {selectedItem.relation_type && (
                   <span className="text-sm font-medium">{selectedItem.relation_type}</span>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -144,22 +144,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighbor
               <div>
                 <h4 className="text-sm font-medium text-white/60 mb-2">关系说明</h4>
                 <p className="text-white/80 text-sm leading-relaxed">{selectedItem.why}</p>
-              </div>
-            )}
-
-            {/* 语义邻域分析结果 */}
-            {neighborhoodAnalysis && (
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <h4 className="text-sm font-medium text-white/60 mb-2">语义邻域分析</h4>
-                <div className="text-white/80 text-sm leading-relaxed space-y-3">
-                  {neighborhoodAnalysis.split('\n').map((paragraph, index) => (
-                    paragraph.trim() && (
-                      <p key={index} className="leading-relaxed">
-                        {paragraph.trim()}
-                      </p>
-                    )
-                  ))}
-                </div>
               </div>
             )}
           </>

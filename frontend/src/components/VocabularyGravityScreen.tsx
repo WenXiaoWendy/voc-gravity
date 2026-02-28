@@ -3,16 +3,11 @@ import { BubbleItem } from '../types/bubble';
 import { BACKGROUND_COLOR } from '../utils/theme';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
-import { SearchBar } from './SearchBar';
+import NavBar from './NavBar';
+import RelationLegend from './RelationLegend';
 
 // 导入本地词书数据
 import ieltsVocabulary from '../data/ielts.json';
-
-// 词书配置
-const VOCABULARY_BOOKS = [
-  { key: 'ielts', name: '雅思词汇真经', description: '权威雅思词汇库' }
-];
-
 // API基础URL
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -69,20 +64,14 @@ const simpleHash = (str: string): number => {
 };
 
 // 确定性关系类型生成，基于中心词和邻居词
-const generateRelationType = (centerWord: string, neighborWord: string): string => {
+const generateRelationType = (centerWord: string, neighborWord: string): string[] => {
   const relationTypes = ['near-synonym', 'contrast', 'confusable', 'topic-cluster', 'usage', 'formal', 'literary', 'noun-form', 'general'];
   const hash = simpleHash(centerWord + '_' + neighborWord);
-  return relationTypes[hash % relationTypes.length];
+  return [relationTypes[hash % relationTypes.length]];
 };
-
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
-// 深色背景 + 毛玻璃效果 + 克制设计
 
-const TOP_BAR_CLASSES = 'fixed top-0 left-0 right-0 z-30 bg-black/30 backdrop-blur-xl p-4 border-b border-white/10';
-const TOP_BAR_GRID_CLASSES = 'grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4';
-const SELECT_CLASSES = 'w-40 px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 appearance-none focus:outline-none focus:border-blue-500';
-const SELECT_ARROW_CLASSES = 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60';
 const BOTTOM_BAR_CLASSES = 'fixed bottom-0 left-0 right-0 z-20 bg-black/20 backdrop-blur-lg p-3 text-center text-sm text-white/60 border-t border-white/5';
 
 export const VocabularyGravityScreen: React.FC = () => {
@@ -90,6 +79,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [neighborhoodAnalysis, setNeighborhoodAnalysis] = useState<string>('');
+  const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -97,6 +87,31 @@ export const VocabularyGravityScreen: React.FC = () => {
   useEffect(() => {
     handleSearch('abandon');
   }, []);
+
+  // 计算筛选后的单词数量
+  const calculateFilteredWordsCount = (): number => {
+    if (selectedRelationTypes.length === 0) {
+      // 未选择任何关系类型时，显示所有单词（包括中心词）
+      return currentWords.length + 1;
+    }
+
+    // 计算符合筛选条件的单词数量
+    const filteredCount = currentWords.filter(item => {
+      // 中心词始终显示
+      if (item.layer === 'center') return true;
+
+      // 检查单词的关系类型是否匹配选中的关系类型
+      if (Array.isArray(item.relation_type)) {
+        return item.relation_type.some(relation => selectedRelationTypes.includes(relation));
+      } else if (item.relation_type) {
+        return selectedRelationTypes.includes(item.relation_type);
+      }
+
+      return false;
+    }).length;
+
+    return filteredCount;
+  };
 
   // 根据后端返回的单词数组生成气泡数据
   const generateBubbleItems = (words: string[], centerWord: string): BubbleItem[] => {
@@ -217,59 +232,22 @@ export const VocabularyGravityScreen: React.FC = () => {
       className="min-h-screen text-white font-serif"
       style={{ backgroundColor: BACKGROUND_COLOR }}
     >
-      {/* 顶部状态栏 - 毛玻璃效果 */}
-      <div className={TOP_BAR_CLASSES}>
-        {/* 关键：全宽 + 1fr auto 1fr，保证搜索框以屏幕中心居中 */}
-        <div className={TOP_BAR_GRID_CLASSES}>
-          {/* 左 */}
-          <div className="justify-self-start flex items-center gap-6 min-w-0">
-            <div className="leading-tight">
-              <h1 className="text-2xl font-semibold text-white/95">Voc Gravity</h1>
-              <p className="text-sm text-white/60">语义邻域探索工具</p>
-            </div>
-
-            <div className="relative">
-              <select
-                className={SELECT_CLASSES}
-                defaultValue="ielts"
-              >
-                {VOCABULARY_BOOKS.map((book) => (
-                  <option key={book.key} value={book.key}>
-                    {book.name}
-                  </option>
-                ))}
-              </select>
-
-              <svg
-                className={SELECT_ARROW_CLASSES}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* 中：永远屏幕中心 */}
-          <div className="justify-self-center w-[min(32rem,calc(100vw-2rem))]">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-
-          {/* 右 */}
-          <div className="justify-self-end text-sm text-white/60 whitespace-nowrap">
-            {isLoading ? "搜索中..." : `当前: ${selectedItem?.word || "无"} • 共 ${currentWords.length + 1} 个词`}
-          </div>
-        </div>
-      </div>
+      {/* 顶部状态栏 */}
+      <NavBar
+        isLoading={isLoading}
+        selectedItemWord={selectedItem?.word || null}
+        totalWordsCount={currentWords.length + 1}
+        onSearch={handleSearch}
+      />
 
       {/* 气泡场 */}
       <div className="pt-20 relative">
-        {/* 始终渲染气泡场，保持组件挂载 */}
+        {/* 气泡场 */}
         <BubbleField
           items={currentWords}
           selectedItem={selectedItem}
           onSelectItem={handleSelectItem}
+          selectedRelationTypes={selectedRelationTypes}
         />
 
         {/* 加载状态覆盖层 */}
@@ -283,6 +261,13 @@ export const VocabularyGravityScreen: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* 关系类型图例 - 固定在右上方 */}
+      <RelationLegend
+        selectedRelationTypes={selectedRelationTypes}
+        filteredWordsCount={calculateFilteredWordsCount()}
+        onRelationTypeChange={setSelectedRelationTypes}
+      />
 
       {/* 右侧信息抽屉 */}
       <BottomSheet selectedItem={selectedItem} neighborhoodAnalysis={neighborhoodAnalysis} />

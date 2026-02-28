@@ -80,8 +80,10 @@ def retrieve():
         # 调用向量数据库检索
         results = query_memory(query, book_key=book_key, k=k)
 
-        # 提取单词信息
+        # 提取单词信息，保持原始顺序
         words = []
+        seen_words = set()  # 用于去重，但保持顺序
+
         for result in results:
             # 从文档内容中提取单词
             content = result.page_content
@@ -92,19 +94,12 @@ def retrieve():
                 if word_end == -1:
                     word_end = len(content)
                 word = content[word_start:word_end].strip()
-                if word:
+                if word and word not in seen_words:
+                    seen_words.add(word)
                     words.append(word)
 
-        # 去重并保持顺序
-        unique_words = []
-        seen = set()
-        for word in words:
-            if word not in seen:
-                seen.add(word)
-                unique_words.append(word)
-
-        # 限制返回数量
-        final_words = unique_words[:56]
+        # 限制返回数量，保持原始检索顺序
+        final_words = words[:56]
 
         # 语义邻域分析结果
         analysis_result = None

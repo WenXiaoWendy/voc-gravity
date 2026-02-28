@@ -55,6 +55,7 @@ interface BubbleProps {
   layout: BubbleLayout;
   isSelected: boolean;
   onClick: (item: BubbleItem) => void;
+  isBlurred?: boolean;
 }
 
 // 单个气泡组件 - Apple Health / iOS 17 风格
@@ -62,7 +63,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false }) => {
   const theme = getBubbleTheme(item);
 
   // 计算合适的字体大小，确保文字不超出边界
@@ -85,13 +86,14 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     height: layout.r * 2,
     padding: '15px',
     background: 'transparent',
-    opacity: item.layer === 'center' ? 0.95 : 0.85,
+    opacity: isBlurred ? 0.3 : (item.layer === 'center' ? 0.95 : 0.85),
     border: isSelected ? BORDER_CONFIG.selected : BORDER_CONFIG.normal,
     boxShadow: isSelected
       ? `${SHADOW_CONFIG.normal}, ${SHADOW_CONFIG.selected}, ${SHADOW_CONFIG.glow}`
       : SHADOW_CONFIG.normal,
-    transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+    transform: isBlurred ? 'scale(0.9)' : (isSelected ? 'scale(1.15)' : 'scale(1)'),
     zIndex: isSelected ? 20 : item.layer === 'center' ? 15 : 10,
+    filter: isBlurred ? 'blur(4px)' : 'none',
   };
 
   // 中心气泡的特殊效果
@@ -102,42 +104,42 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
   return (
     <div
       className={`
-        absolute rounded-full flex items-center justify-center cursor-pointer
+        absolute rounded-full flex items-center justify-center
         transition-all duration-300 font-serif backdrop-blur-sm
-        hover:scale-105 hover:opacity-95 active:scale-100
+        ${isBlurred ? 'cursor-default' : 'cursor-pointer hover:scale-105 hover:opacity-95 active:scale-100'}
       `}
       style={{
         ...baseBubbleStyle,
         ...centerGlowEffect
       }}
-      onClick={() => onClick(item)}
+      onClick={isBlurred ? undefined : () => onClick(item)}
     >
       {/* 多层渐变效果 - 增强立体感 */}
-        {/* 基础渐变层 */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at ${GRADIENT_CONFIG.baseGradient.gradientPosition}, ${theme.gradientFrom}, ${theme.gradientTo} ${GRADIENT_CONFIG.baseGradient.gradientStops}, ${darkenColor(theme.gradientTo, GRADIENT_CONFIG.baseGradient.darkenPercent)} 100%)`
-          }}
-        />
+      {/* 基础渐变层 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.baseGradient.gradientPosition}, ${theme.gradientFrom}, ${theme.gradientTo} ${GRADIENT_CONFIG.baseGradient.gradientStops}, ${darkenColor(theme.gradientTo, GRADIENT_CONFIG.baseGradient.darkenPercent)} 100%)`
+        }}
+      />
 
-        {/* 内高光效果 - 增强玻璃质感 */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            opacity: GRADIENT_CONFIG.innerGlow.opacity,
-            background: `radial-gradient(circle at ${GRADIENT_CONFIG.innerGlow.position}, rgba(255,255,255,${GRADIENT_CONFIG.innerGlow.intensity}), transparent ${GRADIENT_CONFIG.innerGlow.stops})`
-          }}
-        />
+      {/* 内高光效果 - 增强玻璃质感 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          opacity: GRADIENT_CONFIG.innerGlow.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.innerGlow.position}, rgba(255,255,255,${GRADIENT_CONFIG.innerGlow.intensity}), transparent ${GRADIENT_CONFIG.innerGlow.stops})`
+        }}
+      />
 
-        {/* 边缘阴影效果 - 增强立体感 */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            opacity: GRADIENT_CONFIG.edgeShadow.opacity,
-            background: `radial-gradient(circle at ${GRADIENT_CONFIG.edgeShadow.position}, transparent ${GRADIENT_CONFIG.edgeShadow.stops}, rgba(0,0,0,${GRADIENT_CONFIG.edgeShadow.intensity}) 100%)`
-          }}
-        />
+      {/* 边缘阴影效果 - 增强立体感 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          opacity: GRADIENT_CONFIG.edgeShadow.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.edgeShadow.position}, transparent ${GRADIENT_CONFIG.edgeShadow.stops}, rgba(0,0,0,${GRADIENT_CONFIG.edgeShadow.intensity}) 100%)`
+        }}
+      />
 
       <div className="text-center relative z-10" style={{
         maxWidth: '100%',
@@ -169,7 +171,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
               textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)', // 增强阴影
               fontWeight: 500, // 增加字体权重
               letterSpacing: '0.02em', // 增加字间距
-            //   fontFamily: 'system-ui, -apple-system, sans-serif' // 使用系统字体
+              //   fontFamily: 'system-ui, -apple-system, sans-serif' // 使用系统字体
             }}
           >
             {(() => {

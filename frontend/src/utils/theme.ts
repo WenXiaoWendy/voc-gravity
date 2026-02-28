@@ -77,7 +77,17 @@ export const getBubbleTheme = (item: any): BubbleTheme => {
   };
 
   // 优先使用 relation_type，如果没有则根据层级
-  const themeKey = item.relation_type || item.layer;
+  let themeKey = item.layer; // 默认使用层级
+
+  if (item.relation_type) {
+    if (Array.isArray(item.relation_type)) {
+      // 如果是数组，使用第一个关系类型
+      themeKey = item.relation_type[0] || item.layer;
+    } else {
+      // 如果是字符串，直接使用
+      themeKey = item.relation_type;
+    }
+  }
 
   // 如果没有匹配的主题，使用通用默认值
   return themeMap[themeKey] || {
