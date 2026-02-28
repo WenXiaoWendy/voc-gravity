@@ -1,0 +1,1505 @@
+[
+  {
+    "word": "atmosphere",
+    "pos": "n.",
+    "meaning": "大气层；氛围",
+    "example": "The approaching examination created a tense atmosphere on the campus",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hydrosphere",
+    "pos": "n.",
+    "meaning": "水圈；大气中的水汽",
+    "example": "All the water of the earth's surface is included in the hydrosphere",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "lithosphere",
+    "pos": "n.",
+    "meaning": "岩石圈",
+    "example": "The lithosphere and the hydrosphere together form the earth's surface",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "oxygen",
+    "pos": "n.",
+    "meaning": "氧气",
+    "example": "Hydrogen and Oxygen are gases",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "oxide",
+    "pos": "n.",
+    "meaning": "氧化物",
+    "example": "Oxide is a part of our daily life",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "carbon dioxide",
+    "pos": "n.",
+    "meaning": "二氧化碳",
+    "example": "Soft drinks usually contain carbon dioxide",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hydrogen",
+    "pos": "n.",
+    "meaning": "氢气",
+    "example": "Two parts hydrogen, one part oxygen, you'll get water everytime",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "core",
+    "pos": "n.",
+    "meaning": "中心；核心；地核",
+    "example": "He is the core of the working group",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "crust",
+    "pos": "n.",
+    "meaning": "地壳；外壳",
+    "example": "The crust on the snow was thick enough for us to walk on it",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mantle",
+    "pos": "n./v.",
+    "meaning": "地幔；斗篷；披风；覆盖",
+    "example": "Parents often use mantles for their babies to keep warm",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "longitude",
+    "pos": "n.",
+    "meaning": "经度",
+    "example": "The captain determine the latitude and longitude of his ship",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "latitude",
+    "pos": "n.",
+    "meaning": "纬度",
+    "example": "Our position is 40 degrees north latitude",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "horizon",
+    "pos": "n.",
+    "meaning": "地平线；[~s]眼界；见识",
+    "example": "I could see a ship on the horizon",
+    "extra": "horizontal adj. 水平的。broaden sb.'s horizons 开阔眼界",
+    "topic": "自然地理"
+  },
+  {
+    "word": "altitude",
+    "pos": "n.",
+    "meaning": "海拔；高度",
+    "example": "We're currently flying at an altitude of 8,000 meters",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "disaster",
+    "pos": "n.",
+    "meaning": "灾难",
+    "example": "There was a great flood disaster in East China",
+    "extra": "a disaster film/movie 灾难片",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mishap",
+    "pos": "n.",
+    "meaning": "小灾难",
+    "example": "A mishap prevented him from attending the routine company meeting",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "catastrophic",
+    "pos": "adj.",
+    "meaning": "灾难性的",
+    "example": "If the forecast had been wrong, the consequences could have been catastrophic",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "calamity",
+    "pos": "n.",
+    "meaning": "灾难；不幸的事",
+    "example": "A hurricane would be a calamity for this low-lying coastal region",
+    "extra": "cause a calamity 酿成灾祸",
+    "topic": "自然地理"
+  },
+  {
+    "word": "endanger",
+    "pos": "v.",
+    "meaning": "使遭受危险；危及",
+    "example": "If you are work hard without rest, you will endanger your health",
+    "extra": "endangered adj. 濒临灭绝",
+    "topic": "自然地理"
+  },
+  {
+    "word": "jeopardise",
+    "pos": "v.",
+    "meaning": "危害；危及",
+    "example": "If you are rude to the boss, your chances of success may be jeopardised",
+    "extra": "jeopardise sb.'s life 危及某人生命",
+    "topic": "自然地理"
+  },
+  {
+    "word": "destructive",
+    "pos": "adj.",
+    "meaning": "破坏性的；有害的",
+    "example": "Jealousy is an extremely destructive emotion",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "El Nino",
+    "pos": "n.",
+    "meaning": "厄尔尼诺现象",
+    "example": "What changed the equation that year was El Nino",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "greenhouse",
+    "pos": "n.",
+    "meaning": "温室；暖房",
+    "example": "The flowers are grown in the greenhouse",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "phenomenon",
+    "pos": "n.",
+    "meaning": "现象",
+    "example": "Snow is an almost unknown phenomenon in Egypt",
+    "extra": "复数形式：phenomena；a natural phenomenon 自然现象；a social phenomenon 社会现象",
+    "topic": "自然地理"
+  },
+  {
+    "word": "pebble",
+    "pos": "n.",
+    "meaning": "鹅卵石",
+    "example": "The boy put his hand into the money bag and drew out a pebble",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "magnet",
+    "pos": "n.",
+    "meaning": "磁铁；吸铁石",
+    "example": "He picked all the pins up with a magnet",
+    "extra": "magnetic adj./词的，有磁性的；有吸引力的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "ore",
+    "pos": "n.",
+    "meaning": "矿石；矿",
+    "example": "This mountain area is rich in iron ore",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mineral",
+    "pos": "n.",
+    "meaning": "矿物；矿物质；矿场",
+    "example": "China is rich in mineral resources",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "marble",
+    "pos": "n.",
+    "meaning": "大理石",
+    "example": "They used marble to build the steps",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "quartz",
+    "pos": "n.",
+    "meaning": "石英",
+    "example": "Have you bought the quartz clock?",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "granite",
+    "pos": "n.",
+    "meaning": "花岗岩",
+    "example": "His grave is made of granite",
+    "extra": "bit on granite 白费力气；徒劳无功",
+    "topic": "自然地理"
+  },
+  {
+    "word": "gust",
+    "pos": "n.",
+    "meaning": "一整狂风；（情感的）迸发",
+    "example": "A gust of wind blew the leaves off the trees",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "breeze",
+    "pos": "n.",
+    "meaning": "微分；和风",
+    "example": "We are enjoying the cool breeze that comes from the lake",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "monsoon",
+    "pos": "n.",
+    "meaning": "季风；雨季",
+    "example": "The monsoon brings rain to us",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "gale",
+    "pos": "n.",
+    "meaning": "大风",
+    "example": "We got our roof blown off in a gale last night",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hurricane",
+    "pos": "n.",
+    "meaning": "飓风；暴风",
+    "example": "The hurricane flung their motorboat upon the rocks",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "tornado",
+    "pos": "n.",
+    "meaning": "龙卷风",
+    "example": "When a tornado touches the ground, it does a lot of damage",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "typhoon",
+    "pos": "n.",
+    "meaning": "台风",
+    "example": "The typhoon is gathering strength",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "volcano",
+    "pos": "n.",
+    "meaning": "火山",
+    "example": "The valcano erupted and two small towns were buried under meters of hot ash, mud and bits of molten rock",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "erupt",
+    "pos": "v.",
+    "meaning": "爆发；喷发；（斑疹等）突然出现",
+    "example": "Hot lava erupted from the crust",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "magma",
+    "pos": "n.",
+    "meaning": "岩浆",
+    "example": "Some types of minerals are made when magma cools and solidifies",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "thermodynamic",
+    "pos": "adj.",
+    "meaning": "热力的；热力学的",
+    "example": "His theory violates current thermodynamic laws",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "smog",
+    "pos": "n.",
+    "meaning": "烟雾；雾霾",
+    "example": "The smog was so bad that school children were adviced to stay indoors",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "fume",
+    "pos": "n./v.",
+    "meaning": "（难闻有害的）烟，气体；发怒，愤怒",
+    "example": "Petrol fumes from cars are poisoning the atmosphere",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mist",
+    "pos": "n.",
+    "meaning": "薄雾；水汽；使视线模糊的东西",
+    "example": "She could hardly recognize her son from her mist of tears",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "tsunami",
+    "pos": "n.",
+    "meaning": "海啸",
+    "example": "A terrible tsunami followed the earthquake",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "drought",
+    "pos": "n.",
+    "meaning": "干旱；旱灾",
+    "example": "Many areas in Africa have suffered severe drought this year",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "flooding",
+    "pos": "n.",
+    "meaning": "洪水泛滥",
+    "example": "Since the flooding began last month, seventeen people have died state wide",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "torrent",
+    "pos": "n.",
+    "meaning": "激流；洪流",
+    "example": "A torrent of water poured down the mountain",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "earthquake",
+    "pos": "n.",
+    "meaning": "地震",
+    "example": "Several countries in Eastern Europe are counting the losses caused by yesterday's earthquake",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "seismic",
+    "pos": "adj.",
+    "meaning": "地震的；地震引起的",
+    "example": "The discovery of seismic activity suggests geological activity could provide large amounts of heat and minerals",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "avalanche",
+    "pos": "n.",
+    "meaning": "雪崩",
+    "example": "Yesterday's avalanche destroyed several trees",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "terrain",
+    "pos": "n.",
+    "meaning": "地形",
+    "example": "He climbed a tree to view the surrounding terrain",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "landscape",
+    "pos": "n./v.",
+    "meaning": "风景；地貌；对...进行景观美化",
+    "example": "The trees and the mountains made the landscape very beautiful",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "continent",
+    "pos": "n.",
+    "meaning": "大陆；洲",
+    "example": "It is generally thought that Columbus discovered the American continent",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "cave",
+    "pos": "n.",
+    "meaning": "洞穴；山洞",
+    "example": "The cave was used by smugglers in the 18th century",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "cliff",
+    "pos": "n.",
+    "meaning": "悬崖；峭壁",
+    "example": "The narrow path leads to a wooden hut on the cliff",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "glacier",
+    "pos": "n.",
+    "meaning": "冰川；冰河",
+    "example": "The glacier dislocated the great stones",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "swamp",
+    "pos": "n.",
+    "meaning": "沼泽；湿地",
+    "example": "In the swamp we were beset by mosquitoes",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "delta",
+    "pos": "n.",
+    "meaning": "三角洲",
+    "example": "The Nile Delta used to be a fertile land",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "plain",
+    "pos": "n./adj.",
+    "meaning": "平原；简朴的；明白的",
+    "example": "Once there were seventy million buffalo roaming in the great plains",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "plateau",
+    "pos": "n.",
+    "meaning": "高原",
+    "example": "The atmosphere is thin on the plateau",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "oasis",
+    "pos": "n.",
+    "meaning": "绿洲；宜人之地",
+    "example": "Oasis symbolizes a hope in desert areas",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "globe",
+    "pos": "n.",
+    "meaning": "球体；地球仪",
+    "example": "There are people in almost every habitable part of this globe",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hemisphere",
+    "pos": "n.",
+    "meaning": "半球",
+    "example": "In the northern hemisphere, you can hardly see the Magellanic Clouds",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "equator",
+    "pos": "n.",
+    "meaning": "赤道",
+    "example": "The equator is an imaginary line around the middle of the earth",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "arctic",
+    "pos": "adj./n.",
+    "meaning": "北极的；极冷的；北极地区；北极",
+    "example": "The polar bears' habitat is the icy waters of the Arctic",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "Antarctic",
+    "pos": "adj./n.",
+    "meaning": "南极的；南极地区；南极洲",
+    "example": "Because of the extreme cold, the environment in the Antarctic is uniquely fragile",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "pole",
+    "pos": "n.",
+    "meaning": "（地）极；截然相反的两极之一",
+    "example": "English is spoken from pole to pole",
+    "extra": "the South Pole 南极",
+    "topic": "自然地理"
+  },
+  {
+    "word": "polar",
+    "pos": "adj.",
+    "meaning": "极地的；近极地的；对立的",
+    "example": "In these polar regions, the balance of nature has already been disrupted",
+    "extra": "a polar bear 北极熊；polarize v. 使两极分化",
+    "topic": "自然地理"
+  },
+  {
+    "word": "axis",
+    "pos": "n.",
+    "meaning": "轴；轴线",
+    "example": "The earth's axis is the line between the North and the South Poles",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "deteriorate",
+    "pos": "v.",
+    "meaning": "恶化；变坏",
+    "example": "Relations between the two countries have deteriorated sharply in recent weeks",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "aggravate",
+    "pos": "v.",
+    "meaning": "加重；加剧；使恶化",
+    "example": "Grief aggravated her illness",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "degrade",
+    "pos": "v.",
+    "meaning": "降解；降低...身份；使恶化；使退化",
+    "example": "A dishonest action like that will degrade you",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "upgrade",
+    "pos": "v.",
+    "meaning": "使升级；提高；改善",
+    "example": "The anti-virus software should often be upgraded",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "erode",
+    "pos": "v.",
+    "meaning": "侵蚀；腐蚀",
+    "example": "The waves erode the rocks on the shore",
+    "extra": "erosion n. 侵蚀；腐蚀",
+    "topic": "自然地理"
+  },
+  {
+    "word": "Mediterranean",
+    "pos": "adj./n.",
+    "meaning": "地中海的；地中海地区的；地中海；地中海地区",
+    "example": "This dish is a cross between Asian and Mediterranean food",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "Atlantic",
+    "pos": "n.",
+    "meaning": "大西洋",
+    "example": "The Atlantic coast is within sight of the hotel",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "pacific",
+    "pos": "adj./n.",
+    "meaning": "平静的；平和的；太平洋的；太平洋",
+    "example": "What a beautiful and pacific place this is",
+    "extra": "pacify v. 平息；安抚；使平静",
+    "topic": "自然地理"
+  },
+  {
+    "word": "ocean",
+    "pos": "n.",
+    "meaning": "海洋；洋",
+    "example": "These creatures live in the depth of the Pacific Ocean",
+    "extra": "an ocean of/oceans of 大量",
+    "topic": "自然地理"
+  },
+  {
+    "word": "marine",
+    "pos": "adj./n.",
+    "meaning": "海洋的；海生的；海事的/水兵",
+    "example": "It is true that a lot of people like marine plants as their food",
+    "extra": "a marine product 海产品；船用品",
+    "topic": "自然地理"
+  },
+  {
+    "word": "navigation",
+    "pos": "n.",
+    "meaning": "航海；航行",
+    "example": "Navigation is a game for brave people",
+    "extra": "navigator n. 航海家；领航员",
+    "topic": "自然地理"
+  },
+  {
+    "word": "gulf",
+    "pos": "n.",
+    "meaning": "海湾",
+    "example": "The gulf extends northward",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "beach",
+    "pos": "n.",
+    "meaning": "海滩；河滩",
+    "example": "They walked along the beach, talking and laughing",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "coast",
+    "pos": "n.",
+    "meaning": "海岸；海滨",
+    "example": "He is going to live by the coast for the sake of his health",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "shore",
+    "pos": "n.",
+    "meaning": "（海、湖等大水域的）岸；滨",
+    "example": "His ship pulled in to the shore at midnight",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "tide",
+    "pos": "n.",
+    "meaning": "趋势；潮流；潮汐",
+    "example": "The gravitational attraction between the moon and the earth causes tides",
+    "extra": "tidal adj. 潮汐的。at low tide 退潮时，低潮时。Time and tide wait for no man 岁月不等人",
+    "topic": "自然地理"
+  },
+  {
+    "word": "current",
+    "pos": "n.",
+    "meaning": "水流；潮流；电流；气流",
+    "example": "He was swept away by the current",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "brook",
+    "pos": "n.",
+    "meaning": "小河；溪",
+    "example": "Before we drink at a brook, it is good to know its source",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "stream",
+    "pos": "n./v.",
+    "meaning": "小河；溪；流；流动；流出",
+    "example": "On either bank of the stream stand rows of willow trees",
+    "extra": "willow n. 垂柳",
+    "topic": "自然地理"
+  },
+  {
+    "word": "source",
+    "pos": "n.",
+    "meaning": "河的源头；根源",
+    "example": "I have heard from reliable sources that the company is in trouble",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "shallow",
+    "pos": "adj.",
+    "meaning": "浅的；肤浅的；浅薄的",
+    "example": "The sea is shallow here",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "superficial",
+    "pos": "adj.",
+    "meaning": "表皮的；表层的",
+    "example": "Superficial scratches can be easily removed",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "flat",
+    "pos": "adj.",
+    "meaning": "平躺的；扁平的；单调的",
+    "example": "In flat open country, there is plenty of grass for the cattle to feed on",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "smooth",
+    "pos": "adj.",
+    "meaning": "光滑的；平稳的；流畅的",
+    "example": "The process of negotiation was not entirely smooth",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "rough",
+    "pos": "adj.",
+    "meaning": "粗糙的；粗略的",
+    "example": "You'd better give us a rough idea of your price",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "sandy",
+    "pos": "adj.",
+    "meaning": "含沙的；铺满沙的",
+    "example": "We walked across the fields on the sandy path",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "stony",
+    "pos": "adj.",
+    "meaning": "石头的；多石的",
+    "example": "The ground in this part of the country is poor and stony",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "vertical",
+    "pos": "adj.",
+    "meaning": "垂直的；直立的",
+    "example": "In some places, the cliff is almost vertical and too dangerous to climb",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "steep",
+    "pos": "adj.",
+    "meaning": "陡峭的",
+    "example": "A long steep path leads to a tea house with a grand view of the sea",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "parallel",
+    "pos": "n./adj./v.",
+    "meaning": "平行线；相似之处/平行的/与...相似；比得上",
+    "example": "There are few parallels between American football and European football",
+    "extra": "unparalleled adj. 无比的；无双的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "narrow",
+    "pos": "adj./n.",
+    "meaning": "狭窄的；有极限的",
+    "example": "The only access to the garden is by a narrow path at the side of the house",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "Oceania",
+    "pos": "n.",
+    "meaning": "大洋洲",
+    "example": "Oceania is a separate landmass, but it is separated from Asia by very shallow water",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mainland",
+    "pos": "n.",
+    "meaning": "大陆，本土",
+    "example": "Hawaii and Alaska are not on the mainland of the United States",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "peninsula",
+    "pos": "n.",
+    "meaning": "半岛",
+    "example": "His house is located on the tip of the peninsula",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "climate",
+    "pos": "n.",
+    "meaning": "气候；风气，思潮，环境",
+    "example": "The current political climate in that country is favorable for foreign investment",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "weather",
+    "pos": "n.",
+    "meaning": "天气，气象",
+    "example": "In warm weather, you should wear clothing that is cool and comfortable",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "meteorology",
+    "pos": "n.",
+    "meaning": "气象学",
+    "example": "Nowadays few people like to study meteorology",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mild",
+    "pos": "adj.",
+    "meaning": "温和的；不严重的",
+    "example": "The weather is mild today. It is neither hot nor cold",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "heating",
+    "pos": "n.",
+    "meaning": "供暖；暖气装置",
+    "example": "The workers are installing a heating system",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "moderate",
+    "pos": "adj./v.",
+    "meaning": "适度的；温和的；中等的/使缓和",
+    "example": "The wind was strong all day, but it moderated in the evening",
+    "extra": "a moderate climate 温和的气候",
+    "topic": "自然地理"
+  },
+  {
+    "word": "warm",
+    "pos": "adj./v.",
+    "meaning": "温暖的/（使）变暖",
+    "example": "The blood of a warm-blooded animal remains around the same temperature both on warm and cold days",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "thermal",
+    "pos": "adj.",
+    "meaning": "热量的",
+    "example": "The thermal energy has become more and more important",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "tropics",
+    "pos": "n.",
+    "meaning": "热带地区",
+    "example": "He lives in the tropics",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "arid",
+    "pos": "adj.",
+    "meaning": "干燥的；干旱的；枯燥的",
+    "example": "It is difficult to grow food in arid dessert areas",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "moist",
+    "pos": "adj.",
+    "meaning": "潮湿的；湿润的",
+    "example": "His eyes were moist with tears",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "damp",
+    "pos": "adj.",
+    "meaning": "湿气重的；潮湿的",
+    "example": "The damp match won't strike",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "humid",
+    "pos": "adj.",
+    "meaning": "潮湿的；湿热的",
+    "example": "The milk powder has lumped together because my home is so humid",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "snowy",
+    "pos": "adj.",
+    "meaning": "下雪多的；被雪覆盖的",
+    "example": "The snowy weather lasted the whole time we were there",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "frost",
+    "pos": "n.",
+    "meaning": "霜；霜冻；严寒",
+    "example": "Sweet potatoes decayed after the frost",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hail",
+    "pos": "n./v.",
+    "meaning": "冰雹/赞扬；招呼；下冰雹",
+    "example": "It hailed during the night",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "thaw",
+    "pos": "v./n.",
+    "meaning": "解冻；融解；融化/解冻时期",
+    "example": "The sun thawed the ice and melted the snow",
+    "extra": "thaw sth./out 使...解冻；使...变暖",
+    "topic": "自然地理"
+  },
+  {
+    "word": "chill",
+    "pos": "v./n.",
+    "meaning": "使变冷；使恐惧/寒冷；害怕",
+    "example": "The bad news cast a chill over the whole family",
+    "extra": "chilly adj./寒冷的；chill enthusiasm 使热情冷却",
+    "topic": "自然地理"
+  },
+  {
+    "word": "freeze",
+    "pos": "v./n.",
+    "meaning": "结冰；霜冻；严寒期",
+    "example": "The weatherman predicted a freeze for tonight",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "frigid",
+    "pos": "adj.",
+    "meaning": "寒冷的",
+    "example": "Hohhot(呼和浩特) is a frigid city in winter",
+    "extra": "the frigid zones 寒带",
+    "topic": "自然地理"
+  },
+  {
+    "word": "tremble",
+    "pos": "v./n.",
+    "meaning": "战栗；颤抖",
+    "example": "There was a tremble in her voice",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "shiver",
+    "pos": "v.",
+    "meaning": "颤抖；哆嗦；发抖",
+    "example": "She shivered because she was worried and afraid",
+    "extra": "shiver with cold 冻的发抖",
+    "topic": "自然地理"
+  },
+  {
+    "word": "thunder",
+    "pos": "n./v.",
+    "meaning": "雷；雷声/打雷；轰隆隆的快速移动",
+    "example": "An express train thundered through the station",
+    "extra": "thunderstorm n. 雷雨",
+    "topic": "自然地理"
+  },
+  {
+    "word": "lightning",
+    "pos": "n./v.",
+    "meaning": "闪电/闪电般的，极快的",
+    "example": "During the storm, flashes of lightning appeared in the sky",
+    "extra": "lighten v. 使变轻；（使）发亮。lighter n. 打火机。lightly adv. 轻轻地；轻松地",
+    "topic": "自然地理"
+  },
+  {
+    "word": "stormy",
+    "pos": "adj.",
+    "meaning": "有暴风雨的；争吵激烈的；（大海）波涛汹涌的",
+    "example": "Our ship was tossed about on the stormy sea",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "downpour",
+    "pos": "n.",
+    "meaning": "倾盆大雨",
+    "example": "For the past six hours, the downpour had been continuous",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "rainfall",
+    "pos": "n.",
+    "meaning": "降雨量",
+    "example": "There have been four years of below-average rainfall",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "sprinkle",
+    "pos": "v./n.",
+    "meaning": "撒；下小雨/少量；小雨",
+    "example": "We've only had a few sprinkles of rain recently",
+    "extra": "sprinkle sth. on sth. 把某物撒到某物上",
+    "topic": "自然地理"
+  },
+  {
+    "word": "rainbow",
+    "pos": "n.",
+    "meaning": "彩虹",
+    "example": "A rainbow is usually seen after a heavy rain",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "shower",
+    "pos": "n.",
+    "meaning": "阵；阵雨；淋浴",
+    "example": "The weatherman predicts showers this afternoon",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "Celsius",
+    "pos": "adj./n.",
+    "meaning": "摄氏的/摄氏温度",
+    "example": "The maximum temperature in July may be 36 degrees Celsius",
+    "extra": "Farhrenheit adj./n. 华氏的/华氏温度",
+    "topic": "自然地理"
+  },
+  {
+    "word": "temperature",
+    "pos": "n.",
+    "meaning": "气温；体温；温度",
+    "example": "After the storm, there will be a sharp drop in temperature",
+    "extra": "take sb.'s temperature 给...量体温",
+    "topic": "自然地理"
+  },
+  {
+    "word": "forecast",
+    "pos": "n./v.",
+    "meaning": "预测；预报/预测；预言",
+    "example": "The recent statement of the president forecasts a change in the situation",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "peak",
+    "pos": "n./v.",
+    "meaning": "山峰；顶点；达到最大值",
+    "example": "The mountain peaks are covered with snow all year around",
+    "extra": "all year around 一年到头",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mount",
+    "pos": "v./n.",
+    "meaning": "渐渐增加；爬上；登上/山",
+    "example": "The old lady can only mount the stairs with difficulty",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "mountain",
+    "pos": "n.",
+    "meaning": "山，山岳，高山",
+    "example": "The northern side of the mountain is almost vertical",
+    "extra": "mountainous adj. 多山的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "range",
+    "pos": "n.",
+    "meaning": "山脉；范围",
+    "example": "A range of hills rose on our left",
+    "extra": "in the range of 在...范围内；在...射程内",
+    "topic": "自然地理"
+  },
+  {
+    "word": "ridge",
+    "pos": "n./v.",
+    "meaning": "山脊；山脉/使隆起",
+    "example": "The sky above the ridges of the mountains brightened",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "slope",
+    "pos": "v./n.",
+    "meaning": "倾斜；有坡度；山坡；斜坡",
+    "example": "He ran up the slope to the top of the hill",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "valley",
+    "pos": "n.",
+    "meaning": "山谷；溪谷",
+    "example": "The valley was hidden from view in the mist",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "hillside",
+    "pos": "n.",
+    "meaning": "小山的山腰；山坡",
+    "example": "The path steepened as they climed the hillside",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "overlook",
+    "pos": "v.",
+    "meaning": "远眺；俯瞰；未注意到",
+    "example": "The house on the hill overlooks the village",
+    "extra": "be easily overlook 容易被忽略的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "southern",
+    "pos": "adj.",
+    "meaning": "南方的",
+    "example": "Only in the southern part of Taiwan have I seen such scenery",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "southeast",
+    "pos": "n./adj.",
+    "meaning": "Austria lies to the southeast of Germany",
+    "example": "-",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "southwest",
+    "pos": "n./adj.",
+    "meaning": "Ireland is in the southwest of the British Isles",
+    "example": "-",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "northeast",
+    "pos": "n./adj.",
+    "meaning": "Snow in October is nothing strange in northeast China",
+    "example": "-",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "northwest",
+    "pos": "n./adj.",
+    "meaning": "There is a large hilly area in the northwest",
+    "example": "-",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "eastern",
+    "pos": "adj.",
+    "meaning": "东方的",
+    "example": "The eastern situation is similarly intense",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "oriental",
+    "pos": "adj.",
+    "meaning": "东方的（尤其指中日）",
+    "example": "She has studied the cultures of oriental countries",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "inevitable",
+    "pos": "adj.",
+    "meaning": "必然的；不可避免的",
+    "example": "Such a difficult operation may not succeed, but it's an inevitable gamble",
+    "extra": "evitable adj. 可避免的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "irreversible",
+    "pos": "adj.",
+    "meaning": "不可逆转的；不可挽回的",
+    "example": "He suffered irreversible brain damage in the incident",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "irregularly",
+    "pos": "adv.",
+    "meaning": "不规则地；不合常规地",
+    "example": "The patient is breathing irregularly",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "inappropriate",
+    "pos": "adj.",
+    "meaning": "不合适的",
+    "example": "our bright red coat would be quite inappropriate for a funeral",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "abnormal",
+    "pos": "adj.",
+    "meaning": "不正常的；反常的；变态的",
+    "example": "El Nino will result in the abnormal weather",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "sediment",
+    "pos": "n.",
+    "meaning": "沉积物；沉淀物",
+    "example": "The sediment of coffee will settle",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "silt",
+    "pos": "n./v.",
+    "meaning": "淤泥；泥沙；使淤塞",
+    "example": "River sediments gradually silted up the harbor",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "muddy",
+    "pos": "adj.",
+    "meaning": "泥泞的；浑浊的",
+    "example": "We left the car and struck out along the muddy track",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "clay",
+    "pos": "n.",
+    "meaning": "黏土；陶土",
+    "example": "Bricks and dishes are made from various kinds of clay",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "dirt",
+    "pos": "n.",
+    "meaning": "污垢；灰尘；泥土",
+    "example": "The children were outside, playing happily in the dirt",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "rural",
+    "pos": "adj.",
+    "meaning": "农村的；乡村的；田园的",
+    "example": "The disease occurs most frequently in rural areas",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "suburb",
+    "pos": "n.",
+    "meaning": "郊区；郊外；近郊",
+    "example": "They proposed setting up a school in the suburbs",
+    "extra": "suburban adj. 郊区的；土气的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "outskirts",
+    "pos": "n.",
+    "meaning": "郊区；市郊",
+    "example": "We live on the outskirts of the city",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "remote",
+    "pos": "adj.",
+    "meaning": "遥远的；偏僻的；疏远的",
+    "example": "She came from a remote village",
+    "extra": "a remote control 遥控器",
+    "topic": "自然地理"
+  },
+  {
+    "word": "desolate",
+    "pos": "adj.",
+    "meaning": "荒凉的",
+    "example": "So how should they escape from these desolate canyons?",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "distant",
+    "pos": "adj.",
+    "meaning": "疏远的；遥远的",
+    "example": "It snows all year around in that distant little village",
+    "extra": "the distant past 遥远的过去",
+    "topic": "自然地理"
+  },
+  {
+    "word": "adjacent",
+    "pos": "adj.",
+    "meaning": "邻近的；毗连的",
+    "example": "We stayed in adjacent rooms",
+    "extra": "adjacent to 与...毗连的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "toxic",
+    "pos": "adj.",
+    "meaning": "有毒的",
+    "example": "All medicines are toxic",
+    "extra": "poisonous adj. 有毒的；toxic waste 有毒的废物；highly toxic 剧毒的",
+    "topic": "自然地理"
+  },
+  {
+    "word": "pollution",
+    "pos": "n.",
+    "meaning": "污染",
+    "example": "Wastewater from the factory is the main cause of pollution in local rivers",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "pollutant",
+    "pos": "n.",
+    "meaning": "污染物质",
+    "example": "Coal is a heavy pollutant",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "contaminate",
+    "pos": "v.",
+    "meaning": "污染；弄脏",
+    "example": "The river was contaminated with waste",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "geology",
+    "pos": "n.",
+    "meaning": "地质学；地质状况",
+    "example": "He devoted all his life to the research of agricultural geology",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "border",
+    "pos": "n./v.",
+    "meaning": "边界；边界地区；镶边；和...毗邻；形成...边界",
+    "example": "The border incident led to the war between the two countries",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "margin",
+    "pos": "n.",
+    "meaning": "边缘；页边空白；余地",
+    "example": "There is no margin for error in our plan",
+    "extra": "allow a greater margin of 允许有更大的余地",
+    "topic": "自然地理"
+  },
+  {
+    "word": "fringe",
+    "pos": "n./adj.",
+    "meaning": "边缘；刘海/非主要的；次要的；边缘的，附加的",
+    "example": "We feel it's pretty good and we also offer some good fringe benefits",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "plate",
+    "pos": "n.",
+    "meaning": "板块；盘",
+    "example": "It is generally accepted that earthquakes are caused by two tectonic plates bumping into each other",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "debris",
+    "pos": "n.",
+    "meaning": "碎片；残骸",
+    "example": "We are searching for his corpse among the debris after the explosion",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "crack",
+    "pos": "v./n.",
+    "meaning": "破裂；发出爆裂声/裂缝；缝隙",
+    "example": "The door opened just a crack",
+    "extra": "cause a crack 弄出裂缝",
+    "topic": "自然地理"
+  },
+  {
+    "word": "gap",
+    "pos": "n.",
+    "meaning": "缺口；裂缝；差距；空白",
+    "example": "There are wide gaps in my knowledge of history",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "splendid",
+    "pos": "adj.",
+    "meaning": "极好的；壮观的",
+    "example": "You're all doing a splendid job; keep up the good work",
+    "extra": "a splendid chance极好的机会",
+    "topic": "自然地理"
+  },
+  {
+    "word": "grand",
+    "pos": "adj.",
+    "meaning": "宏大的；豪华的；宏伟的；极好的",
+    "example": "He was born in the purple and was brougt up in the grand palace",
+    "extra": "be born in the purple 出生在皇室家庭；出生显贵",
+    "topic": "自然地理"
+  },
+  {
+    "word": "magnificent",
+    "pos": "adj.",
+    "meaning": "壮丽的；宏伟的；令人印象深刻的",
+    "example": "The king lived in this magnificent palace",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "super",
+    "pos": "adj.",
+    "meaning": "极好的；特级的",
+    "example": "I've discoverd a super restaurant near here",
+    "extra": "-",
+    "topic": "自然地理"
+  },
+  {
+    "word": "interesting",
+    "pos": "adj.",
+    "meaning": "有意思的",
+    "example": "There is an interesting program on television tonight",
+    "extra": "-",
+    "topic": "自然地理"
+  }]
