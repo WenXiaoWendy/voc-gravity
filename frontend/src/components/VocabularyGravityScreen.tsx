@@ -21,8 +21,8 @@ const getWordDetails = (word: string): any => {
   return ieltsVocabulary.find((item: any) => item.word === word) || null;
 };
 
-// 后端检索相似词汇
-const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts'): Promise<string[]> => {
+// 后端检索相似词汇（整合语义邻域分析）
+const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = true): Promise<{ words: string[], analysis?: string }> => {
   try {
     const response = await fetch(`${API_BASE_URL}/retrieve`, {
       method: 'POST',
@@ -32,7 +32,8 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts'): P
       body: JSON.stringify({
         query,
         book_key: bookKey,
-        k: 56
+        k: 56,
+        include_analysis: includeAnalysis
       })
     });
 
@@ -43,13 +44,16 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts'): P
     const data = await response.json();
 
     if (data.success) {
-      return data.words || [];
+      return {
+        words: data.words || [],
+        analysis: data.analysis
+      };
     } else {
       throw new Error(data.error || '检索失败');
     }
   } catch (error) {
     console.error('检索相似词汇失败:', error);
-    return [];
+    return { words: [] };
   }
 };
 
@@ -85,6 +89,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [neighborhoodAnalysis, setNeighborhoodAnalysis] = useState<string>('');
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -160,30 +165,38 @@ export const VocabularyGravityScreen: React.FC = () => {
     try {
       // 检查缓存
       const cachedBubbleItems = bubbleCache.current.get(query);
-      if (cachedBubbleItems) {
-        // 使用缓存数据
-        setCurrentWords(cachedBubbleItems);
-        setSelectedItem(cachedBubbleItems[0]);
-        return;
-      }
 
-      // 调用后端检索接口
-      const similarWords = await retrieveSimilarWords(query);
+      // 同步发起检索请求（整合语义邻域分析）
+      const retrieveResult = await (cachedBubbleItems
+        ? Promise.resolve({
+          words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
+          analysis: undefined
+        })
+        : retrieveSimilarWords(query, 'ielts', true)
+      );
 
-      if (similarWords.length === 0) {
+      if (retrieveResult.words.length === 0) {
         console.warn('未检索到相关词汇');
         return;
       }
 
-      // 生成气泡数据（同步函数）
-      const bubbleItems = generateBubbleItems(similarWords, query);
+      // 生成气泡数据
+      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, query);
 
-      // 存入缓存
-      bubbleCache.current.set(query, bubbleItems);
+      // 存入缓存（如果没有缓存）
+      if (!cachedBubbleItems) {
+        bubbleCache.current.set(query, bubbleItems);
+      }
 
       // 更新状态
       setCurrentWords(bubbleItems);
-      setSelectedItem(bubbleItems[0]); // 设置中心词为选中状态
+      setSelectedItem(bubbleItems[0]);
+
+      // 设置语义邻域分析结果
+      if (retrieveResult.analysis) {
+        console.log('语义邻域分析结果:', retrieveResult.analysis);
+        setNeighborhoodAnalysis(retrieveResult.analysis);
+      }
 
     } catch (error) {
       console.error('搜索失败:', error);
@@ -260,15 +273,19 @@ export const VocabularyGravityScreen: React.FC = () => {
         />
 
         {/* 加载状态覆盖层 */}
-        {/* {isLoading && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
-            <div className="text-white/80 text-lg font-medium">加载中...</div>
+        {isLoading && (
+          <div className="absolute inset-0 bg-transparent flex justify-center items-center z-50">
+            <div className="flex flex-col items-center space-y-4">
+              {/* 旋转的loading图标 */}
+              <div className="w-12 h-12 border-4 border-white/30 border-t-white/80 rounded-full animate-spin"></div>
+              <div className="text-white/80 text-lg font-medium">加载中...</div>
+            </div>
           </div>
-        )} */}
+        )}
       </div>
 
       {/* 右侧信息抽屉 */}
-      <BottomSheet selectedItem={selectedItem} />
+      <BottomSheet selectedItem={selectedItem} neighborhoodAnalysis={neighborhoodAnalysis} />
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>

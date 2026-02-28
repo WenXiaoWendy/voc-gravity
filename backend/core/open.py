@@ -2,51 +2,116 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
+import json
 
-# from openai import OpenAI
-
-# client = OpenAI()
-
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
 embedding = OpenAIEmbeddings()
 
-texts = [
-    "Abyss Lumina 是一个 AI 代理项目，小狐狸正在学习 Python",
-    "小狐狸要写出 abyss lumina",
-]
-vectorstore = FAISS.from_texts(texts, embedding)
+# 新的在线问答功能：分析语义邻域
+def analyze_semantic_neighborhood(center_word, neighbor_words):
+    """
+    分析中心词和其语义邻域的关系
 
+    Args:
+        center_word: 中心词
+        neighbor_words: 语义邻域词汇列表
 
-# 让 AI 记住一条信息
-def store_memory(text):
-    vectorstore.add_texts([text])
+    Returns:
+        OpenAI的分析结果
+    """
+    # 调试信息：打印发送给OpenAI的数据
+    print(f"=== 调试信息：发送给OpenAI的数据 ===")
+    print(f"中心词: {center_word}")
+    print(f"邻域词汇: {neighbor_words}")
+    print(f"邻域词汇数量: {len(neighbor_words)}")
 
+    # 设置更明确的系统提示
+    SYSTEM = """
+你是一个专业的语义关系分析助手。请分析中心词和其邻域词汇之间的语义关系。
 
-# # 让 AI 检索记忆
-def recall_memory(query):
-    docs = vectorstore.similarity_search(query, k=3)  # 只返回最相关的 3 条数据s
-    context = "\n".join([doc.page_content for doc in docs])  # 拼接成上下文
+输入数据：
+- 中心词：一个单词
+- 邻域词汇：一个词汇列表
+
+请为每个邻域词汇分配语义关系标签，使用以下关系代码：
+- "syn": 同义词
+- "ant": 反义词
+- "hyper": 上位词
+- "hypo": 下位词
+- "sib": 同级词
+- "coll": 搭配词
+- "frame": 框架关系
+- "reg": 区域变体
+- "int": 强度变化
+- "poly": 多义词不同含义
+- "noise": 无关系或不确定
+
+输出格式要求：
+- 必须返回有效的JSON格式
+- 每个邻域词汇作为键，对应的关系标签列表作为值
+- 每个词汇可以有多个关系标签（最多3个）
+- 如果词汇与中心词无关或不确定，使用["noise"]
+
+示例输出格式：
+{
+  "desert": ["syn"],
+  "forsake": ["syn"],
+  "quit": ["frame"],
+  "resign": ["frame"],
+  "ditch": ["reg","syn"],
+  "bishop": ["noise"]
+}
+
+请确保分析准确，不要添加额外的文本或解释。
+"""
+
+    # 构建更明确的用户提示
+    user_prompt = f"""
+请分析以下中心词和其邻域词汇的语义关系：
+
+中心词: {center_word}
+邻域词汇: {', '.join(neighbor_words)}
+
+请按照上述要求输出JSON格式的分析结果。
+"""
+
     messages = [
-        SystemMessage(content="你是一个 AI 记忆代理，帮助用户回忆信息。"),
-        HumanMessage(content=f"根据以下记忆回答问题：\n{context}\n\n问题：{query}"),
+        SystemMessage(content=SYSTEM.strip()),
+        HumanMessage(content=user_prompt.strip()),
     ]
-    response = llm(messages)
-    return response.content
-    # 以下是openai的写法
-    # response = client.chat.completions.create(
-    #     model="gpt-3.5-turbo",
-    #     temperature=0,
-    #     max_tokens=50,
-    #     messages=[
-    #         {"role": "system", "content": "你是一个 AI 记忆代理，帮助用户回忆信息。"},
-    #         {"role": "user", "content": f"根据以下记忆回答问题：\n{context}\n\n问题：{query}"}
-    #     ]
-    # )
-    # return response.choices[0].message.content
 
+    # 打印发送的消息内容用于调试
+    print(f"=== 系统提示 ===")
+    print(SYSTEM)
+    print(f"=== 用户提示 ===")
+    print(user_prompt)
 
-# 存储一条记忆
-store_memory("小狐狸更喜欢AI，但她更喜欢阿深。")
+    try:
+        response = llm(messages)
 
-# 让 AI 回忆说过的话
-print(recall_memory("小狐狸最喜欢谁？"))
+        # 打印OpenAI的原始响应
+        print(f"=== OpenAI原始响应 ===")
+        print(response.content)
+
+        # 尝试解析JSON以确保格式正确
+        try:
+            parsed_response = json.loads(response.content)
+            print(f"=== 解析后的JSON ===")
+            print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
+        except json.JSONDecodeError as e:
+            print(f"JSON解析错误: {e}")
+            print(f"原始响应内容: {response.content}")
+            # 如果JSON解析失败，返回默认的noise响应
+            error_response = {}
+            for word in neighbor_words:
+                error_response[word] = ["noise"]
+            return json.dumps(error_response)
+
+        return response.content
+    except Exception as e:
+        print(f"OpenAI调用失败: {e}")
+        # 返回一个默认的错误响应
+        error_response = {}
+        for word in neighbor_words:
+            error_response[word] = ["noise"]
+        return json.dumps(error_response)

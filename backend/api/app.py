@@ -14,6 +14,7 @@ CORS(app)
 try:
     from core.qa import ask_question
     from core.mem import query_memory, switch_vocabulary_book
+    from core.open import analyze_semantic_neighborhood
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -59,7 +60,7 @@ def ask():
 
 @app.route('/api/retrieve', methods=['POST'])
 def retrieve():
-    """检索相似词汇接口"""
+    """检索相似词汇接口（整合语义邻域分析）"""
     if not backend_available:
         return jsonify({
             'error': 'Backend not available',
@@ -71,6 +72,7 @@ def retrieve():
         query = data.get('query', '').strip()
         book_key = data.get('book_key', 'ielts')
         k = data.get('k', 56)  # 默认召回56个近邻
+        include_analysis = data.get('include_analysis', True)  # 默认包含语义分析
 
         if not query:
             return jsonify({'error': 'Query is required'}), 400
@@ -101,10 +103,24 @@ def retrieve():
                 seen.add(word)
                 unique_words.append(word)
 
+        # 限制返回数量
+        final_words = unique_words[:56]
+
+        # 语义邻域分析结果
+        analysis_result = None
+        if include_analysis and final_words:
+            try:
+                analysis_result = analyze_semantic_neighborhood(query, final_words)
+            except Exception as analysis_error:
+                print(f"语义邻域分析失败: {analysis_error}")
+                # 分析失败不影响主要功能
+
         return jsonify({
             'query': query,
-            'words': unique_words[:56],  # 确保不超过56个
-            'count': len(unique_words[:56]),
+            'words': final_words,
+            'count': len(final_words),
+            'analysis': analysis_result,
+            'include_analysis': include_analysis,
             'success': True
         })
     except Exception as e:
@@ -113,8 +129,6 @@ def retrieve():
             'success': False
         }), 500
 
-@app.route('/api/chat', methods=['POST'])
-def chat():
     if not backend_available:
         return jsonify({
             'error': 'Backend not available',
@@ -143,6 +157,44 @@ def chat():
             'error': 'Internal server error',
             'message': str(e)
         }), 500
+
+@app.route('/api/analyze_neighborhood', methods=['POST'])
+def analyze_neighborhood():
+    """语义邻域分析接口"""
+    if not backend_available:
+        return jsonify({
+            'error': 'Backend not available',
+            'message': 'Python backend modules could not be loaded'
+        }), 503
+
+    try:
+        data = request.get_json()
+        center_word = data.get('center_word', '').strip()
+        neighbor_words = data.get('neighbor_words', [])
+
+        if not center_word:
+            return jsonify({'error': 'Center word is required'}), 400
+
+        if not neighbor_words or not isinstance(neighbor_words, list):
+            return jsonify({'error': 'Neighbor words must be a non-empty list'}), 400
+
+        # 调用语义邻域分析函数
+        analysis_result = analyze_semantic_neighborhood(center_word, neighbor_words)
+
+        return jsonify({
+            'center_word': center_word,
+            'neighbor_words': neighbor_words,
+            'analysis': analysis_result,
+            'success': True
+        })
+
+    except Exception as e:
+        print(f"Error in analyze_neighborhood endpoint: {e}")
+        return jsonify({
+            'error': 'Internal server error',
+            'message': str(e)
+        }), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

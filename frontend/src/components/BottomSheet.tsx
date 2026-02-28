@@ -4,13 +4,14 @@ import { getBubbleTheme } from '../utils/theme';
 
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
+  neighborhoodAnalysis?: string;
 }
 
 // 右侧信息抽屉组件 - iOS 毛玻璃效果
 // Apple Health / iOS 17 风格
 // 毛玻璃 + 细边框 + 柔和阴影 + 可收起动画
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
+export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighborhoodAnalysis }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -64,9 +65,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
         tabIndex={isVisible ? 0 : -1}
       >
         <svg
-          className={`w-4 h-4 text-white/80 transition-transform duration-300 ${
-            isExpanded ? 'rotate-0' : 'rotate-180'
-          }`}
+          className={`w-4 h-4 text-white/80 transition-transform duration-300 ${isExpanded ? 'rotate-0' : 'rotate-180'
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -144,6 +144,22 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
               <div>
                 <h4 className="text-sm font-medium text-white/60 mb-2">关系说明</h4>
                 <p className="text-white/80 text-sm leading-relaxed">{selectedItem.why}</p>
+              </div>
+            )}
+
+            {/* 语义邻域分析结果 */}
+            {neighborhoodAnalysis && (
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <h4 className="text-sm font-medium text-white/60 mb-2">语义邻域分析</h4>
+                <div className="text-white/80 text-sm leading-relaxed space-y-3">
+                  {neighborhoodAnalysis.split('\n').map((paragraph, index) => (
+                    paragraph.trim() && (
+                      <p key={index} className="leading-relaxed">
+                        {paragraph.trim()}
+                      </p>
+                    )
+                  ))}
+                </div>
               </div>
             )}
           </>
