@@ -12,9 +12,9 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
     sizes: { center: 90, inner: 80, middle: 60, outer: 45 },
     baseRadii: {
       center: 0,
-      inner: 200,    // 中心半径 45 + 间隙 10 + 内层半径 40 + 额外空间 105
-      middle: 350,   // 内层 200 + 间隙 10 + 中层半径 30 + 额外空间 110
-      outer: 500     // 中层 350 + 间隙 10 + 外层半径 22.5 + 额外空间 117.5
+      inner: 250,    // 增大内层半径：中心半径 45 + 间隙 10 + 内层半径 40 + 额外空间 155
+      middle: 400,   // 内层 250 + 间隙 10 + 中层半径 30 + 额外空间 110
+      outer: 550     // 中层 400 + 间隙 10 + 外层半径 22.5 + 额外空间 117.5
     },
     maxCount: {
       center: 1,
@@ -105,20 +105,20 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
     // 分层的电荷力：中心气泡有更强的排斥力
     .force('charge', forceManyBody<ForceNode>()
       .strength((d: ForceNode) => {
-        if (d.isCenter) return -3000; // 中心气泡有非常强的排斥力
-        if (d.layer === 'inner') return -1200; // 内层气泡有较强排斥力
-        if (d.layer === 'middle') return -800;  // 中层气泡中等排斥力
-        return -600;                             // 外层气泡较弱排斥力
+        if (d.isCenter) return -5000; // 增强中心气泡排斥力
+        if (d.layer === 'inner') return -1800; // 增强内层气泡排斥力
+        if (d.layer === 'middle') return -1000; // 增强中层气泡排斥力
+        return -700;                            // 增强外层气泡排斥力
       })
     )
     // 统一的碰撞检测：所有气泡间隙统一为 10px
     .force('collide', forceCollide<ForceNode>()
       .radius((d: ForceNode) => d.radius + GAP) // 统一间隙 10px
       .strength(1.0) // 最强碰撞强度，确保不重叠
-      .iterations(3)
+      .iterations(5) // 增加碰撞检测迭代次数
     )
     // 轻微的中心力，保持整体向心性
-    .force('center', forceCenter(centerX, centerY).strength(0.05))
+    .force('center', forceCenter(centerX, centerY).strength(0.03))
     // 径向力：保持分层结构
     .force('radial', forceRadial<ForceNode>(
       (d: ForceNode) => d.targetRadius,
@@ -127,22 +127,22 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
     ).strength((d: ForceNode) => {
       if (d.isCenter) return 0;
       // 内层气泡径向力最强，确保不靠近中心
-      if (d.layer === 'inner') return 1.2;
-      if (d.layer === 'middle') return 0.8;
-      return 0.6;
+      if (d.layer === 'inner') return 1.8; // 增强内层径向力
+      if (d.layer === 'middle') return 1.0; // 增强中层径向力
+      return 0.7;                            // 增强外层径向力
     }))
-    .alphaMin(0.001)
-    .alphaDecay(0.02)
-    .velocityDecay(0.3)
+    .alphaMin(0.0001) // 降低alpha阈值，让模拟运行更久
+    .alphaDecay(0.01) // 降低alpha衰减速度，让模拟更充分
+    .velocityDecay(0.4)
     .stop();
 
   // 手动运行模拟，确保收敛
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 1000; i++) {  // 增加模拟迭代次数
     simulation.tick();
 
     // 检查是否收敛
     const maxVelocity = Math.max(...nodes.map(n => Math.sqrt(n.vx * n.vx + n.vy * n.vy)));
-    if (maxVelocity < 0.05) {
+    if (maxVelocity < 0.01) {  // 降低收敛阈值
       break;
     }
   }
@@ -195,7 +195,7 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
   });
 
   // 二次碰撞检查：确保边界调整后仍然没有重叠
-  for (let iter = 0; iter < 100; iter++) {
+  for (let iter = 0; iter < 200; iter++) {  // 增加迭代次数
     let hasOverlap = false;
 
     for (let i = 0; i < nodes.length; i++) {
@@ -206,7 +206,14 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
         const dx = n2.x - n1.x;
         const dy = n2.y - n1.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = n1.radius + n2.radius + GAP;
+
+        // 如果涉及中心气泡，增加额外间隙
+        let extraGap = 0;
+        if (n1.isCenter || n2.isCenter) {
+          extraGap = 15;  // 中心气泡与其他气泡额外增加5px间隙
+        }
+
+        const minDist = n1.radius + n2.radius + GAP + extraGap;
 
         if (dist < minDist && dist > 0) {
           hasOverlap = true;

@@ -1,79 +1,169 @@
-import React, { useCallback, useState } from 'react';
-import { mockWords } from '../data/mockWords';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { BACKGROUND_COLOR } from '../utils/theme';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
 import { SearchBar } from './SearchBar';
 
+// 导入本地词书数据
+import ieltsVocabulary from '../data/ielts.json';
+
 // 词书配置
 const VOCABULARY_BOOKS = [
   { key: 'ielts', name: '雅思词汇真经', description: '权威雅思词汇库' }
 ];
+
+// API基础URL
+const API_BASE_URL = 'http://localhost:8000/api';
+
+// 从本地JSON数据获取单词详细信息
+const getWordDetails = (word: string): any => {
+  return ieltsVocabulary.find((item: any) => item.word === word) || null;
+};
+
+// 后端检索相似词汇
+const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts'): Promise<string[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/retrieve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        book_key: bookKey,
+        k: 56
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      return data.words || [];
+    } else {
+      throw new Error(data.error || '检索失败');
+    }
+  } catch (error) {
+    console.error('检索相似词汇失败:', error);
+    return [];
+  }
+};
 
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
 // 深色背景 + 毛玻璃效果 + 克制设计
 
 export const VocabularyGravityScreen: React.FC = () => {
-  const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(mockWords[0]);
-  const [currentWords, setCurrentWords] = useState<BubbleItem[]>(mockWords);
+  const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
+  const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const currentQueryRef = useRef<string>('');
+
+  // 挂载后默认搜索abandon
+  useEffect(() => {
+    handleSearch('abandon');
+  }, []);
+
+  // 根据后端返回的单词数组生成气泡数据
+  const generateBubbleItems = (words: string[], centerWord: string): BubbleItem[] => {
+    const bubbleItems: BubbleItem[] = [];
+
+    // 中心词
+    const centerWordDetails = getWordDetails(centerWord);
+    bubbleItems.push({
+      id: 'center',
+      word: centerWord,
+      pos: centerWordDetails?.pos?.replace('.', '') || 'n',
+      brief_gloss: centerWordDetails?.meaning || `Definition for ${centerWord}`,
+      chinese_gloss: centerWordDetails?.meaning || `${centerWord}的中文释义`,
+      source: 'retriever',
+      layer: 'center',
+      score: 0.95,
+      relation_type: 'center',
+      why: `This is the center word: ${centerWord}`,
+      usage_notes: centerWordDetails?.extra !== '-' ? [centerWordDetails?.extra] : ['Common usage'],
+      example: centerWordDetails?.example || `This is an example sentence for ${centerWord}.`
+    });
+
+    // 按照7-16-32层级分配其他词汇
+    const layerDistribution = [7, 16, 32];
+    let wordIndex = 0;
+
+    for (let layerIndex = 0; layerIndex < layerDistribution.length; layerIndex++) {
+      const layerSize = layerDistribution[layerIndex];
+      const layer = layerIndex === 0 ? 'inner' : layerIndex === 1 ? 'middle' : 'outer';
+
+      for (let i = 0; i < layerSize && wordIndex < words.length; i++, wordIndex++) {
+        const word = words[wordIndex];
+        if (word === centerWord) continue; // 跳过中心词
+
+        const wordDetails = getWordDetails(word);
+        const relationTypes = ['near-synonym', 'contrast', 'confusable', 'topic-cluster', 'usage', 'formal', 'literary', 'noun-form', 'general'];
+        const relationType = relationTypes[Math.floor(Math.random() * relationTypes.length)];
+
+        bubbleItems.push({
+          id: `word-${wordIndex}`,
+          word: word,
+          pos: wordDetails?.pos?.replace('.', '') || 'n',
+          brief_gloss: wordDetails?.meaning || `Definition for ${word}`,
+          chinese_gloss: wordDetails?.meaning || `${word}的中文释义`,
+          source: 'retriever',
+          layer,
+          score: 0.95 - (wordIndex * 0.003),
+          relation_type: relationType,
+          why: `Related to ${centerWord} through ${relationType} relationship`,
+          usage_notes: wordDetails?.extra !== '-' ? [wordDetails?.extra] : ['Common usage'],
+          example: wordDetails?.example || `This is an example sentence for ${word}.`
+        });
+      }
+    }
+
+    return bubbleItems;
+  };
+
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim() || isLoading || currentQueryRef.current === query) {
+      return;
+    }
+
+    setIsLoading(true);
+    currentQueryRef.current = query;
+
+    try {
+      // 调用后端检索接口
+      const similarWords = await retrieveSimilarWords(query);
+
+      if (similarWords.length === 0) {
+        console.warn('未检索到相关词汇');
+        return;
+      }
+
+      // 生成气泡数据（同步函数）
+      const bubbleItems = generateBubbleItems(similarWords, query);
+
+      // 更新状态
+      setCurrentWords(bubbleItems);
+      setSelectedItem(bubbleItems[0]); // 设置中心词为选中状态
+
+    } catch (error) {
+      console.error('搜索失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
 
   const handleSelectItem = useCallback((item: BubbleItem) => {
     setSelectedItem(item);
 
-    // 模拟中心切换 - 重新组织布局
-    const newWords = currentWords.map(word => {
-      if (word.id === item.id) {
-        return { ...word, layer: 'center' as const, score: 0.95 };
-      } else if (word.layer === 'center') {
-        return { ...word, layer: 'inner' as const, score: Math.random() * 0.3 + 0.6 };
-      }
-      return word;
-    });
-
-    setCurrentWords(newWords);
-  }, [currentWords]);
-
-  const handleSearch = useCallback((query: string) => {
-    // 首先检查是否已有该词
-    const existingWord = currentWords.find(word =>
-      word.word.toLowerCase() === query.toLowerCase()
-    );
-
-    if (existingWord) {
-      // 如果已有该词，直接将其设为中心
-      handleSelectItem(existingWord);
-      return;
+    // 点击气泡时重新搜索该词
+    if (item.word !== currentQueryRef.current) {
+      handleSearch(item.word);
     }
-
-    // 模拟搜索功能 - 创建完整的新词数据
-    const newCenter: BubbleItem = {
-      id: Date.now().toString(),
-      word: query,
-      pos: 'v', // 默认词性
-      brief_gloss: `Definition for ${query}`,
-      chinese_gloss: `${query}的中文释义`,
-      source: 'search',
-      layer: 'center',
-      score: 0.95,
-      relation_type: 'center',
-      why: `This word was searched: ${query}`,
-      usage_notes: [`Usage note for ${query}`],
-      example: `This is an example sentence for ${query}.`
-    };
-
-    // 重新组织布局，将当前中心移到内层
-    const updatedWords = currentWords.map(word => {
-      if (word.layer === 'center') {
-        return { ...word, layer: 'inner' as const, score: Math.random() * 0.3 + 0.6 };
-      }
-      return word;
-    });
-
-    setCurrentWords([newCenter, ...updatedWords.filter(w => w.id !== newCenter.id)]);
-    setSelectedItem(newCenter);
-  }, [currentWords, handleSelectItem]);
+  }, [handleSearch]);
 
   return (
     <div
@@ -125,18 +215,24 @@ export const VocabularyGravityScreen: React.FC = () => {
 
           {/* 右侧：状态信息 */}
           <div className="text-sm text-white/60">
-            当前: {selectedItem?.word} • 共 {currentWords.length} 个词
+            {isLoading ? '搜索中...' : `当前: ${selectedItem?.word || '无'} • 共 ${currentWords.length + 1} 个词`}
           </div>
         </div>
       </div>
 
       {/* 气泡场 */}
       <div className="pt-20">
-        <BubbleField
-          items={currentWords}
-          selectedItem={selectedItem}
-          onSelectItem={handleSelectItem}
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center h-96">
+            <div className="text-white/60 text-lg">加载中...</div>
+          </div>
+        ) : (
+          <BubbleField
+            items={currentWords}
+            selectedItem={selectedItem}
+            onSelectItem={handleSelectItem}
+          />
+        )}
       </div>
 
       {/* 右侧信息抽屉 */}

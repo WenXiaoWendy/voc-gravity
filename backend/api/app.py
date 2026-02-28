@@ -13,6 +13,7 @@ CORS(app)
 # 导入现有的Python模块
 try:
     from core.qa import ask_question
+    from core.mem import query_memory, switch_vocabulary_book
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -54,6 +55,62 @@ def ask():
         return jsonify({
             'error': 'Internal server error',
             'message': str(e)
+        }), 500
+
+@app.route('/api/retrieve', methods=['POST'])
+def retrieve():
+    """检索相似词汇接口"""
+    if not backend_available:
+        return jsonify({
+            'error': 'Backend not available',
+            'message': 'Python backend modules could not be loaded'
+        }), 503
+
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+        book_key = data.get('book_key', 'ielts')
+        k = data.get('k', 56)  # 默认召回56个近邻
+
+        if not query:
+            return jsonify({'error': 'Query is required'}), 400
+
+        # 调用向量数据库检索
+        results = query_memory(query, book_key=book_key, k=k)
+
+        # 提取单词信息
+        words = []
+        for result in results:
+            # 从文档内容中提取单词
+            content = result.page_content
+            # 查找"单词: "后面的内容
+            if "单词: " in content:
+                word_start = content.index("单词: ") + 4
+                word_end = content.find(" | ", word_start)
+                if word_end == -1:
+                    word_end = len(content)
+                word = content[word_start:word_end].strip()
+                if word:
+                    words.append(word)
+
+        # 去重并保持顺序
+        unique_words = []
+        seen = set()
+        for word in words:
+            if word not in seen:
+                seen.add(word)
+                unique_words.append(word)
+
+        return jsonify({
+            'query': query,
+            'words': unique_words[:56],  # 确保不超过56个
+            'count': len(unique_words[:56]),
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'success': False
         }), 500
 
 @app.route('/api/chat', methods=['POST'])
