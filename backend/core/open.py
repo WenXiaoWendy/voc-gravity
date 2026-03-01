@@ -19,11 +19,6 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
     Returns:
         OpenAI的分析结果
     """
-    # 调试信息：打印发送给OpenAI的数据
-    print(f"=== 调试信息：发送给OpenAI的数据 ===")
-    print(f"中心词: {center_word}")
-    print(f"邻域词汇: {neighbor_words}")
-    print(f"邻域词汇数量: {len(neighbor_words)}")
 
     # 设置更明确的系统提示
     SYSTEM = """
@@ -80,24 +75,12 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
         HumanMessage(content=user_prompt.strip()),
     ]
 
-    # 打印发送的消息内容用于调试
-    print(f"=== 系统提示 ===")
-    print(SYSTEM)
-    print(f"=== 用户提示 ===")
-    print(user_prompt)
-
     try:
         response = llm(messages)
-
-        # 打印OpenAI的原始响应
-        print(f"=== OpenAI原始响应 ===")
-        print(response.content)
 
         # 尝试解析JSON以确保格式正确
         try:
             parsed_response = json.loads(response.content)
-            print(f"=== 解析后的JSON ===")
-            print(json.dumps(parsed_response, indent=2, ensure_ascii=False))
 
             # 将关系代码映射为前端可用的关系类型
             # 关系代码到关系类型的映射
@@ -129,9 +112,6 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
                 else:
                     # 如果OpenAI没有返回该单词的关系，使用默认值
                     converted_response[word] = ["general"]
-
-            print(f"=== 转换后的关系类型（按输入顺序） ===")
-            print(json.dumps(converted_response, indent=2, ensure_ascii=False))
 
             return json.dumps(converted_response)
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { SearchBar } from './SearchBar';
 
 // 词书配置
 const VOCABULARY_BOOKS = [
@@ -12,26 +13,16 @@ const SELECT_CLASSES = 'w-40 px-4 py-2 rounded-lg bg-gray-800 text-white border 
 const SELECT_ARROW_CLASSES = 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60';
 
 interface NavBarProps {
-  isLoading: boolean;
-  selectedItemWord: string | null;
-  totalWordsCount: number;
   onSearch: (query: string) => void;
   className?: string;
 }
 
 // 顶部状态栏组件
 const NavBar: React.FC<NavBarProps> = ({
-  isLoading,
-  selectedItemWord,
-  totalWordsCount,
   onSearch,
   className = ''
 }) => {
-  // 动态导入SearchBar组件以避免循环依赖
-  const SearchBarComponent = React.lazy(async () => {
-    const module = await import('./SearchBar');
-    return { default: module.SearchBar };
-  });
+
 
   return (
     <div className={`${className} ${TOP_BAR_CLASSES}`}>
@@ -69,14 +60,7 @@ const NavBar: React.FC<NavBarProps> = ({
 
         {/* 中：永远屏幕中心 */}
         <div className="justify-self-center w-[min(32rem,calc(100vw-2rem))]">
-          <React.Suspense fallback={<div className="w-full h-10 bg-white/10 rounded-lg"></div>}>
-            <SearchBarComponent onSearch={onSearch} />
-          </React.Suspense>
-        </div>
-
-        {/* 右 */}
-        <div className="justify-self-end text-sm text-white/60 whitespace-nowrap">
-          {isLoading ? "搜索中..." : `当前: ${selectedItemWord || "无"} • 共 ${totalWordsCount} 个词`}
+          <SearchBar onSearch={onSearch} />
         </div>
       </div>
     </div>

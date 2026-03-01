@@ -17,7 +17,7 @@ const getWordDetails = (word: string): any => {
 };
 
 // 后端检索相似词汇（整合语义邻域分析）
-const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = true): Promise<{ words: string[], analysis?: string }> => {
+const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: string }> => {
   try {
     const response = await fetch(`${API_BASE_URL}/retrieve`, {
       method: 'POST',
@@ -187,7 +187,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
           analysis: undefined
         })
-        : retrieveSimilarWords(query, 'ielts', true)
+        : retrieveSimilarWords(query, 'ielts', false)
       );
 
       if (retrieveResult.words.length === 0) {
@@ -234,9 +234,6 @@ export const VocabularyGravityScreen: React.FC = () => {
     >
       {/* 顶部状态栏 */}
       <NavBar
-        isLoading={isLoading}
-        selectedItemWord={selectedItem?.word || null}
-        totalWordsCount={currentWords.length + 1}
         onSearch={handleSearch}
       />
 

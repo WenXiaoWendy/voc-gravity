@@ -27,37 +27,6 @@ def health_check():
         'backend_available': backend_available
     })
 
-@app.route('/api/ask', methods=['POST'])
-def ask():
-    if not backend_available:
-        return jsonify({
-            'error': 'Backend not available',
-            'message': 'Python backend modules could not be loaded'
-        }), 503
-
-    try:
-        data = request.get_json()
-        question = data.get('question', '').strip()
-
-        if not question:
-            return jsonify({'error': 'Question is required'}), 400
-
-        # 调用现有的问答函数
-        answer = ask_question(question)
-
-        return jsonify({
-            'question': question,
-            'answer': answer,
-            'success': True
-        })
-
-    except Exception as e:
-        print(f"Error in ask endpoint: {e}")
-        return jsonify({
-            'error': 'Internal server error',
-            'message': str(e)
-        }), 500
-
 @app.route('/api/retrieve', methods=['POST'])
 def retrieve():
     """检索相似词汇接口（整合语义邻域分析）"""
@@ -72,7 +41,7 @@ def retrieve():
         query = data.get('query', '').strip()
         book_key = data.get('book_key', 'ielts')
         k = data.get('k', 56)  # 默认召回56个近邻
-        include_analysis = data.get('include_analysis', True)  # 默认包含语义分析
+        include_analysis = data.get('include_analysis', False)  # 默认不包含语义分析
 
         if not query:
             return jsonify({'error': 'Query is required'}), 400
@@ -122,35 +91,6 @@ def retrieve():
         return jsonify({
             'error': str(e),
             'success': False
-        }), 500
-
-    if not backend_available:
-        return jsonify({
-            'error': 'Backend not available',
-            'message': 'Python backend modules could not be loaded'
-        }), 503
-
-    try:
-        data = request.get_json()
-        message = data.get('message', '').strip()
-
-        if not message:
-            return jsonify({'error': 'Message is required'}), 400
-
-        # 这里可以扩展为更复杂的对话逻辑
-        answer = ask_question(message)
-
-        return jsonify({
-            'message': message,
-            'response': answer,
-            'success': True
-        })
-
-    except Exception as e:
-        print(f"Error in chat endpoint: {e}")
-        return jsonify({
-            'error': 'Internal server error',
-            'message': str(e)
         }), 500
 
 @app.route('/api/analyze_neighborhood', methods=['POST'])
