@@ -15,9 +15,16 @@ start = time.time()
 # 初始化 AI 记忆数据库
 # 使用本地模型避免HuggingFace认证问题
 # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-# 使用OpenAI text-embedding-3-large模型
-embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
-llm = ChatOpenAI(model="gpt-3.5-turbo")
+# 使用OpenAI text-embedding-3-large模型（DeepSeek不提供embedding服务）
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key=os.getenv("OPENAI_API_KEY") # type: ignore
+)
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    base_url="https://api.deepseek.com/v1",
+    api_key=os.getenv("DEEPSEEK_API_KEY") # type: ignore
+)
 
 # 注意：如果更改嵌入模型，需要删除 faiss_index 目录以重新构建索引
 

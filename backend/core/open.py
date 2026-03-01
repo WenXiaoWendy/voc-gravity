@@ -3,9 +3,20 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 import json
+import os
+from core.token_stats import token_stats
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
-embedding = OpenAIEmbeddings(model="text-embedding-3-large")
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0.1,
+    # 出于与 OpenAI 兼容考虑，您也可以将 base_url 设置为 https://api.deepseek.com/v1 来使用，但注意，此处 v1 与模型版本无关
+    base_url="https://api.deepseek.com/v1",
+    api_key=os.getenv("DEEPSEEK_API_KEY") # type: ignore
+)
+embedding = OpenAIEmbeddings(
+    model="text-embedding-3-large",
+    api_key=os.getenv("OPENAI_API_KEY") # type: ignore
+)
 
 # 新的在线问答功能：分析语义邻域
 def analyze_semantic_neighborhood(center_word, neighbor_words):
@@ -17,7 +28,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
         neighbor_words: 语义邻域词汇列表
 
     Returns:
-        OpenAI的分析结果
+        DeepSeek的分析结果
     """
 
     # 设置更明确的系统提示
@@ -106,7 +117,6 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 
 现在请开始分析，严格遵守以上规则！
 """
-#   "reason": "本次分析围绕中心词 'abandon' 展开，邻域词汇可分为以下几类：1. 同义词（synonym）：desert、forsake 与 abandon 意思高度接近，都表示'离开、放弃'，在多数语境下可互换使用。2. 同场景词（frame）：quit、resign 都与'离开某个位置或状态'相关，quit 更口语化，resign 更正式，常用于辞去职位。3. 语体差异（register）：ditch 是口语化表达，与 abandon 同义，但更随意。4. 噪声（noise）：bishop 与 abandon 完全无关，属于召回误差。学习建议：注意区分正式与非正式用词，如 quit 与 resign 的使用场景差异。",
 
     # 构建更明确的用户提示
     user_prompt = f"""
@@ -123,8 +133,23 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
         HumanMessage(content=user_prompt.strip()),
     ]
 
+    # 计算输入 tokens
+    input_text = SYSTEM.strip() + "\n" + user_prompt.strip()
+    input_tokens = token_stats.estimate_tokens(input_text)
+
     try:
         response = llm(messages)
+        output_text = str(response.content)
+        output_tokens = token_stats.estimate_tokens(output_text)
+
+        # 记录 token 统计
+        token_stats.record_call(
+            model="deepseek-chat",
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cache_hit=False,
+            metadata={"center_word": center_word, "neighbor_count": len(neighbor_words)}
+        )
 
         # 尝试解析JSON以确保格式正确
         try:
@@ -184,7 +209,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
                     else:
                         result["relation"][word] = ["noise"]
                 else:
-                    # 如果OpenAI没有返回该单词的关系，使用默认值
+                    # 如果DeepSeek没有返回该单词的关系，使用默认值
                     result["relation"][word] = ["noise"]
 
             return result
@@ -202,10 +227,10 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
             return error_response
 
     except Exception as e:
-        print(f"OpenAI调用失败: {e}")
+        print(f"DeepSeek调用失败: {e}")
         # 返回一个默认的错误响应
         error_response = {
-            "reason": f"OpenAI调用失败: {str(e)}",
+            "reason": f"DeepSeek调用失败: {str(e)}",
             "relation": {}
         }
         for word in neighbor_words:

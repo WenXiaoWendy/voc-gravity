@@ -18,37 +18,32 @@ const getWordDetails = (word: string): any => {
 };
 
 const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any }> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/retrieve`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        book_key: bookKey,
-        k: 56,
-        include_analysis: includeAnalysis
-      })
-    });
+  const response = await fetch(`${API_BASE_URL}/retrieve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      book_key: bookKey,
+      k: 56,
+      include_analysis: includeAnalysis
+    })
+  });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  if (!response.ok) {
+    throw new Error(`服务器错误 (${response.status})`);
+  }
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (data.success) {
-      return {
-        words: data.words || [],
-        analysis: data.analysis
-      };
-    } else {
-      throw new Error(data.error || '检索失败');
-    }
-  } catch (error) {
-    console.error('检索相似词汇失败:', error);
-    return { words: [] };
+  if (data.success) {
+    return {
+      words: data.words || [],
+      analysis: data.analysis
+    };
+  } else {
+    throw new Error(data.error || '检索失败');
   }
 };
 
@@ -83,6 +78,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [showRelationColors, setShowRelationColors] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -195,6 +191,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     }
 
     setIsLoading(true);
+    setErrorMessage(null);
     currentQueryRef.current = query;
     const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
 
@@ -213,7 +210,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       console.log('检索结果:', retrieveResult);
 
       if (retrieveResult.words.length === 0) {
-        console.warn('未检索到相关词汇');
+        setErrorMessage('未检索到相关词汇，请尝试其他单词');
         return;
       }
 
@@ -273,6 +270,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
     } catch (error) {
       console.error('搜索失败:', error);
+      setErrorMessage(error instanceof Error ? error.message : '搜索失败，请稍后重试');
       setLoadingItemId(null);
     } finally {
       setIsLoading(false);
@@ -290,16 +288,28 @@ export const VocabularyGravityScreen: React.FC = () => {
 
     setIncludeAnalysis(newIncludeAnalysis);
 
-    // 切换到AI探索时自动调用retrieve（强制清除缓存重新获取）
+    // 切换到AI探索时
     if (currentQueryRef.current && newIncludeAnalysis) {
-      // 设置当前选中项为loadingItem，显示呼吸灯效果
-      if (selectedItem) {
-        setLoadingItemId(selectedItem.id);
-      }
+      // 检查缓存中是否有该单词的数据，且有AI分析数据
+      const cachedBubbleItems = bubbleCache.current.get(currentQueryRef.current);
+      const hasCachedAnalysis = cachedBubbleItems && cachedBubbleItems.some(item => item.reason);
 
-      // 清除当前查询词的缓存，强制重新获取包含AI分析的数据
-      bubbleCache.current.delete(currentQueryRef.current);
-      handleSearch(currentQueryRef.current, newIncludeAnalysis);
+      if (hasCachedAnalysis) {
+        // 有缓存且有AI分析数据，直接使用缓存
+        setCurrentWords(cachedBubbleItems);
+        setSelectedItem(cachedBubbleItems[0]);
+        setShowRelationColors(true);
+      } else {
+        // 没有缓存或没有AI分析数据，发起请求
+        // 设置当前选中项为loadingItem，显示呼吸灯效果
+        if (selectedItem) {
+          setLoadingItemId(selectedItem.id);
+        }
+
+        // 清除当前查询词的缓存，强制重新获取包含AI分析的数据
+        bubbleCache.current.delete(currentQueryRef.current);
+        handleSearch(currentQueryRef.current, newIncludeAnalysis);
+      }
     }
   }, [handleSearch, selectedItem]);
 
@@ -328,6 +338,28 @@ export const VocabularyGravityScreen: React.FC = () => {
         onModeChange={handleModeChange}
         isLoading={isLoading}
       />
+
+      {/* 错误提示 */}
+      {errorMessage && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-red-500/20 backdrop-blur-xl border border-red-500/30 rounded-lg px-6 py-3 shadow-xl">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-white/90 text-sm">{errorMessage}</span>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="ml-2 text-white/60 hover:text-white transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 气泡场 */}
       <div className="pt-20 relative">

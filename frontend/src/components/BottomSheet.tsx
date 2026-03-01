@@ -59,13 +59,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
     <div
       ref={sheetRef}
       className={`
-        fixed right-4 bottom-4 z-50
+        fixed right-4 bottom-4 z-40
         bg-white/10 backdrop-blur-xl rounded-2xl
         border border-white/10 shadow-2xl
         transition-all duration-300 linear
         ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
         ${isExpanded ? 'w-96 min-h-64' : 'w-16 max-h-128'}
       `}
+      style={{ height: isExpanded ? (includeAnalysis ? '800px' : '400px') : 'auto' }}
       aria-hidden={!isVisible}
     >
       {/* 展开按钮 - 收起状态下横向居中 */}
@@ -100,11 +101,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
       </button>
 
       {/* 抽屉内容 */}
-      <div className={`p-6 transition-all duration-300 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`p-6 transition-all duration-300 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0'} ${isExpanded ? 'h-full flex flex-col' : ''}`}>
         {selectedItem && (
           <>
             {/* 标题区域 */}
-            <div className="mb-6 pb-4 border-b border-white/10">
+            <div className="mb-6 pb-4 border-b border-white/10 flex-shrink-0">
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-2xl font-serif font-semibold text-white/95">
                   {selectedItem.word}
@@ -117,7 +118,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
 
             {/* 中文释义 */}
             {selectedItem.chinese_gloss && (
-              <div className="mb-6">
+              <div className="mb-6 flex-shrink-0">
                 <h4 className="text-sm font-medium text-white/60 mb-2">中文释义</h4>
                 <p className="text-white/90 leading-relaxed">{selectedItem.chinese_gloss}</p>
               </div>
@@ -125,7 +126,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
 
             {/* 例句 */}
             {selectedItem.example && (
-              <div className="mb-6">
+              <div className="mb-6 flex-shrink-0">
                 <h4 className="text-sm font-medium text-white/60 mb-2">例句</h4>
                 <p className="text-white/80 text-sm leading-relaxed italic">
                   "{selectedItem.example}"
@@ -135,7 +136,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
 
             {/* 额外信息 */}
             {selectedItem.usage_notes && selectedItem.usage_notes.length > 0 && selectedItem.usage_notes[0] !== 'Common usage' && (
-              <div className="mb-6">
+              <div className="mb-6 flex-shrink-0">
                 <h4 className="text-sm font-medium text-white/60 mb-2">额外信息</h4>
                 <ul className="space-y-2">
                   {selectedItem.usage_notes.map((note, index) => (
@@ -148,9 +149,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
             )}
 
             {includeAnalysis && selectedItem.reason && (
-              <div className="mt-6 pt-6 border-t border-white/10">
+              <div className="mt-auto pt-6 border-t border-white/10 flex-shrink-0 min-h-0">
                 <h4 className="text-sm font-medium text-white/60 mb-3">AI语义分析</h4>
-                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/10 shadow-inner">
+                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/10 shadow-inner flex-1 overflow-y-auto max-h-80">
                   <div className="space-y-1">
                     {formatReason(selectedItem.reason)}
                   </div>

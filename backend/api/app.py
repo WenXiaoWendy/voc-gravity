@@ -14,6 +14,7 @@ CORS(app)
 try:
     from core.mem import query_memory, switch_vocabulary_book
     from core.open import analyze_semantic_neighborhood
+    from core.token_stats import token_stats
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -127,6 +128,29 @@ def analyze_neighborhood():
         return jsonify({
             'error': 'Internal server error',
             'message': str(e)
+        }), 500
+
+
+@app.route('/api/token-stats', methods=['GET'])
+def get_token_stats():
+    """获取 token 用量统计接口"""
+    if not backend_available:
+        return jsonify({
+            'error': 'Backend not available',
+            'message': 'Python backend modules could not be loaded'
+        }), 503
+
+    try:
+        date = request.args.get('date')
+        stats = token_stats.get_stats(date)
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'success': False
         }), 500
 
 

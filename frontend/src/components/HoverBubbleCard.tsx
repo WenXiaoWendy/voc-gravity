@@ -81,7 +81,7 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
     <div
       ref={cardRef}
       className={`
-        fixed z-40 pointer-events-none
+        fixed z-50 pointer-events-none
         bg-white/10 backdrop-blur-xl rounded-xl
         border border-white/10 shadow-xl
         transition-opacity duration-200 ease-out

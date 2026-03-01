@@ -171,6 +171,52 @@ Content-Type: application/json
 GET /api/health
 ```
 
+#### Token用量统计
+```http
+GET /api/token-stats
+```
+
+获取token用量统计数据，包含：
+- 总输入/输出token数
+- 总费用
+- 每日统计
+- 最近20次调用记录
+
+按日期查询：
+```http
+GET /api/token-stats?date=2026-03-02
+```
+
+**查看计费的方式**：
+
+1. **通过浏览器直接访问**
+   ```
+   http://localhost:8000/api/token-stats
+   ```
+
+2. **使用 curl 命令**
+   ```bash
+   curl http://localhost:8000/api/token-stats
+   ```
+
+3. **查看特定日期统计**
+   ```bash
+   curl "http://localhost:8000/api/token-stats?date=2026-03-02"
+   ```
+
+4. **查看原始数据文件**
+   - 统计数据保存在 `backend/data/token_stats.json`
+   - 可以直接用 JSON 查看器打开查看详细信息
+
+**计费规则**：
+- 输入（缓存命中）：0.2元/百万tokens
+- 输入（缓存未命中）：2.0元/百万tokens
+- 输出：3.0元/百万tokens
+
+**数据持久化**：
+- 统计数据自动保存到 `backend/data/token_stats.json`
+- 服务重启后数据不会丢失
+
 ---
 
 ## 📦 部署说明

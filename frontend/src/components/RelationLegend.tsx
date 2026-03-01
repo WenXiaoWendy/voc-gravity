@@ -30,7 +30,7 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
 
   return (
     <div className={`${className} fixed top-24 right-3 z-30 ${!includeAnalysis ? 'pointer-events-none' : ''}`}>
-      <div className={`bg-black/30 backdrop-blur-xl rounded-lg shadow-xl p-2 w-56 ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
+      <div className={`bg-black/30 backdrop-blur-xl rounded-lg shadow-xl p-2 w-60 ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
         <div className="grid grid-cols-2 gap-1.5">
           {Object.entries(relationTypeChineseMap).map(([key, chinese]) => {
             const isSelected = selectedRelationTypes.includes(key);
@@ -43,17 +43,18 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
                   flex items-center gap-1.5 p-1.5 rounded-md cursor-pointer transition-all duration-150
                   border border-transparent hover:border-white/20
                   ${isSelected && 'bg-white/20'}
+                  min-w-0
                 `}
               >
                 <div
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: relationTypeColorMap[key] }}
                 />
-                <span className={`text-xs ${isSelected ? 'text-white font-medium' : 'text-white/80'}`}>
+                <span className={`text-xs ${isSelected ? 'text-white font-medium' : 'text-white/80'} truncate flex-1`}>
                   {chinese}
                 </span>
                 {isSelected && (
-                  <div className="ml-auto text-xs text-white/80 font-bold">×</div>
+                  <div className="flex-shrink-0 text-xs text-white/80 font-bold">×</div>
                 )}
               </div>
             );
@@ -66,10 +67,11 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
               flex items-center gap-1.5 p-1.5 rounded-md cursor-pointer transition-all duration-150
               border border-transparent hover:border-white/20
               ${selectedRelationTypes.length > 0 ? 'bg-white/20' : ''}
+              min-w-0
             `}
           >
-            <div className="text-sm text-white/80 font-bold">×</div>
-            <span className={`text-xs ${selectedRelationTypes.length > 0 ? 'text-white font-medium' : 'text-white/80'}`}>
+            <div className="flex-shrink-0 text-sm text-white/80 font-bold">×</div>
+            <span className={`text-xs ${selectedRelationTypes.length > 0 ? 'text-white font-medium' : 'text-white/80'} truncate flex-1`}>
               清空选择
             </span>
           </div>
