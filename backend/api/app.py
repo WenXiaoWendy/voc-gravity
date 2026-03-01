@@ -12,7 +12,6 @@ CORS(app)
 
 # 导入现有的Python模块
 try:
-    from core.qa import ask_question
     from core.mem import query_memory, switch_vocabulary_book
     from core.open import analyze_semantic_neighborhood
     backend_available = True

@@ -31,6 +31,7 @@ interface RelationLegendProps {
   filteredWordsCount: number;
   onRelationTypeChange: (relationTypes: string[]) => void;
   className?: string;
+  includeAnalysis?: boolean;
 }
 
 // 关系类型图例组件 - 紧凑布局，无边框设计
@@ -38,7 +39,8 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
   selectedRelationTypes,
   filteredWordsCount,
   onRelationTypeChange,
-  className = ''
+  className = '',
+  includeAnalysis = true
 }) => {
   // 处理关系类型选择
   const handleRelationTypeClick = (relationType: string) => {
@@ -51,10 +53,15 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
     }
   };
 
+  // 清除所有选中的关系类型
+  const handleClearAll = () => {
+    onRelationTypeChange([]);
+  };
+
   return (
-    <div className={`${className} fixed top-24 right-4 z-30`}>
+    <div className={`${className} fixed top-24 right-4 z-30 ${!includeAnalysis ? 'pointer-events-none' : ''}`}>
       {/* 紧凑布局容器 */}
-      <div className="bg-black/30 backdrop-blur-xl rounded-xl shadow-xl p-3 w-64">
+      <div className={`bg-black/30 backdrop-blur-xl rounded-xl shadow-xl p-3 w-64 ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
         {/* 紧凑的两列布局 */}
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(relationTypeChineseMap).map(([key, chinese]) => {
@@ -88,13 +95,34 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
               </div>
             );
           })}
+
+          {/* 清空选择按钮 - 跟随在最后一个关系映射元素后面 */}
+          <div
+            key="clear-all"
+            onClick={handleClearAll}
+            className={`
+              flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-150
+              border border-transparent hover:border-white/20
+              ${selectedRelationTypes.length > 0 ? 'bg-white/20' : ''}
+            `}
+          >
+            {/* 清除图标 - 使用叉号，与颜色圆点对齐 */}
+            <div className="text-lg text-white/80 font-bold">×</div>
+            {/* 按钮文字 - 与关系文字对齐 */}
+            <span className={`text-sm ${selectedRelationTypes.length > 0 ? 'text-white font-medium' : 'text-white/80'}`}>
+               清空选择
+            </span>
+          </div>
         </div>
 
         {/* 简洁的状态信息 */}
-        <div className="mt-2 text-xs text-white/60 text-center">
-          {selectedRelationTypes.length > 0
-            ? `已筛选出单词 ${filteredWordsCount} 个`
-            : '点击关系进行筛选'
+        <div className={`mt-2 text-xs text-white/60 text-center`}>
+          {includeAnalysis
+            ? (selectedRelationTypes.length > 0
+              ? `已筛选出单词 ${filteredWordsCount} 个`
+              : '点击关系进行筛选'
+            )
+            : '切换到 AI 深度解析以进行关系筛选'
           }
         </div>
       </div>

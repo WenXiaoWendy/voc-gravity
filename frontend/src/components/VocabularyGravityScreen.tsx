@@ -80,6 +80,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [neighborhoodAnalysis, setNeighborhoodAnalysis] = useState<string>('');
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
+  const [includeAnalysis, setIncludeAnalysis] = useState(false);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -169,13 +170,14 @@ export const VocabularyGravityScreen: React.FC = () => {
     return bubbleItems;
   };
 
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback(async (query: string, includeAnalysisParam?: boolean) => {
     if (!query.trim() || isLoading || currentQueryRef.current === query) {
       return;
     }
 
     setIsLoading(true);
     currentQueryRef.current = query;
+    const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
 
     try {
       // 检查缓存
@@ -187,8 +189,9 @@ export const VocabularyGravityScreen: React.FC = () => {
           words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
           analysis: undefined
         })
-        : retrieveSimilarWords(query, 'ielts', false)
+        : retrieveSimilarWords(query, 'ielts', shouldIncludeAnalysis)
       );
+      console.log('检索结果:', retrieveResult);
 
       if (retrieveResult.words.length === 0) {
         console.warn('未检索到相关词汇');
@@ -209,7 +212,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       // 设置语义邻域分析结果
       if (retrieveResult.analysis) {
-        console.log('语义邻域分析结果:', retrieveResult.analysis);
+        console.log('语义邻域分析结果:', retrieveResult.analysis.replace(/,/g, '\n'));
         setNeighborhoodAnalysis(retrieveResult.analysis);
       }
 
@@ -218,14 +221,23 @@ export const VocabularyGravityScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, [isLoading, includeAnalysis]);
+
+  // 处理模式切换
+  const handleModeChange = useCallback((newIncludeAnalysis: boolean) => {
+    setIncludeAnalysis(newIncludeAnalysis);
+    // 当模式切换时，如果当前有搜索词，重新发起搜索以应用新模式
+    if (currentQueryRef.current) {
+      handleSearch(currentQueryRef.current, newIncludeAnalysis);
+    }
+  }, [handleSearch]);
 
   const handleSelectItem = useCallback((item: BubbleItem) => {
     // 如果点击的是新词，直接搜索（搜索完成后会自动设置选中项）
     if (item.word !== currentQueryRef.current) {
-      handleSearch(item.word);
+      handleSearch(item.word, includeAnalysis);
     }
-  }, [handleSearch]);
+  }, [handleSearch, includeAnalysis]);
 
   return (
     <div
@@ -235,6 +247,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       {/* 顶部状态栏 */}
       <NavBar
         onSearch={handleSearch}
+        onModeChange={handleModeChange}
       />
 
       {/* 气泡场 */}
@@ -245,6 +258,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           selectedItem={selectedItem}
           onSelectItem={handleSelectItem}
           selectedRelationTypes={selectedRelationTypes}
+          includeAnalysis={includeAnalysis}
         />
 
         {/* 加载状态覆盖层 */}
@@ -264,6 +278,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         selectedRelationTypes={selectedRelationTypes}
         filteredWordsCount={calculateFilteredWordsCount()}
         onRelationTypeChange={setSelectedRelationTypes}
+        includeAnalysis={includeAnalysis}
       />
 
       {/* 右侧信息抽屉 */}
@@ -271,7 +286,10 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>
-        点击气泡探索语义邻域 • 支持近义词、对比词、易混淆词等多种关系类型
+        {includeAnalysis
+          ? '🫧 点击任意气泡，探索词汇间的语义关系与详细分析'
+          : '🫧 气泡颜色代表词性 • 点击气泡快速探索相邻语义空间 • 切换到AI模式获取关系分析'
+        }
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ export interface BubbleTheme {
   badgeColor: string;
 }
 
-export const getBubbleTheme = (item: any): BubbleTheme => {
+export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): BubbleTheme => {
   // 莫兰迪调色板 - 低饱和、偏灰、统一明度
   const themeMap: Record<string, BubbleTheme> = {
     // 近义词关系 - 灰尘蓝
@@ -76,8 +76,53 @@ export const getBubbleTheme = (item: any): BubbleTheme => {
     }
   };
 
-  // 优先使用 relation_type，如果没有则根据层级
-  let themeKey = item.layer; // 默认使用层级
+  // 词性（POS）颜色映射 - 用于快速探索模式
+  const posThemeMap: Record<string, BubbleTheme> = {
+    // 名词 - 灰尘蓝
+    'n.': {
+      baseColor: '#7FA8B8',
+      gradientFrom: '#7FA8B8',
+      gradientTo: '#6E96A8',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#5E8698'
+    },
+    // 动词 - 鼠尾草灰
+    'v.': {
+      baseColor: '#8FA3A0',
+      gradientFrom: '#8FA3A0',
+      gradientTo: '#7F9491',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#6F8481'
+    },
+    // 形容词 - 灰尘玫瑰
+    'adj.': {
+      baseColor: '#B4848F',
+      gradientFrom: '#B4848F',
+      gradientTo: '#A57480',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#956470'
+    },
+    // 副词 - 灰尘绿
+    'adv.': {
+      baseColor: '#7FA58A',
+      gradientFrom: '#7FA58A',
+      gradientTo: '#6E967D',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#5E876D'
+    },
+    // 其他词性 - 灰尘靛蓝
+    'other': {
+      baseColor: '#8F98B6',
+      gradientFrom: '#8F98B6',
+      gradientTo: '#7F88A6',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#6F7896'
+    }
+  };
+
+  if (includeAnalysis) {
+    // AI深度解析模式：根据关系类型分类
+    let themeKey = item.layer; // 默认使用层级
 
   if (item.relation_type) {
     if (Array.isArray(item.relation_type)) {
@@ -89,14 +134,37 @@ export const getBubbleTheme = (item: any): BubbleTheme => {
     }
   }
 
-  // 如果没有匹配的主题，使用通用默认值
-  return themeMap[themeKey] || {
-    baseColor: '#8FA3A0',
-    gradientFrom: '#8FA3A0',
-    gradientTo: '#7F9491',
-    textColor: 'rgba(255, 255, 255, 0.95)',
-    badgeColor: '#6F8481'
-  };
+    // 如果没有匹配的主题，使用通用默认值
+    return themeMap[themeKey] || {
+      baseColor: '#8FA3A0',
+      gradientFrom: '#8FA3A0',
+      gradientTo: '#7F9491',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#6F8481'
+    };
+  } else {
+    // 快速探索模式：根据词性（POS）分类
+    // 获取词性，如果有多个词性，使用第一个
+    let posKey = 'other';
+    if (item.pos) {
+      if (item.pos.includes('/')) {
+        // 如果是数组，使用第一个词性
+        posKey = item.pos.split('/')?.[0] || 'other';
+      } else {
+        // 如果是字符串，直接使用
+        posKey = item.pos;
+      }
+    }
+
+    // 标准化词性键（确保以点号结尾）
+    if (!posKey.endsWith('.')) {
+      posKey = posKey + '.';
+    }
+
+    // 查找对应的POS主题，如果没有则使用'other'
+    const posTheme = posThemeMap[posKey];
+    return posTheme || posThemeMap['other'];
+  }
 };
 
 // 背景颜色配置

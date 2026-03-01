@@ -56,6 +56,7 @@ interface BubbleProps {
   isSelected: boolean;
   onClick: (item: BubbleItem) => void;
   isBlurred?: boolean;
+  includeAnalysis?: boolean;
 }
 
 // 单个气泡组件 - Apple Health / iOS 17 风格
@@ -63,8 +64,8 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false }) => {
-  const theme = getBubbleTheme(item);
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false }) => {
+  const theme = getBubbleTheme(item, includeAnalysis);
 
   // 计算合适的字体大小，确保文字不超出边界
   const calculateFontSize = () => {

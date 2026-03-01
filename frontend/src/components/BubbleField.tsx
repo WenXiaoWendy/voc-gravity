@@ -8,10 +8,11 @@ interface BubbleFieldProps {
   selectedItem: BubbleItem | null;
   onSelectItem: (item: BubbleItem) => void;
   selectedRelationTypes?: string[];
+  includeAnalysis?: boolean;
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [] }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -55,6 +56,7 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             isSelected={selectedItem?.id === item.id}
             onClick={onSelectItem}
             isBlurred={isBlurred}
+            includeAnalysis={includeAnalysis}
           />
         );
       })}
