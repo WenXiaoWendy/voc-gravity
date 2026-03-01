@@ -1,11 +1,11 @@
 # qa.py
 from langchain_community.vectorstores.faiss import FAISS
-from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 import os
 
 # 初始化组件（只加载一次）
-_embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+_embedding = OpenAIEmbeddings(model="text-embedding-3-large")
 _llm = ChatOpenAI(name="gpt-3.5-turbo", temperature=0)
 
 # 使用新的向量数据库架构

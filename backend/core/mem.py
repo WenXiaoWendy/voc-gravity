@@ -2,7 +2,8 @@ import os
 import json
 import time
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_openai import ChatOpenAI
 from langchain.schema import Document
@@ -13,8 +14,12 @@ start = time.time()
 
 # 初始化 AI 记忆数据库
 # 使用本地模型避免HuggingFace认证问题
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+# 使用OpenAI text-embedding-3-large模型
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 llm = ChatOpenAI(model="gpt-3.5-turbo")
+
+# 注意：如果更改嵌入模型，需要删除 faiss_index 目录以重新构建索引
 
 # 词书配置
 VOCABULARY_BOOKS = {

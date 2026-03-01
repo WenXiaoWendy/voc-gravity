@@ -5,7 +5,7 @@ from langchain.schema import SystemMessage, HumanMessage
 import json
 
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
-embedding = OpenAIEmbeddings()
+embedding = OpenAIEmbeddings(model="text-embedding-3-large")
 
 # 新的在线问答功能：分析语义邻域
 def analyze_semantic_neighborhood(center_word, neighbor_words):
@@ -80,7 +80,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 
         # 尝试解析JSON以确保格式正确
         try:
-            parsed_response = json.loads(response.content)
+            parsed_response = json.loads(str(response.content))
 
             # 将关系代码映射为前端可用的关系类型
             # 关系代码到关系类型的映射
