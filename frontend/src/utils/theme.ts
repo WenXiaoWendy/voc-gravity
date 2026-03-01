@@ -10,61 +10,77 @@ export interface BubbleTheme {
 export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): BubbleTheme => {
   // 莫兰迪调色板 - 低饱和、偏灰、统一明度
   const themeMap: Record<string, BubbleTheme> = {
-    // 近义词关系 - 灰尘蓝
-    'near-synonym': {
+    // 近义/同义 - 灰尘蓝
+    'synonym': {
       baseColor: '#7FA8B8',
       gradientFrom: '#7FA8B8',
       gradientTo: '#6E96A8',
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#5E8698'
     },
-    // 易混淆词 - 灰尘琥珀
-    'confusable': {
-      baseColor: '#B79A7A',
-      gradientFrom: '#B79A7A',
-      gradientTo: '#A98969',
-      textColor: 'rgba(255, 255, 255, 0.95)',
-      badgeColor: '#997859'
-    },
-    // 对比关系 - 灰尘玫瑰
-    'contrast': {
+    // 反义/对立 - 灰尘玫瑰
+    'antonym': {
       baseColor: '#B4848F',
       gradientFrom: '#B4848F',
       gradientTo: '#A57480',
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#956470'
     },
-    // 主题聚类 - 灰尘绿
-    'topic-cluster': {
+    // 上位（更泛） - 鼠尾草灰
+    'hypernym': {
+      baseColor: '#8FA3A0',
+      gradientFrom: '#8FA3A0',
+      gradientTo: '#7F9491',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#6F8481'
+    },
+    // 下位（更具体） - 灰尘绿
+    'hyponym': {
       baseColor: '#7FA58A',
       gradientFrom: '#7FA58A',
       gradientTo: '#6E967D',
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#5E876D'
     },
-    // 用法关系 - 灰尘靛蓝
-    'usage': {
+    // 同类并列 - 灰尘靛蓝
+    'cohyponym': {
       baseColor: '#8F98B6',
       gradientFrom: '#8F98B6',
       gradientTo: '#7F88A6',
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#6F7896'
     },
-    // 名词形式 - 暖灰
-    'noun-form': {
+    // 常见搭配 - 暖灰
+    'collocation': {
       baseColor: '#9EA3AA',
       gradientFrom: '#9EA3AA',
       gradientTo: '#8E939A',
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#7E838A'
     },
-    // 通用关系 - 鼠尾草灰
-    'general': {
-      baseColor: '#8FA3A0',
-      gradientFrom: '#8FA3A0',
-      gradientTo: '#7F9491',
+    // 同场景 - 暖灰
+    'frame': {
+      baseColor: '#9EA3AA',
+      gradientFrom: '#9EA3AA',
+      gradientTo: '#8E939A',
       textColor: 'rgba(255, 255, 255, 0.95)',
-      badgeColor: '#6F8481'
+      badgeColor: '#7E838A'
+    },
+    // 语体差异 - 暖灰
+    'register': {
+      baseColor: '#9EA3AA',
+      gradientFrom: '#9EA3AA',
+      gradientTo: '#8E939A',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#7E838A'
+    },
+    // 噪声/漂移 - 灰尘琥珀
+    'noise': {
+      baseColor: '#B79A7A',
+      gradientFrom: '#B79A7A',
+      gradientTo: '#A98969',
+      textColor: 'rgba(255, 255, 255, 0.95)',
+      badgeColor: '#997859'
     },
     // 中心词 - 柔和紫罗兰
     'center': {

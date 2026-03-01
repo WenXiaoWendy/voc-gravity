@@ -4,14 +4,13 @@ import { getBubbleTheme } from '../utils/theme';
 
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
-  neighborhoodAnalysis?: string;
 }
 
 // 右侧信息抽屉组件 - iOS 毛玻璃效果
 // Apple Health / iOS 17 风格
 // 毛玻璃 + 细边框 + 柔和阴影 + 可收起动画
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighborhoodAnalysis }) => {
+export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -139,13 +138,22 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, neighbor
               </div>
             )}
 
-            {/* 关系说明 */}
-            {selectedItem.why && selectedItem.relation_type !== 'center' && (
-              <div>
-                <h4 className="text-sm font-medium text-white/60 mb-2">关系说明</h4>
-                <p className="text-white/80 text-sm leading-relaxed">{selectedItem.why}</p>
+            {/* AI分析结果 - 强制显示，不做条件判断 */}
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <h4 className="text-sm font-medium text-white/60 mb-3">AI语义分析</h4>
+              <div className="bg-white/5 rounded-lg p-4">
+                {selectedItem.reason ? (
+                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
+                    {selectedItem.reason}
+                  </p>
+                ) : (
+                  <p className="text-red-400 text-sm">
+                    Reason字段为空或未找到<br />
+                    当前selectedItem数据:
+                  </p>
+                )}
               </div>
-            )}
+            </div>
           </>
         )}
       </div>

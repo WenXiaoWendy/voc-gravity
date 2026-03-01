@@ -1,29 +1,42 @@
 import React from 'react';
 
 // 关系类型中文映射（不包含中心词）
+// const relationTypeChineseMap: Record<string, string> = {
+//   'synonym': '近义/ 同义',
+//   'antonym': '反义 / 对立',
+//   'hypernym': '上位（更泛）',
+//   'hyponym': '下位（更具体）',
+//   'cohyponym': '同类并列（同一上位下的兄弟词）',
+//   'collocation': '常见搭配（固定搭配 / 高频搭配）',
+//   'frame': '同场景 / 同语义框架（相关但非同义）',
+//   'register': '语体差异（正式 / 口语 / 文学 / 俚语等）',
+//   'noise': '噪声/漂移（不相关或多义跑偏）'
+// };
+
+// 关系类型中文映射（不包含中心词）
 const relationTypeChineseMap: Record<string, string> = {
-  'near-synonym': '近义词',
-  'contrast': '对比词',
-  'confusable': '易混淆词',
-  'topic-cluster': '主题相关',
-  'usage': '用法相关',
-  'formal': '正式用语',
-  'literary': '文学用语',
-  'noun-form': '名词形式',
-  'general': '一般关系'
+  'synonym': '近义/同义',
+  'antonym': '反义/对立',
+  'hypernym': '上位（更泛）',
+  'hyponym': '下位（更具体）',
+  'cohyponym': '同类并列',
+  'collocation': '常见搭配',
+  'frame': '同场景',
+  'register': '语体差异',
+  'noise': '噪声/漂移'
 };
 
 // 关系类型颜色映射（不包含中心词）
 const relationTypeColorMap: Record<string, string> = {
-  'near-synonym': '#7FA8B8',
-  'contrast': '#B4848F',
-  'confusable': '#B79A7A',
-  'topic-cluster': '#7FA58A',
-  'usage': '#8F98B6',
-  'formal': '#9EA3AA',
-  'literary': '#9EA3AA',
-  'noun-form': '#9EA3AA',
-  'general': '#8FA3A0'
+  'synonym': '#7FA8B8',
+  'antonym': '#B4848F',
+  'hypernym': '#8FA3A0',
+  'hyponym': '#7FA58A',
+  'cohyponym': '#8F98B6',
+  'collocation': '#9EA3AA',
+  'frame': '#9EA3AA',
+  'register': '#9EA3AA',
+  'noise': '#B79A7A'
 };
 
 interface RelationLegendProps {
@@ -110,7 +123,7 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
             <div className="text-lg text-white/80 font-bold">×</div>
             {/* 按钮文字 - 与关系文字对齐 */}
             <span className={`text-sm ${selectedRelationTypes.length > 0 ? 'text-white font-medium' : 'text-white/80'}`}>
-               清空选择
+              清空选择
             </span>
           </div>
         </div>

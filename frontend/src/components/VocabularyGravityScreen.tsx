@@ -16,8 +16,7 @@ const getWordDetails = (word: string): any => {
   return ieltsVocabulary.find((item: any) => item.word === word) || null;
 };
 
-// 后端检索相似词汇（整合语义邻域分析）
-const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: string }> => {
+const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any }> => {
   try {
     const response = await fetch(`${API_BASE_URL}/retrieve`, {
       method: 'POST',
@@ -65,7 +64,7 @@ const simpleHash = (str: string): number => {
 
 // 确定性关系类型生成，基于中心词和邻居词
 const generateRelationType = (centerWord: string, neighborWord: string): string[] => {
-  const relationTypes = ['near-synonym', 'contrast', 'confusable', 'topic-cluster', 'usage', 'formal', 'literary', 'noun-form', 'general'];
+  const relationTypes = ['synonym', 'antonym', 'hypernym', 'hyponym', 'cohyponym', 'collocation', 'frame', 'register', 'noise'];
   const hash = simpleHash(centerWord + '_' + neighborWord);
   return [relationTypes[hash % relationTypes.length]];
 };
@@ -78,9 +77,8 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [neighborhoodAnalysis, setNeighborhoodAnalysis] = useState<string>('');
-  const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [includeAnalysis, setIncludeAnalysis] = useState(false);
+  const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [showRelationColors, setShowRelationColors] = useState(false);
   const currentQueryRef = useRef<string>('');
@@ -140,7 +138,6 @@ export const VocabularyGravityScreen: React.FC = () => {
       layer: 'center',
       score: 0.95,
       relation_type: 'center',
-      why: `This is the center word: ${centerWord}`,
       usage_notes: centerWordDetails?.extra !== '-' ? [centerWordDetails?.extra] : ['Common usage'],
       example: centerWordDetails?.example || `This is an example sentence for ${centerWord}.`
     });
@@ -170,7 +167,6 @@ export const VocabularyGravityScreen: React.FC = () => {
           layer,
           score: 0.95 - (wordIndex * 0.003),
           relation_type: relationType,
-          why: `Related to ${centerWord} through ${relationType} relationship`,
           usage_notes: wordDetails?.extra !== '-' ? [wordDetails?.extra] : ['Common usage'],
           example: wordDetails?.example || `This is an example sentence for ${word}.`
         });
@@ -217,28 +213,55 @@ export const VocabularyGravityScreen: React.FC = () => {
       // 生成气泡数据
       const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, query);
 
-      // 存入缓存（如果没有缓存）
-      if (!cachedBubbleItems) {
-        bubbleCache.current.set(query, bubbleItems);
-      }
-
-      // 更新状态
-      setCurrentWords(bubbleItems);
-
-      // 数据加载完成后，设置新的中心节点为选中项
-      const newCenterItem = bubbleItems[0];
-      setSelectedItem(newCenterItem);
-      setLoadingItemId(null);
-
-      // 如果在AI模式下，开始显示关系类型颜色
-      if (shouldIncludeAnalysis) {
-        setShowRelationColors(true);
-      }
-
-      // 设置语义邻域分析结果
       if (retrieveResult.analysis) {
-        console.log('语义邻域分析结果:', retrieveResult.analysis.replace(/,/g, '\n'));
-        setNeighborhoodAnalysis(retrieveResult.analysis);
+        try {
+          const analysisData = retrieveResult.analysis;
+
+          const updatedBubbleItems = bubbleItems.map(item => {
+            if (item.id === 'center') {
+              return {
+                ...item,
+                reason: analysisData.reason
+              };
+            }
+
+            const relations = analysisData.relation?.[item.word];
+            if (relations && relations.length > 0) {
+              return {
+                ...item,
+                relation_type: relations,
+              };
+            }
+
+            return item;
+          });
+
+          bubbleCache.current.set(query, updatedBubbleItems);
+          setCurrentWords(updatedBubbleItems);
+
+          const newCenterItem = updatedBubbleItems[0];
+          setSelectedItem(newCenterItem);
+          setLoadingItemId(null);
+
+          if (shouldIncludeAnalysis) {
+            setShowRelationColors(true);
+          }
+
+        } catch (e) {
+          setCurrentWords(bubbleItems);
+          setSelectedItem(bubbleItems[0]);
+          setLoadingItemId(null);
+          if (shouldIncludeAnalysis) {
+            setShowRelationColors(true);
+          }
+        }
+      } else {
+        setCurrentWords(bubbleItems);
+        setSelectedItem(bubbleItems[0]);
+        setLoadingItemId(null);
+        if (shouldIncludeAnalysis) {
+          setShowRelationColors(true);
+        }
       }
 
     } catch (error) {
@@ -322,7 +345,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       />
 
       {/* 右侧信息抽屉 */}
-      <BottomSheet selectedItem={selectedItem} neighborhoodAnalysis={neighborhoodAnalysis} />
+      <BottomSheet selectedItem={selectedItem} />
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>
