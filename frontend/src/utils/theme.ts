@@ -79,7 +79,7 @@ export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): Bubb
   // 词性（POS）颜色映射 - 用于快速探索模式
   const posThemeMap: Record<string, BubbleTheme> = {
     // 名词 - 灰尘蓝
-    'n.': {
+    'v.': {
       baseColor: '#7FA8B8',
       gradientFrom: '#7FA8B8',
       gradientTo: '#6E96A8',
@@ -87,7 +87,7 @@ export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): Bubb
       badgeColor: '#5E8698'
     },
     // 动词 - 鼠尾草灰
-    'v.': {
+    'n.': {
       baseColor: '#8FA3A0',
       gradientFrom: '#8FA3A0',
       gradientTo: '#7F9491',

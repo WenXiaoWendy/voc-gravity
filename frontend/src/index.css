@@ -15,3 +15,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* 气泡呼吸灯动画 */
+@keyframes bubbleBreathing {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.2), 0 0 0 8px rgba(255, 255, 255, 0.1), 0 0 0 10px rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.6), 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px rgba(255, 255, 255, 0.4), 0 0 0 8px rgba(255, 255, 255, 0.25), 0 0 0 10px rgba(255, 255, 255, 0.15);
+  }
+}

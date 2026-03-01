@@ -9,10 +9,12 @@ interface BubbleFieldProps {
   onSelectItem: (item: BubbleItem) => void;
   selectedRelationTypes?: string[];
   includeAnalysis?: boolean;
+  isLoading?: boolean;
+  loadingItemId?: string | null;
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -57,6 +59,8 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             onClick={onSelectItem}
             isBlurred={isBlurred}
             includeAnalysis={includeAnalysis}
+            isLoading={isLoading}
+            isLoadingItem={loadingItemId === item.id}
           />
         );
       })}

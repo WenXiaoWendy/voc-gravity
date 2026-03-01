@@ -81,6 +81,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [neighborhoodAnalysis, setNeighborhoodAnalysis] = useState<string>('');
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [includeAnalysis, setIncludeAnalysis] = useState(false);
+  const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -214,7 +215,11 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       // 更新状态
       setCurrentWords(bubbleItems);
-      setSelectedItem(bubbleItems[0]);
+
+      // 数据加载完成后，设置新的中心节点为选中项
+      const newCenterItem = bubbleItems[0];
+      setSelectedItem(newCenterItem);
+      setLoadingItemId(null);
 
       // 设置语义邻域分析结果
       if (retrieveResult.analysis) {
@@ -224,6 +229,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
     } catch (error) {
       console.error('搜索失败:', error);
+      setLoadingItemId(null);
     } finally {
       setIsLoading(false);
     }
@@ -240,16 +246,28 @@ export const VocabularyGravityScreen: React.FC = () => {
 
     // 切换到AI探索时自动调用retrieve（强制清除缓存重新获取）
     if (currentQueryRef.current && newIncludeAnalysis) {
+      // 设置当前选中项为loadingItem，显示呼吸灯效果
+      if (selectedItem) {
+        setLoadingItemId(selectedItem.id);
+      }
+
       // 清除当前查询词的缓存，强制重新获取包含AI分析的数据
       bubbleCache.current.delete(currentQueryRef.current);
       handleSearch(currentQueryRef.current, newIncludeAnalysis);
     }
-  }, [handleSearch]);
+  }, [handleSearch, selectedItem]);
 
   const handleSelectItem = useCallback((item: BubbleItem) => {
-    // 如果点击的是新词，直接搜索（搜索完成后会自动设置选中项）
+    // 点击时设置正在加载的节点（显示呼吸灯效果，但不立即放大）
+    setLoadingItemId(item.id);
+
+    // 如果点击的是新词，发起搜索
     if (item.word !== currentQueryRef.current) {
       handleSearch(item.word, includeAnalysis);
+    } else {
+      // 点击的是当前中心词，直接选中它
+      setSelectedItem(item);
+      setLoadingItemId(null);
     }
   }, [handleSearch, includeAnalysis]);
 
@@ -262,6 +280,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       <NavBar
         onSearch={handleSearch}
         onModeChange={handleModeChange}
+        isLoading={isLoading}
       />
 
       {/* 气泡场 */}
@@ -273,18 +292,9 @@ export const VocabularyGravityScreen: React.FC = () => {
           onSelectItem={handleSelectItem}
           selectedRelationTypes={selectedRelationTypes}
           includeAnalysis={includeAnalysis}
+          isLoading={isLoading}
+          loadingItemId={loadingItemId}
         />
-
-        {/* 加载状态覆盖层 */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-transparent flex justify-center items-center z-50">
-            <div className="flex flex-col items-center space-y-4">
-              {/* 旋转的loading图标 */}
-              <div className="w-12 h-12 border-4 border-white/30 border-t-white/80 rounded-full animate-spin"></div>
-              <div className="text-white/80 text-lg font-medium">加载中...</div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 关系类型图例 - 固定在右上方 */}

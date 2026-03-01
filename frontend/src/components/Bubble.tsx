@@ -57,6 +57,8 @@ interface BubbleProps {
   onClick: (item: BubbleItem) => void;
   isBlurred?: boolean;
   includeAnalysis?: boolean;
+  isLoading?: boolean;
+  isLoadingItem?: boolean;
 }
 
 // 单个气泡组件 - Apple Health / iOS 17 风格
@@ -64,7 +66,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false, isLoading = false, isLoadingItem = false }) => {
   const theme = getBubbleTheme(item, includeAnalysis);
 
   // 计算合适的字体大小，确保文字不超出边界
@@ -79,6 +81,15 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
 
   const fontSize = calculateFontSize();
 
+  // 呼吸灯边框样式 - 白色光圈，透明度变化
+  const breathingBorder = {
+    boxShadow: isLoading && isLoadingItem
+      ? 'none'  // 呼吸灯模式下，让动画完全控制box-shadow
+      : isSelected
+        ? `${SHADOW_CONFIG.normal}, ${SHADOW_CONFIG.selected}, ${SHADOW_CONFIG.glow}`
+        : SHADOW_CONFIG.normal,
+  };
+
   // 气泡基础样式 - Apple 质感
   const baseBubbleStyle = {
     left: layout.x - layout.r,
@@ -88,17 +99,28 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     padding: '15px',
     background: 'transparent',
     opacity: isBlurred ? 0.3 : (item.layer === 'center' ? 0.95 : 0.85),
-    border: isSelected ? BORDER_CONFIG.selected : BORDER_CONFIG.normal,
-    boxShadow: isSelected
-      ? `${SHADOW_CONFIG.normal}, ${SHADOW_CONFIG.selected}, ${SHADOW_CONFIG.glow}`
-      : SHADOW_CONFIG.normal,
+    border: isLoading && isLoadingItem
+      ? '2px solid rgba(255, 255, 255, 0.8)'
+      : isSelected
+        ? BORDER_CONFIG.selected
+        : BORDER_CONFIG.normal,
+    boxShadow: breathingBorder.boxShadow,
     transform: isBlurred ? 'scale(0.9)' : (isSelected ? 'scale(1.15)' : 'scale(1)'),
     zIndex: isSelected ? 20 : item.layer === 'center' ? 15 : 10,
     filter: isBlurred ? 'blur(4px)' : 'none',
+    // 呼吸灯效果 - 加载状态下被选中的气泡微弱发光
+    animation: isLoading && isLoadingItem ? 'bubbleBreathing 3s ease-in-out infinite' : 'none',
   };
 
-  // 中心气泡的特殊效果
-  const centerGlowEffect = item.layer === 'center' ? {
+  // 处理点击事件 - 加载状态下不可点击
+  const handleClick = () => {
+    if (!isBlurred && !isLoading) {
+      onClick(item);
+    }
+  };
+
+  // 中心气泡的特殊效果（在呼吸灯模式下禁用，避免干扰白色光圈）
+  const centerGlowEffect = item.layer === 'center' && !(isLoading && isLoadingItem) ? {
     boxShadow: `${SHADOW_CONFIG.normal}, 0 0 60px rgba(167, 166, 191, 0.3)`
   } : {};
 
@@ -106,14 +128,15 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     <div
       className={`
         absolute rounded-full flex items-center justify-center
-        transition-all duration-300 font-serif backdrop-blur-sm
-        ${isBlurred ? 'cursor-default' : 'cursor-pointer hover:scale-105 hover:opacity-95 active:scale-100'}
+        ${isLoading && isLoadingItem ? '' : 'transition-all duration-300'} font-serif backdrop-blur-sm
+        ${isBlurred ? 'cursor-default' : (isLoading ? 'cursor-default' : 'cursor-pointer hover:scale-105 hover:opacity-95 active:scale-100')}
       `}
-      style={{
-        ...baseBubbleStyle,
-        ...centerGlowEffect
-      }}
-      onClick={isBlurred ? undefined : () => onClick(item)}
+      style={
+        (isLoading && isLoadingItem)
+          ? baseBubbleStyle  // 呼吸灯模式下只使用基础样式
+          : { ...baseBubbleStyle, ...centerGlowEffect }
+      }
+      onClick={handleClick}
     >
       {/* 多层渐变效果 - 增强立体感 */}
       {/* 基础渐变层 */}

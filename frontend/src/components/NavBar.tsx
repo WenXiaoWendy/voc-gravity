@@ -13,24 +13,34 @@ const SELECT_CLASSES = 'w-40 px-4 py-2 rounded-lg bg-gray-800 text-white border 
 const SELECT_ARROW_CLASSES = 'pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60';
 const AVATAR_CLASSES = 'w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold';
 const SWITCH_CONTAINER_CLASSES = 'flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm rounded-full px-3 py-1.5 border border-gray-700/50';
-const SWITCH_BUTTON_CLASSES = (active: boolean) =>
-  `px-3 py-1 text-sm font-medium rounded-full transition-all duration-200 ${active ? 'bg-blue-500 text-white shadow-md' : 'text-gray-300 hover:text-white'}`;
+const SWITCH_BUTTON_CLASSES = (active: boolean, disabled: boolean) =>
+  `px-3 py-1 text-sm font-medium rounded-full transition-all duration-200 ${disabled
+    ? 'text-gray-500 cursor-default'
+    : active
+      ? 'bg-blue-500 text-white shadow-md'
+      : 'text-gray-300 hover:text-white'
+  }`;
 
 interface NavBarProps {
   onSearch: (query: string) => void;
   onModeChange?: (includeAnalysis: boolean) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
 // 顶部状态栏组件
 const NavBar: React.FC<NavBarProps> = ({
   onSearch,
   onModeChange,
-  className = ''
+  className = '',
+  isLoading = false
 }) => {
   const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
 
   const handleModeToggle = () => {
+    // 加载中不允许切换模式
+    if (isLoading) return;
+
     const newMode = !includeAnalysis;
     setIncludeAnalysis(newMode);
     if (onModeChange) {
@@ -84,14 +94,16 @@ const NavBar: React.FC<NavBarProps> = ({
             <button
               type="button"
               onClick={() => includeAnalysis && handleModeToggle()}
-              className={SWITCH_BUTTON_CLASSES(!includeAnalysis)}
+              className={SWITCH_BUTTON_CLASSES(!includeAnalysis, isLoading)}
+              disabled={isLoading}
             >
               快速探索
             </button>
             <button
               type="button"
               onClick={() => !includeAnalysis && handleModeToggle()}
-              className={SWITCH_BUTTON_CLASSES(includeAnalysis)}
+              className={SWITCH_BUTTON_CLASSES(includeAnalysis, isLoading)}
+              disabled={isLoading}
             >
               AI 深度解析
             </button>
