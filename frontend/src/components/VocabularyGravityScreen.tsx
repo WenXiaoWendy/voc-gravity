@@ -345,7 +345,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       />
 
       {/* 右侧信息抽屉 */}
-      <BottomSheet selectedItem={selectedItem} />
+      <BottomSheet selectedItem={selectedItem} includeAnalysis={showRelationColors} />
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>

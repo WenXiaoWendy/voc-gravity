@@ -4,13 +4,33 @@ import { getBubbleTheme } from '../utils/theme';
 
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
+  includeAnalysis: boolean;
 }
 
 // 右侧信息抽屉组件 - iOS 毛玻璃效果
 // Apple Health / iOS 17 风格
 // 毛玻璃 + 细边框 + 柔和阴影 + 可收起动画
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
+export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeAnalysis }) => {
+  const formatReason = (reason: string) => {
+    if (!reason) return null;
+
+    let formatted = reason;
+
+    formatted = formatted.replace(/。(?![\s\n])/g, '。\n \n');
+    formatted = formatted.replace(/[：:](?![\s\n])/g, '：\n');
+    formatted = formatted.replace(/；(?![\s\n])/g, '；\n');
+    // formatted = formatted.replace(/，(?=[^，。；：；、]{10,}[：；。])/g, '，\n');
+
+    const lines = formatted.split('\n').filter(line => line.trim());
+
+    return lines.map((line, index) => (
+      <p key={index} className="text-white/80 text-sm leading-relaxed mb-2 last:mb-0">
+        {line.trim()}
+      </p>
+    ));
+  };
+
   const [isExpanded, setIsExpanded] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -100,9 +120,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
                 {selectedItem.pos && (
                   <span className="text-sm font-medium">{selectedItem.pos}</span>
                 )}
-                {/* {selectedItem.relation_type && (
-                  <span className="text-sm font-medium">{selectedItem.relation_type}</span>
-                )} */}
               </div>
             </div>
 
@@ -138,22 +155,16 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem }) => {
               </div>
             )}
 
-            {/* AI分析结果 - 强制显示，不做条件判断 */}
-            <div className="mt-6 pt-6 border-t border-white/10">
-              <h4 className="text-sm font-medium text-white/60 mb-3">AI语义分析</h4>
-              <div className="bg-white/5 rounded-lg p-4">
-                {selectedItem.reason ? (
-                  <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
-                    {selectedItem.reason}
-                  </p>
-                ) : (
-                  <p className="text-red-400 text-sm">
-                    Reason字段为空或未找到<br />
-                    当前selectedItem数据:
-                  </p>
-                )}
+            {includeAnalysis && selectedItem.reason && (
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <h4 className="text-sm font-medium text-white/60 mb-3">AI语义分析</h4>
+                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/10 shadow-inner">
+                  <div className="space-y-1">
+                    {formatReason(selectedItem.reason)}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
