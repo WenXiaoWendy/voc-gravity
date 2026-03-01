@@ -171,7 +171,13 @@ export const VocabularyGravityScreen: React.FC = () => {
   };
 
   const handleSearch = useCallback(async (query: string, includeAnalysisParam?: boolean) => {
-    if (!query.trim() || isLoading || currentQueryRef.current === query) {
+    if (!query.trim() || isLoading) {
+      return;
+    }
+
+    // 只有当查询词改变时才跳过重复搜索
+    // 模式切换时即使查询词相同也需要重新搜索
+    if (currentQueryRef.current === query && includeAnalysisParam === undefined) {
       return;
     }
 
@@ -225,9 +231,17 @@ export const VocabularyGravityScreen: React.FC = () => {
 
   // 处理模式切换
   const handleModeChange = useCallback((newIncludeAnalysis: boolean) => {
+    // 切换到快速探索时清空关系筛选项
+    if (!newIncludeAnalysis) {
+      setSelectedRelationTypes([]);
+    }
+
     setIncludeAnalysis(newIncludeAnalysis);
-    // 当模式切换时，如果当前有搜索词，重新发起搜索以应用新模式
-    if (currentQueryRef.current) {
+
+    // 切换到AI探索时自动调用retrieve（强制清除缓存重新获取）
+    if (currentQueryRef.current && newIncludeAnalysis) {
+      // 清除当前查询词的缓存，强制重新获取包含AI分析的数据
+      bubbleCache.current.delete(currentQueryRef.current);
       handleSearch(currentQueryRef.current, newIncludeAnalysis);
     }
   }, [handleSearch]);
