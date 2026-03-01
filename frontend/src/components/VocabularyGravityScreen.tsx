@@ -82,6 +82,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [includeAnalysis, setIncludeAnalysis] = useState(false);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
+  const [showRelationColors, setShowRelationColors] = useState(false);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
@@ -89,6 +90,14 @@ export const VocabularyGravityScreen: React.FC = () => {
   useEffect(() => {
     handleSearch('abandon');
   }, []);
+
+  // 确保 showRelationColors 和 includeAnalysis 保持一致
+  useEffect(() => {
+    // 如果切换到快速模式，立即关闭关系颜色
+    if (!includeAnalysis) {
+      setShowRelationColors(false);
+    }
+  }, [includeAnalysis]);
 
   // 计算筛选后的单词数量
   const calculateFilteredWordsCount = (): number => {
@@ -221,6 +230,11 @@ export const VocabularyGravityScreen: React.FC = () => {
       setSelectedItem(newCenterItem);
       setLoadingItemId(null);
 
+      // 如果在AI模式下，开始显示关系类型颜色
+      if (shouldIncludeAnalysis) {
+        setShowRelationColors(true);
+      }
+
       // 设置语义邻域分析结果
       if (retrieveResult.analysis) {
         console.log('语义邻域分析结果:', retrieveResult.analysis.replace(/,/g, '\n'));
@@ -237,9 +251,11 @@ export const VocabularyGravityScreen: React.FC = () => {
 
   // 处理模式切换
   const handleModeChange = useCallback((newIncludeAnalysis: boolean) => {
-    // 切换到快速探索时清空关系筛选项
+    // 切换到快速探索时清空关系筛选项和loadingItemId
     if (!newIncludeAnalysis) {
       setSelectedRelationTypes([]);
+      setLoadingItemId(null);
+      setShowRelationColors(false);
     }
 
     setIncludeAnalysis(newIncludeAnalysis);
@@ -291,7 +307,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           selectedItem={selectedItem}
           onSelectItem={handleSelectItem}
           selectedRelationTypes={selectedRelationTypes}
-          includeAnalysis={includeAnalysis}
+          includeAnalysis={showRelationColors}
           isLoading={isLoading}
           loadingItemId={loadingItemId}
         />
@@ -302,7 +318,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         selectedRelationTypes={selectedRelationTypes}
         filteredWordsCount={calculateFilteredWordsCount()}
         onRelationTypeChange={setSelectedRelationTypes}
-        includeAnalysis={includeAnalysis}
+        includeAnalysis={showRelationColors}
       />
 
       {/* 右侧信息抽屉 */}
