@@ -11,10 +11,11 @@ interface BubbleFieldProps {
   includeAnalysis?: boolean;
   isLoading?: boolean;
   loadingItemId?: string | null;
+  onHoverItem?: (item: BubbleItem | null) => void;
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null, onHoverItem }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -61,6 +62,8 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             includeAnalysis={includeAnalysis}
             isLoading={isLoading}
             isLoadingItem={loadingItemId === item.id}
+            onMouseEnter={onHoverItem ? (item) => onHoverItem(item) : undefined}
+            onMouseLeave={onHoverItem ? () => onHoverItem(null) : undefined}
           />
         );
       })}

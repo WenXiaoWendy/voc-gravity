@@ -17,7 +17,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
 
     let formatted = reason;
 
-    formatted = formatted.replace(/。(?![\s\n])/g, '。\n \n');
+    formatted = formatted.replace(/。(?![\s\n])/g, '。\n');
     formatted = formatted.replace(/[：:](?![\s\n])/g, '：\n');
     formatted = formatted.replace(/；(?![\s\n])/g, '；\n');
     // formatted = formatted.replace(/，(?=[^，。；：；、]{10,}[：；。])/g, '，\n');
@@ -106,19 +106,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
             {/* 标题区域 */}
             <div className="mb-6 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3 mb-2">
-                {/* 关系类型徽章 - 同色系 */}
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: theme?.badgeColor }}
-                />
                 <h3 className="text-2xl font-serif font-semibold text-white/95">
                   {selectedItem.word}
                 </h3>
-              </div>
-
-              <div className="flex items-center gap-3 text-white/60">
                 {selectedItem.pos && (
-                  <span className="text-sm font-medium">{selectedItem.pos}</span>
+                  <span className="text-sm font-medium text-white/60">{selectedItem.pos}</span>
                 )}
               </div>
             </div>
@@ -177,12 +169,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
       `}>
         {selectedItem && theme && (
           <>
-            {/* 关系类型徽章 */}
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: theme.badgeColor }}
-            />
-            {/* 单词 - 纵向排列 */}
             <div className="flex flex-col items-center">
               {selectedItem.word.split('').map((char, index) => (
                 <span

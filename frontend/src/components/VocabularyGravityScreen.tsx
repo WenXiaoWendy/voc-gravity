@@ -3,6 +3,7 @@ import { BubbleItem } from '../types/bubble';
 import { BACKGROUND_COLOR } from '../utils/theme';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
+import { HoverBubbleCard } from './HoverBubbleCard';
 import NavBar from './NavBar';
 import RelationLegend from './RelationLegend';
 
@@ -75,6 +76,7 @@ const BOTTOM_BAR_CLASSES = 'fixed bottom-0 left-0 right-0 z-20 bg-black/20 backd
 
 export const VocabularyGravityScreen: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
+  const [hoverItem, setHoverItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [includeAnalysis, setIncludeAnalysis] = useState(false);
@@ -145,20 +147,24 @@ export const VocabularyGravityScreen: React.FC = () => {
     // 按照7-16-32层级分配其他词汇
     const layerDistribution = [7, 16, 32];
     let wordIndex = 0;
+    let uniqueId = 0;
 
     for (let layerIndex = 0; layerIndex < layerDistribution.length; layerIndex++) {
       const layerSize = layerDistribution[layerIndex];
       const layer = layerIndex === 0 ? 'inner' : layerIndex === 1 ? 'middle' : 'outer';
+      let addedInLayer = 0;
 
-      for (let i = 0; i < layerSize && wordIndex < words.length; i++, wordIndex++) {
+      while (addedInLayer < layerSize && wordIndex < words.length) {
         const word = words[wordIndex];
+        wordIndex++;
+
         if (word === centerWord) continue; // 跳过中心词
 
         const wordDetails = getWordDetails(word);
         const relationType = generateRelationType(centerWord, word);
 
         bubbleItems.push({
-          id: `word-${wordIndex}`,
+          id: `word-${uniqueId++}`,
           word: word,
           pos: wordDetails?.pos || 'n.',
           brief_gloss: wordDetails?.meaning || `Definition for ${word}`,
@@ -170,6 +176,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           usage_notes: wordDetails?.extra !== '-' ? [wordDetails?.extra] : ['Common usage'],
           example: wordDetails?.example || `This is an example sentence for ${word}.`
         });
+        addedInLayer++;
       }
     }
 
@@ -333,7 +340,11 @@ export const VocabularyGravityScreen: React.FC = () => {
           includeAnalysis={showRelationColors}
           isLoading={isLoading}
           loadingItemId={loadingItemId}
+          onHoverItem={setHoverItem}
         />
+
+        {/* Hover 卡片 */}
+        <HoverBubbleCard item={hoverItem} includeAnalysis={showRelationColors} />
       </div>
 
       {/* 关系类型图例 - 固定在右上方 */}

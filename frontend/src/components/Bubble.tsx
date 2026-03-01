@@ -59,6 +59,8 @@ interface BubbleProps {
   includeAnalysis?: boolean;
   isLoading?: boolean;
   isLoadingItem?: boolean;
+  onMouseEnter?: (item: BubbleItem) => void;
+  onMouseLeave?: () => void;
 }
 
 // 单个气泡组件 - Apple Health / iOS 17 风格
@@ -66,7 +68,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false, isLoading = false, isLoadingItem = false }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, onMouseEnter, onMouseLeave }) => {
   const theme = getBubbleTheme(item, includeAnalysis);
 
   // 计算合适的字体大小，确保文字不超出边界
@@ -119,6 +121,18 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     }
   };
 
+  const handleMouseEnter = () => {
+    if (onMouseEnter) {
+      onMouseEnter(item);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (onMouseLeave) {
+      onMouseLeave();
+    }
+  };
+
   // 中心气泡的特殊效果（在呼吸灯模式下禁用，避免干扰白色光圈）
   const centerGlowEffect = item.layer === 'center' && !(isLoading && isLoadingItem) ? {
     boxShadow: `${SHADOW_CONFIG.normal}, 0 0 60px rgba(167, 166, 191, 0.3)`
@@ -137,6 +151,8 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
           : { ...baseBubbleStyle, ...centerGlowEffect }
       }
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* 多层渐变效果 - 增强立体感 */}
       {/* 基础渐变层 */}
