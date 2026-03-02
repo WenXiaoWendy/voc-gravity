@@ -8,13 +8,13 @@ import NavBar from './NavBar';
 import RelationLegend from './RelationLegend';
 
 // 导入本地词书数据
-import ieltsVocabulary from '../data/ielts.json';
+import ieltsVocabulary from '../data/ielts_complete.json';
 // API基础URL
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // 从本地JSON数据获取单词详细信息
 const getWordDetails = (word: string): any => {
-  return ieltsVocabulary.find((item: any) => item.word === word) || null;
+  return ieltsVocabulary[word] || null;
 };
 
 const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any }> => {
@@ -120,25 +120,57 @@ export const VocabularyGravityScreen: React.FC = () => {
     return filteredCount;
   };
 
+  const createBubbleItem = (
+    word: string,
+    id: string,
+    layer: 'center' | 'inner' | 'middle' | 'outer',
+    score: number,
+    relation_type: string | string[]
+  ): BubbleItem => {
+    const wordDetails = getWordDetails(word);
+    const {
+      pos,
+      chinese_meaning,
+      frequency,
+      category,
+      pronunciation,
+      english_meaning,
+      examples,
+      collocations,
+      word_forms,
+      derivatives,
+      usage_notes
+    } = wordDetails || {};
+
+    return {
+      id,
+      word,
+      pos: pos || 'n.',
+      brief_gloss: chinese_meaning || `Definition for ${word}`,
+      chinese_gloss: chinese_meaning || `${word}的中文释义`,
+      source: 'retriever',
+      layer,
+      score,
+      relation_type,
+      frequency,
+      category,
+      pronunciation,
+      english_meaning,
+      examples,
+      collocations,
+      word_forms,
+      derivatives,
+      usage_notes: usage_notes || ['Common usage'],
+      example: examples?.[0]?.sentence || `This is an example sentence for ${word}.`
+    };
+  };
+
   // 根据后端返回的单词数组生成气泡数据
   const generateBubbleItems = (words: string[], centerWord: string): BubbleItem[] => {
     const bubbleItems: BubbleItem[] = [];
 
     // 中心词
-    const centerWordDetails = getWordDetails(centerWord);
-    bubbleItems.push({
-      id: 'center',
-      word: centerWord,
-      pos: centerWordDetails?.pos || 'n.',
-      brief_gloss: centerWordDetails?.meaning || `Definition for ${centerWord}`,
-      chinese_gloss: centerWordDetails?.meaning || `${centerWord}的中文释义`,
-      source: 'retriever',
-      layer: 'center',
-      score: 0.95,
-      relation_type: 'center',
-      usage_notes: centerWordDetails?.extra !== '-' ? [centerWordDetails?.extra] : ['Common usage'],
-      example: centerWordDetails?.example || `This is an example sentence for ${centerWord}.`
-    });
+    bubbleItems.push(createBubbleItem(centerWord, 'center', 'center', 0.95, 'center'));
 
     // 按照7-16-32层级分配其他词汇
     const layerDistribution = [7, 16, 32];
@@ -156,22 +188,14 @@ export const VocabularyGravityScreen: React.FC = () => {
 
         if (word === centerWord) continue; // 跳过中心词
 
-        const wordDetails = getWordDetails(word);
         const relationType = generateRelationType(centerWord, word);
-
-        bubbleItems.push({
-          id: `word-${uniqueId++}`,
-          word: word,
-          pos: wordDetails?.pos || 'n.',
-          brief_gloss: wordDetails?.meaning || `Definition for ${word}`,
-          chinese_gloss: wordDetails?.meaning || `${word}的中文释义`,
-          source: 'retriever',
+        bubbleItems.push(createBubbleItem(
+          word,
+          `word-${uniqueId++}`,
           layer,
-          score: 0.95 - (wordIndex * 0.003),
-          relation_type: relationType,
-          usage_notes: wordDetails?.extra !== '-' ? [wordDetails?.extra] : ['Common usage'],
-          example: wordDetails?.example || `This is an example sentence for ${word}.`
-        });
+          0.95 - (wordIndex * 0.003),
+          relationType
+        ));
         addedInLayer++;
       }
     }

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { getBubbleTheme } from '../utils/theme';
+import { wordFormChineseMap } from '../utils/wordForms';
 
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
@@ -66,7 +67,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
         ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
         ${isExpanded ? 'w-96 min-h-64' : 'w-16 max-h-128'}
       `}
-      style={{ height: isExpanded ? (includeAnalysis ? '800px' : '400px') : 'auto' }}
+      style={{ height: isExpanded ? '800px' : 'auto' }}
       aria-hidden={!isVisible}
     >
       {/* 展开按钮 - 收起状态下横向居中 */}
@@ -101,63 +102,173 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
       </button>
 
       {/* 抽屉内容 */}
-      <div className={`p-6 transition-all duration-300 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0'} ${isExpanded ? 'h-full flex flex-col' : ''}`}>
+      <div className={`transition-all duration-300 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0'} ${isExpanded ? 'h-full flex flex-col' : ''}`}>
         {selectedItem && (
           <>
-            {/* 标题区域 */}
-            <div className="mb-6 pb-4 border-b border-white/10 flex-shrink-0">
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-2xl font-serif font-semibold text-white/95">
+            {/* 标题区域 - 固定 */}
+            <div className="p-5 pb-3 border-b border-white/10 flex-shrink-0">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <h3 className="text-xl font-serif font-semibold text-white/95">
                   {selectedItem.word}
                 </h3>
                 {selectedItem.pos && (
-                  <span className="text-sm font-medium text-white/60">{selectedItem.pos}</span>
+                  <div className="flex items-center gap-1">
+                    {Array.isArray(selectedItem.pos) ? (
+                      selectedItem.pos.map((p, idx) => (
+                        <span key={idx} className="text-sm font-medium text-white/60">{p}</span>
+                      ))
+                    ) : (
+                      <span className="text-sm font-medium text-white/60">{selectedItem.pos}</span>
+                    )}
+                  </div>
+                )}
+                {selectedItem.frequency && (
+                  <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/60">
+                    词频 {selectedItem.frequency}/10
+                  </span>
                 )}
               </div>
+              {selectedItem.pronunciation && (
+                <div className="mb-2">
+                  {Array.isArray(selectedItem.pronunciation) ? (
+                    selectedItem.pronunciation.map((pron, idx) => (
+                      <p key={idx} className="text-white/70 text-sm font-mono">{pron}</p>
+                    ))
+                  ) : (
+                    <p className="text-white/70 text-sm font-mono">{selectedItem.pronunciation}</p>
+                  )}
+                </div>
+              )}
+              {selectedItem.category && selectedItem.category.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {selectedItem.category.map((cat, index) => (
+                    <span key={index} className="text-xs bg-white/5 px-1.5 py-0.5 rounded text-white/60">
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* 中文释义 */}
-            {selectedItem.chinese_gloss && (
-              <div className="mb-6 flex-shrink-0">
-                <h4 className="text-sm font-medium text-white/60 mb-2">中文释义</h4>
-                <p className="text-white/90 leading-relaxed">{selectedItem.chinese_gloss}</p>
-              </div>
-            )}
+            {/* 滚动内容区域 */}
+            <div className="flex-1 overflow-y-auto px-5 py-3">
 
-            {/* 例句 */}
-            {selectedItem.example && (
-              <div className="mb-6 flex-shrink-0">
-                <h4 className="text-sm font-medium text-white/60 mb-2">例句</h4>
-                <p className="text-white/80 text-sm leading-relaxed italic">
-                  "{selectedItem.example}"
-                </p>
-              </div>
-            )}
+              {/* 中文释义 */}
+              {selectedItem.chinese_gloss && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">中文释义</h4>
+                  <p className="text-white/90 leading-relaxed text-sm">{selectedItem.chinese_gloss}</p>
+                </div>
+              )}
 
-            {/* 额外信息 */}
-            {selectedItem.usage_notes && selectedItem.usage_notes.length > 0 && selectedItem.usage_notes[0] !== 'Common usage' && (
-              <div className="mb-6 flex-shrink-0">
-                <h4 className="text-sm font-medium text-white/60 mb-2">额外信息</h4>
-                <ul className="space-y-2">
-                  {selectedItem.usage_notes.map((note, index) => (
-                    <li key={index} className="text-white/80 text-sm leading-relaxed">
-                      • {note}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              {/* 英文释义 */}
+              {selectedItem.english_meaning && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">英文释义</h4>
+                  <p className="text-white/80 text-xs leading-relaxed italic">{selectedItem.english_meaning}</p>
+                </div>
+              )}
 
-            {includeAnalysis && selectedItem.reason && (
-              <div className="mt-auto pt-6 border-t border-white/10 flex-shrink-0 min-h-0">
-                <h4 className="text-sm font-medium text-white/60 mb-3">AI语义分析</h4>
-                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-5 border border-white/10 shadow-inner flex-1 overflow-y-auto max-h-80">
-                  <div className="space-y-1">
-                    {formatReason(selectedItem.reason)}
+              {/* 例句 */}
+              {selectedItem.examples && selectedItem.examples.length > 0 && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">例句</h4>
+                  <div className="space-y-2.5">
+                    {selectedItem.examples.map((example, index) => (
+                      <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/5">
+                        <p className="text-white/85 text-xs leading-relaxed italic mb-1">
+                          "{example.sentence}"
+                        </p>
+                        <p className="text-white/65 text-xs leading-relaxed mb-0.5">
+                          {example.chinese_translation}
+                        </p>
+                        <p className="text-white/45 text-[10px] font-medium">
+                          — {example.source}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* 词形变化 */}
+              {selectedItem.word_forms && Object.keys(selectedItem.word_forms).length > 0 && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">词形变化</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(selectedItem.word_forms).map(([form, word], index) => (
+                      <div key={index} className="bg-white/5 px-2 py-1 rounded-lg">
+                        <span className="text-white/50 text-[10px] mr-0.5">{wordFormChineseMap[form] || form}:</span>
+                        <span className="text-white/80 text-xs font-medium">{word}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 高频搭配 */}
+              {selectedItem.collocations && selectedItem.collocations.length > 0 && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">高频搭配</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedItem.collocations.map((collocation, index) => (
+                      <span key={index} className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/75">
+                        {collocation}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 派生词 */}
+              {selectedItem.derivatives && selectedItem.derivatives.length > 0 && (
+                <div className="mb-3 flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">派生词</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedItem.derivatives.map((derivative, index) => (
+                      <div key={index} className="bg-white/5 px-2 py-1 rounded-lg">
+                        <div className="font-medium text-white/85 text-xs mb-0.5">
+                          {derivative.word}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px]">
+                          {derivative.pos && (
+                            <span className="text-white/50">{derivative.pos}</span>
+                          )}
+                          {derivative.meaning && (
+                            <span className="text-white/65">{derivative.meaning}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 使用注意事项 */}
+              {selectedItem.usage_notes && selectedItem.usage_notes.length > 0 && selectedItem.usage_notes[0] !== 'Common usage' && (
+                <div className="flex-shrink-0">
+                  <h4 className="text-xs font-medium text-white/60 mb-1.5">使用注意</h4>
+                  <ul className="space-y-1">
+                    {selectedItem.usage_notes.map((note, index) => (
+                      <li key={index} className="text-white/80 text-xs leading-relaxed">
+                        • {note}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {includeAnalysis && selectedItem.reason && (
+                <div className="pt-4 border-t border-white/10 flex-shrink-0 min-h-0 mb-3">
+                  <h4 className="text-xs font-medium text-white/60 mb-2">AI语义分析</h4>
+                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-4 border border-white/10 shadow-inner overflow-y-auto max-h-48">
+                    <div className="space-y-0.5">
+                      {formatReason(selectedItem.reason)}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

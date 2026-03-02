@@ -1,0 +1,410 @@
+[
+  {
+    "word": "atmosphere",
+    "pos": "n.",
+    "frequency": 8,
+    "category": [
+      "四级",
+      "六级",
+      "雅思",
+      "托福",
+      "考研"
+    ],
+    "pronunciation": "/ˈætməsfɪər/",
+    "chinese_meaning": "大气层；氛围，气氛",
+    "english_meaning": "the layer of gases surrounding a planet; the mood or feeling in a particular place",
+    "examples": [
+      {
+        "sentence": "The Earth's atmosphere protects life by absorbing ultraviolet solar radiation.",
+        "chinese_translation": "地球的大气层通过吸收太阳紫外线辐射来保护生命。",
+        "source": "NASA Science"
+      },
+      {
+        "sentence": "The restaurant had a cozy and romantic atmosphere.",
+        "chinese_translation": "这家餐厅有一种温馨浪漫的氛围。",
+        "source": "Travel Magazine"
+      }
+    ],
+    "collocations": [
+      "friendly atmosphere",
+      "tense atmosphere",
+      "atmosphere of trust",
+      "create an atmosphere",
+      "relaxed atmosphere"
+    ],
+    "word_forms": {
+      "plural": "atmospheres",
+      "adjective": "atmospheric"
+    },
+    "usage_notes": [
+      "作为科学术语时通常指行星的气体层；作为普通词汇时指抽象的氛围或环境。"
+    ]
+  },
+  {
+    "word": "hydrosphere",
+    "pos": "n.",
+    "frequency": 3,
+    "category": [
+      "托福",
+      "雅思",
+      "GRE",
+      "考研"
+    ],
+    "pronunciation": "/ˈhaɪdrəsfɪər/",
+    "chinese_meaning": "水圈（地球上所有水的总称）",
+    "english_meaning": "all the water on the surface of a planet, including oceans, lakes, rivers, and groundwater",
+    "examples": [
+      {
+        "sentence": "The hydrosphere interacts with the atmosphere and lithosphere in the global water cycle.",
+        "chinese_translation": "在全球水循环中，水圈与大气圈和岩石圈相互作用。",
+        "source": "Earth Science Textbook"
+      },
+      {
+        "sentence": "Pollution in one part of the hydrosphere can affect water quality globally.",
+        "chinese_translation": "水圈一个部分的污染会影响全球的水质。",
+        "source": "Environmental Science Journal"
+      }
+    ],
+    "collocations": [
+      "global hydrosphere",
+      "Earth's hydrosphere",
+      "hydrosphere interaction",
+      "hydrosphere cycle",
+      "hydrosphere pollution"
+    ],
+    "word_forms": {
+      "plural": "hydrospheres",
+      "adjective": "hydrospheric"
+    },
+    "usage_notes": [
+      "这是一个专业的地球科学术语，通常用于学术语境。"
+    ]
+  },
+  {
+    "word": "lithosphere",
+    "pos": "n.",
+    "frequency": 3,
+    "category": [
+      "托福",
+      "雅思",
+      "GRE",
+      "考研"
+    ],
+    "pronunciation": "/ˈlɪθəsfɪər/",
+    "chinese_meaning": "岩石圈（地球的固态外层，包括地壳和上地幔顶部）",
+    "english_meaning": "the rigid outer layer of the Earth, consisting of the crust and the upper part of the mantle",
+    "examples": [
+      {
+        "sentence": "The movement of tectonic plates occurs within the lithosphere.",
+        "chinese_translation": "构造板块的运动发生在岩石圈内。",
+        "source": "Geology Textbook"
+      },
+      {
+        "sentence": "Earthquakes are a result of stress release in the lithosphere.",
+        "chinese_translation": "地震是岩石圈内应力释放的结果。",
+        "source": "National Geographic"
+      }
+    ],
+    "collocations": [
+      "Earth's lithosphere",
+      "oceanic lithosphere",
+      "continental lithosphere",
+      "lithosphere plates",
+      "lithosphere dynamics"
+    ],
+    "word_forms": {
+      "plural": "lithospheres",
+      "adjective": "lithospheric"
+    },
+    "usage_notes": [
+      "这是一个专业的地质学术语，常与'asthenosphere'（软流圈）对比使用。"
+    ]
+  },
+  {
+    "word": "oxygen",
+    "pos": "n.",
+    "frequency": 9,
+    "category": [
+      "四级",
+      "六级",
+      "雅思",
+      "托福",
+      "考研",
+      "日常用语"
+    ],
+    "pronunciation": "/ˈɒksɪdʒən/",
+    "chinese_meaning": "氧，氧气",
+    "english_meaning": "a chemical element (symbol O) that is a colorless, odorless gas essential for life and combustion",
+    "examples": [
+      {
+        "sentence": "Plants produce oxygen through the process of photosynthesis.",
+        "chinese_translation": "植物通过光合作用产生氧气。",
+        "source": "Biology Textbook"
+      },
+      {
+        "sentence": "The patient was given supplemental oxygen to help with breathing.",
+        "chinese_translation": "给病人提供了辅助氧气以帮助呼吸。",
+        "source": "Medical Drama"
+      }
+    ],
+    "collocations": [
+      "oxygen level",
+      "oxygen mask",
+      "oxygen tank",
+      "supplemental oxygen",
+      "oxygen saturation"
+    ],
+    "word_forms": {
+      "adjective": "oxygenic"
+    },
+    "usage_notes": [
+      "作为不可数名词使用，指氧气这种物质。"
+    ]
+  },
+  {
+    "word": "oxide",
+    "pos": "n.",
+    "frequency": 5,
+    "category": [
+      "六级",
+      "托福",
+      "雅思",
+      "GRE",
+      "考研"
+    ],
+    "pronunciation": "/ˈɒksaɪd/",
+    "chinese_meaning": "氧化物",
+    "english_meaning": "a chemical compound of oxygen with another element or group",
+    "examples": [
+      {
+        "sentence": "Rust is a form of iron oxide that forms when iron is exposed to oxygen and moisture.",
+        "chinese_translation": "铁锈是氧化铁的一种形式，当铁暴露在氧气和湿气中时形成。",
+        "source": "Chemistry Textbook"
+      },
+      {
+        "sentence": "Nitrous oxide, also known as laughing gas, is used as an anesthetic.",
+        "chinese_translation": "一氧化二氮，也被称为笑气，被用作麻醉剂。",
+        "source": "Medical Encyclopedia"
+      }
+    ],
+    "collocations": [
+      "iron oxide",
+      "nitrous oxide",
+      "aluminum oxide",
+      "zinc oxide",
+      "metal oxide"
+    ],
+    "word_forms": {
+      "plural": "oxides"
+    },
+    "usage_notes": [
+      "通常作为可数名词，指具体的氧化物化合物。"
+    ]
+  },
+  {
+    "word": "carbon dioxide",
+    "pos": "n.",
+    "frequency": 8,
+    "category": [
+      "四级",
+      "六级",
+      "雅思",
+      "托福",
+      "考研",
+      "日常用语"
+    ],
+    "pronunciation": "/ˌkɑːbən daɪˈɒksaɪd/",
+    "chinese_meaning": "二氧化碳",
+    "english_meaning": "a colorless, odorless gas produced by burning carbon and organic compounds and by respiration, absorbed by plants in photosynthesis",
+    "examples": [
+      {
+        "sentence": "The increase in atmospheric carbon dioxide is a major contributor to global warming.",
+        "chinese_translation": "大气中二氧化碳的增加是全球变暖的一个主要因素。",
+        "source": "IPCC Climate Report"
+      },
+      {
+        "sentence": "Humans exhale carbon dioxide as a waste product of cellular respiration.",
+        "chinese_translation": "人类呼出二氧化碳，这是细胞呼吸的废物。",
+        "source": "Biology Textbook"
+      }
+    ],
+    "collocations": [
+      "carbon dioxide emissions",
+      "carbon dioxide levels",
+      "absorb carbon dioxide",
+      "release carbon dioxide",
+      "carbon dioxide concentration"
+    ],
+    "word_forms": {
+      "chemical formula": "CO₂"
+    },
+    "usage_notes": [
+      "作为不可数名词使用，化学式为CO₂。常简称为CO2。"
+    ]
+  },
+  {
+    "word": "hydrogen",
+    "pos": "n.",
+    "frequency": 7,
+    "category": [
+      "四级",
+      "六级",
+      "雅思",
+      "托福",
+      "考研"
+    ],
+    "pronunciation": "/ˈhaɪdrədʒən/",
+    "chinese_meaning": "氢",
+    "english_meaning": "a chemical element (symbol H) that is a colorless, odorless, highly flammable gas, the lightest and most abundant element in the universe",
+    "examples": [
+      {
+        "sentence": "Hydrogen is the primary fuel for stars like our Sun.",
+        "chinese_translation": "氢是像我们太阳这样的恒星的主要燃料。",
+        "source": "Astronomy Documentary"
+      },
+      {
+        "sentence": "Hydrogen fuel cells are being developed as a clean energy source for vehicles.",
+        "chinese_translation": "氢燃料电池正在被开发为车辆的清洁能源。",
+        "source": "Technology Review"
+      }
+    ],
+    "collocations": [
+      "hydrogen atom",
+      "hydrogen fuel",
+      "hydrogen bomb",
+      "hydrogen peroxide",
+      "hydrogen gas"
+    ],
+    "word_forms": {
+      "chemical symbol": "H"
+    },
+    "usage_notes": [
+      "作为不可数名词，指氢元素或氢气。"
+    ]
+  },
+  {
+    "word": "core",
+    "pos": "n.",
+    "frequency": 8,
+    "category": [
+      "四级",
+      "六级",
+      "雅思",
+      "托福",
+      "考研",
+      "日常用语",
+      "商务英语"
+    ],
+    "pronunciation": "/kɔːr/",
+    "chinese_meaning": "核心；中心；地核；果核",
+    "english_meaning": "the central or most important part of something; the innermost part of a planet; the central part of some fruits",
+    "examples": [
+      {
+        "sentence": "The Earth's core is composed primarily of iron and nickel.",
+        "chinese_translation": "地核主要由铁和镍组成。",
+        "source": "Geology Textbook"
+      },
+      {
+        "sentence": "Innovation is at the core of our company's strategy.",
+        "chinese_translation": "创新是我们公司战略的核心。",
+        "source": "Business Presentation"
+      }
+    ],
+    "collocations": [
+      "core values",
+      "core business",
+      "inner core",
+      "outer core",
+      "core competency"
+    ],
+    "word_forms": {
+      "plural": "cores",
+      "adjective": "core"
+    },
+    "usage_notes": [
+      "含义广泛，可用于物理核心（如地核）、抽象核心（如核心理念）或具体核心（如果核）。"
+    ]
+  },
+  {
+    "word": "crust",
+    "pos": "n.",
+    "frequency": 6,
+    "category": [
+      "六级",
+      "托福",
+      "雅思",
+      "考研",
+      "日常用语"
+    ],
+    "pronunciation": "/krʌst/",
+    "chinese_meaning": "地壳；面包皮；硬外皮",
+    "english_meaning": "the outermost solid shell of a planet; the hard outer surface of bread; any hard outer layer",
+    "examples": [
+      {
+        "sentence": "The Earth's crust is divided into tectonic plates that are constantly moving.",
+        "chinese_translation": "地壳被划分为不断运动的构造板块。",
+        "source": "Earth Science Documentary"
+      },
+      {
+        "sentence": "She prefers the soft part of the bread and always cuts off the crust.",
+        "chinese_translation": "她更喜欢面包的柔软部分，总是把面包皮切掉。",
+        "source": "Everyday Conversation"
+      }
+    ],
+    "collocations": [
+      "Earth's crust",
+      "continental crust",
+      "oceanic crust",
+      "pie crust",
+      "bread crust"
+    ],
+    "word_forms": {
+      "plural": "crusts",
+      "adjective": "crusty"
+    },
+    "usage_notes": [
+      "在地质学中指行星的固态外层；在日常生活中常指食物的硬皮。"
+    ]
+  },
+  {
+    "word": "mantle",
+    "pos": "n.",
+    "frequency": 5,
+    "category": [
+      "六级",
+      "托福",
+      "雅思",
+      "GRE",
+      "考研"
+    ],
+    "pronunciation": "/ˈmæntl/",
+    "chinese_meaning": "地幔；披风，斗篷；职责，衣钵",
+    "english_meaning": "the layer of the Earth between the crust and the core; a loose sleeveless cloak; a role or responsibility that passes from one person to another",
+    "examples": [
+      {
+        "sentence": "Convection currents in the Earth's mantle drive the movement of tectonic plates.",
+        "chinese_translation": "地幔中的对流驱动着构造板块的运动。",
+        "source": "Geology Journal"
+      },
+      {
+        "sentence": "He took up the mantle of leadership after his father retired.",
+        "chinese_translation": "父亲退休后，他接过了领导职责。",
+        "source": "Historical Biography"
+      }
+    ],
+    "collocations": [
+      "Earth's mantle",
+      "upper mantle",
+      "take up the mantle",
+      "mantle convection",
+      "mantle plume"
+    ],
+    "word_forms": {
+      "plural": "mantles",
+      "verb": "mantle (to cover)"
+    },
+    "usage_notes": [
+      "在地质学中是专业术语；在比喻用法中，'take up the mantle'是固定短语，意为'接替职责'。"
+    ]
+  }
+]

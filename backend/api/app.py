@@ -15,6 +15,7 @@ try:
     from core.mem import query_memory, switch_vocabulary_book
     from core.open import analyze_semantic_neighborhood
     from core.token_stats import token_stats
+    from core.generate_vocabulary import load_ielts_words, generate_vocabulary_data, save_vocabulary_data
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -151,6 +152,59 @@ def get_token_stats():
         return jsonify({
             'error': str(e),
             'success': False
+        }), 500
+
+
+@app.route('/api/generate-vocabulary', methods=['POST'])
+def generate_vocabulary():
+    """生成完整的雅思词汇数据接口"""
+    if not backend_available:
+        return jsonify({
+            'error': 'Backend not available',
+            'message': 'Python backend modules could not be loaded'
+        }), 503
+
+    try:
+        data = request.get_json()
+        batch_size = data.get('batch_size', 15)
+        start_index = data.get('start_index', 0)
+        end_index = data.get('end_index', None)
+
+        # 加载现有单词
+        words = load_ielts_words()
+
+        # 如果指定了范围，截取对应部分
+        if end_index is not None:
+            words = words[start_index:end_index]
+        elif start_index > 0:
+            words = words[start_index:]
+
+        print(f"开始生成 {len(words)} 个单词的完整词汇数据...")
+
+        # 生成完整数据
+        vocabulary_data = generate_vocabulary_data(words, batch_size=batch_size)
+
+        # 保存结果
+        if vocabulary_data:
+            output_filename = "data/ielts_complete.json"
+            save_vocabulary_data(vocabulary_data, output_filename)
+            return jsonify({
+                'success': True,
+                'message': f"成功生成 {len(vocabulary_data)} 个单词的完整词汇数据",
+                'count': len(vocabulary_data),
+                'output_file': output_filename
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': '未能生成任何词汇数据'
+            }), 500
+
+    except Exception as e:
+        print(f"Error in generate_vocabulary endpoint: {e}")
+        return jsonify({
+            'error': 'Internal server error',
+            'message': str(e)
         }), 500
 
 

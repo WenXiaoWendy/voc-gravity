@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
-import { getRelationChinese, relationTypeColorMap } from '../utils/relations';
+import { getRelationChinese, relationTypeColorMap } from '@/utils/relations';
+import { wordFormChineseMap } from '@/utils/wordForms';
 
 interface HoverBubbleCardProps {
   item: BubbleItem | null;
@@ -18,7 +19,7 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
       const offsetX = 20;
       const offsetY = 20;
       const cardWidth = 280;
-      const cardHeight = 220;
+      const cardHeight = 280;
 
       let x = e.clientX + offsetX;
       let y = e.clientY + offsetY;
@@ -94,44 +95,77 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
       }}
     >
       {item && (
-        <div className="p-4">
-          <div className="mb-3 pb-3 border-b border-white/10">
-            <div className="flex items-start gap-2 mb-2">
-              <h3 className="text-lg font-serif font-semibold text-white/95 flex-shrink-0">
-                {item.word}
-              </h3>
-              {includeAnalysis && (
-                <div className="flex flex-wrap gap-1 mt-0.5">
-                  {getRelationTypes().map((relationType, index) => (
-                    <span
-                      key={index}
-                      className="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0"
-                      style={getRelationTagStyle(relationType)}
-                    >
-                      {getRelationChinese(relationType)}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="p-3.5">
+          {/* 单词、发音、词频一行 */}
+          <div className="flex items-center gap-2 mb-2.5">
+            <h3 className="text-lg font-serif font-semibold text-white/95">
+              {item.word}
+            </h3>
+            {item.pronunciation && (
+              <span className="text-white/60 text-xs font-mono">
+                {Array.isArray(item.pronunciation) ? item.pronunciation[0] : item.pronunciation}
+              </span>
+            )}
+            {item.frequency && (
+              <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/50 ml-auto">
+                {item.frequency}/10
+              </span>
+            )}
           </div>
 
-          {item.chinese_gloss && (
-            <div className="mb-3">
-              <div className="flex items-start gap-2">
-                {item.pos && (
-                  <span className="text-xs font-medium text-white/60 flex-shrink-0 mt-0.5">{item.pos}</span>
-                )}
-                <p className="text-white/90 text-sm leading-relaxed flex-1">{item.chinese_gloss}</p>
-              </div>
+          {includeAnalysis && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {getRelationTypes().map((relationType, index) => (
+                <span
+                  key={index}
+                  className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                  style={getRelationTagStyle(relationType)}
+                >
+                  {getRelationChinese(relationType)}
+                </span>
+              ))}
             </div>
           )}
 
-          {item.example && item.example !== '-' && (
-            <div className="mb-3">
-              <p className="text-white/70 text-xs leading-relaxed italic">
-                "{item.example}"
+          {/* 词性和中文释义 */}
+          <div className="mb-2.5">
+            <div className="flex items-start gap-2">
+              {item.pos && (
+                <div className="flex flex-wrap gap-1">
+                  {Array.isArray(item.pos) ? (
+                    item.pos.map((p, idx) => (
+                      <span key={idx} className="text-xs font-medium text-white/60 mt-0.5">{p}</span>
+                    ))
+                  ) : (
+                    <span className="text-xs font-medium text-white/60 mt-0.5">{item.pos}</span>
+                  )}
+                </div>
+              )}
+              <p className="text-white/90 text-sm leading-relaxed flex-1">{item.chinese_gloss}</p>
+            </div>
+          </div>
+
+          {/* 例句（英文+中文） */}
+          {item.examples && item.examples.length > 0 && (
+            <div className="mb-2.5">
+              <p className="text-white/70 text-xs leading-relaxed italic mb-1">
+                "{item.examples[0].sentence}"
               </p>
+              <p className="text-white/60 text-xs leading-relaxed">
+                {item.examples[0].chinese_translation}
+              </p>
+            </div>
+          )}
+
+          {/* 词形变化（放最下面） */}
+          {item.word_forms && Object.keys(item.word_forms).length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {Object.entries(item.word_forms).map(([key, value], idx) => (
+                <div key={idx} className="bg-white/5 px-2 py-1 rounded-lg">
+                  <span className="text-white/50 text-[10px] mr-0.5">{wordFormChineseMap[key] || key}:</span>
+                  <span className="text-white/80 text-xs font-medium">{value}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -1,22 +1,62 @@
-// 类型定义 - 符合项目数据模型
+// 完整词汇数据类型定义
+export interface Derivative {
+  word: string;
+  pos: string;
+  meaning: string;
+}
+
+export interface CompleteWordData {
+  word: string;
+  pos: string | string[];
+  frequency: number;
+  category: string[];
+  pronunciation: string | string[];
+  chinese_meaning: string;
+  english_meaning: string;
+  examples: Array<{
+    sentence: string;
+    chinese_translation: string;
+    source: string;
+  }>;
+  collocations: string[];
+  word_forms: Record<string, string>;
+  derivatives: Derivative[];
+  usage_notes: string[];
+}
+
+// 词汇条目（简化版本，用于词库）
 export interface WordEntry {
   id: string;
   word: string;
-  pos?: string;
+  pos?: string | string[];
   brief_gloss?: string;
   chinese_gloss?: string;
   source: string;
   tags?: string[];
+  // 新增完整词汇数据字段
+  frequency?: number;
+  category?: string[];
+  pronunciation?: string | string[];
+  english_meaning?: string;
+  examples?: Array<{
+    sentence: string;
+    chinese_translation: string;
+    source: string;
+  }>;
+  collocations?: string[];
+  word_forms?: Record<string, string>;
+  derivatives?: Derivative[];
 }
 
+// 气泡数据结构
 export interface BubbleItem extends WordEntry {
-  layer: 'center' | 'inner' | 'middle' | 'outer';
+  id: string;
+  layer: 'center' | 'middle' | 'outer';
   score: number;
-  relation_type?: string | string[];
+  relation_type: string | string[];
+  reason?: string;
   usage_notes?: string[];
   example?: string;
-  contrast_example?: string;
-  reason?: string;
 }
 
 export type Layer = 'center' | 'inner' | 'middle' | 'outer';

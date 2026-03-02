@@ -1,0 +1,23 @@
+export const wordFormChineseMap: Record<string, string> = {
+  'plural': '复数',
+  'singular': '单数',
+  'past_tense': '过去式',
+  'past_participle': '过去分词',
+  'present_participle': '现在分词',
+  'third_person_singular': '第三人称单数',
+  'gerund': '动名词',
+  'infinitive': '不定式',
+  'comparative': '比较级',
+  'superlative': '最高级',
+  'adjective': '形容词',
+  'adverb': '副词',
+  'noun': '名词',
+  'verb': '动词',
+  'adjective form': '形容词形式',
+  'adverb form': '副词形式',
+  'noun form': '名词形式',
+  'verb form': '动词形式',
+  'chemical formula': '化学式',
+  'chemical symbol': '化学符号',
+  'symbol': '符号'
+};

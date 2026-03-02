@@ -163,12 +163,17 @@ export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): Bubb
     // 获取词性，如果有多个词性，使用第一个
     let posKey = 'other';
     if (item.pos) {
-      if (item.pos.includes('/')) {
+      if (Array.isArray(item.pos)) {
         // 如果是数组，使用第一个词性
-        posKey = item.pos.split('/')?.[0] || 'other';
-      } else {
-        // 如果是字符串，直接使用
-        posKey = item.pos;
+        posKey = item.pos[0] || 'other';
+      } else if (typeof item.pos === 'string') {
+        if (item.pos.includes('/')) {
+          // 如果是用 / 分隔的字符串，使用第一个词性
+          posKey = item.pos.split('/')?.[0] || 'other';
+        } else {
+          // 如果是简单字符串，直接使用
+          posKey = item.pos;
+        }
       }
     }
 
