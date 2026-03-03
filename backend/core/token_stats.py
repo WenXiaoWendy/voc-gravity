@@ -10,7 +10,9 @@ PRICING = {
     "output": 3.0              # 输出
 }
 
-STATS_FILE = "data/token_stats.json"
+# 使用绝对路径，确保从任意目录运行时都写入同一个文件
+_backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATS_FILE = os.path.join(_backend_root, "data", "token_stats.json")
 
 
 class TokenStats:

@@ -22,17 +22,19 @@
 ```
 voc-gravity/
 ├── backend/                 # Python后端
-│   ├── api/app.py          # Flask API服务器
+│   ├── api/app.py          # Flask API服务器（端口8000）
 │   ├── core/               # 核心业务逻辑模块
+│   ├── data/               # 词汇数据与统计文件
+│   ├── faiss_index/        # 向量数据库索引文件
 │   └── requirements.txt    # Python依赖
 ├── frontend/               # React前端
 │   ├── src/                # 源码目录
-│   │   ├── App.tsx         # 主应用组件
-│   │   ├── main.tsx        # 应用入口
-│   │   └── index.css       # 全局样式
+│   │   ├── components/     # UI组件
+│   │   ├── data/           # 本地词汇数据（JSON）
+│   │   └── utils/          # 工具函数
 │   ├── package.json        # 前端依赖配置
 │   └── vite.config.ts      # Vite配置
-├── faiss_index/            # 向量数据库文件
+├── venv/                   # Python虚拟环境
 ├── start.sh                # 一键启动脚本
 └── README.md               # 项目说明
 ```
@@ -80,19 +82,22 @@ pip install -r backend/requirements.txt
 # 2. 安装前端依赖
 cd frontend
 npm install
+cd ..
 
-# 3. 启动后端API（终端1）
-npm run api
+# 3. 启动后端API（终端1，需先激活venv）
+source venv/bin/activate
+cd frontend && npm run api
 
 # 4. 启动前端开发服务器（终端2）
-npm run dev
+cd frontend && npm run dev
 ```
 
 ### 方式三：同时启动前后端
 
 ```bash
-cd frontend
-npm run start:dev
+# 必须先激活venv，npm脚本才能找到flask
+source venv/bin/activate
+cd frontend && npm run start:dev
 ```
 
 ---
@@ -156,13 +161,16 @@ python app.py
 
 ### API接口
 
-#### 问答接口
+#### 词汇检索
 ```http
-POST /api/ask
+POST /api/retrieve
 Content-Type: application/json
 
 {
-  "question": "什么是人工智能？"
+  "query": "abandon",
+  "book_key": "ielts",
+  "k": 56,
+  "include_analysis": false
 }
 ```
 

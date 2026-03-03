@@ -71,6 +71,10 @@ def validate_vocabulary_data(data: Dict[str, Any]) -> Dict[str, Any]:
                 pos = 'pron.'
             elif pos_lower in ['int', 'interjection']:
                 pos = 'int.'
+            elif pos_lower in ['modal v.', 'modal verb', 'modal']:
+                pos = 'v.'
+            elif pos_lower in ['det.', 'det', 'determiner', 'art.', 'article']:
+                pos = 'adj.'
             else:
                 raise ValueError(f"无效的词性: {pos}")
 
@@ -347,81 +351,57 @@ def load_ielts_words() -> List[str]:
     return words
 
 
-def generate_vocabulary_data(words: List[str], batch_size: int = 20) -> List[Dict[str, Any]]:
-    """调用 DeepSeek API 生成完整的词汇数据"""
+def generate_vocabulary_data(words: List[str], batch_size: int = 25) -> List[Dict[str, Any]]:
+    """调用 DeepSeek API 生成完整的词汇数据（单次 API 调用，由调用方控制批次大小）"""
     llm = ChatOpenAI(
         model="deepseek-chat",
         temperature=0.3,
         base_url="https://api.deepseek.com/v1",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
-        max_tokens=4000
+        max_tokens=8192
     )
 
-    all_results = []
+    user_prompt = f"请为以下单词生成详细的词汇数据：\n\n{json.dumps(words, ensure_ascii=False, indent=2)}"
 
-    for i in range(0, len(words), batch_size):
-        batch = words[i:i + batch_size]
-        print(f"正在处理第 {i//batch_size + 1} 批，共 {len(words)} 个单词...")
+    messages = [
+        SystemMessage(content=SYSTEM_PROMPT),
+        HumanMessage(content=user_prompt)
+    ]
+    response = llm(messages)
+    content = str(response.content)
 
-        user_prompt = f"请为以下单词生成详细的词汇数据：\n\n{json.dumps(batch, ensure_ascii=False, indent=2)}"
+    # 优先使用 API 实际返回的 token 数，fallback 到估算
+    usage = response.response_metadata.get('token_usage', {})
+    input_tokens = usage.get('prompt_tokens') or token_stats.estimate_tokens(SYSTEM_PROMPT + "\n" + user_prompt)
+    output_tokens = usage.get('completion_tokens') or token_stats.estimate_tokens(content)
 
+    # 记录 token 统计
+    token_stats.record_call(
+        model="deepseek-chat",
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cache_hit=False,
+        metadata={"task": "generate_vocabulary", "word_count": len(words)}
+    )
+
+    # 解析 JSON
+    start_idx = content.find('[')
+    end_idx = content.rfind(']') + 1
+    if start_idx == -1 or end_idx == 0:
+        raise ValueError(f"无法从响应中提取 JSON: {content[:200]}...")
+
+    batch_results = json.loads(content[start_idx:end_idx])
+
+    # 验证每个单词数据
+    validated_results = []
+    for item in batch_results:
         try:
-            # 计算输入 tokens
-            input_text = SYSTEM_PROMPT.strip() + "\n" + user_prompt.strip()
-            input_tokens = token_stats.estimate_tokens(input_text)
+            validated_results.append(validate_vocabulary_data(item))
+        except ValueError as e:
+            print(f"  数据验证失败 [{item.get('word', 'unknown')}]: {e}")
 
-            messages = [
-                SystemMessage(content=SYSTEM_PROMPT),
-                HumanMessage(content=user_prompt)
-            ]
-            response = llm(messages)
-            content = str(response.content)
-
-            # 计算输出 tokens
-            output_tokens = token_stats.estimate_tokens(content)
-
-            # 记录 token 统计
-            token_stats.record_call(
-                model="deepseek-chat",
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                cache_hit=False,
-                metadata={"task": "generate_vocabulary", "word_count": len(batch)}
-            )
-
-            # 尝试解析 JSON
-            try:
-                # 找到第一个 [ 和最后一个 ] 之间的内容
-                start_idx = content.find('[')
-                end_idx = content.rfind(']') + 1
-                if start_idx != -1 and end_idx != -1:
-                    json_content = content[start_idx:end_idx]
-                    batch_results = json.loads(json_content)
-
-                    # 验证每个单词数据
-                    validated_results = []
-                    for item in batch_results:
-                        try:
-                            validated_item = validate_vocabulary_data(item)
-                            validated_results.append(validated_item)
-                        except ValueError as e:
-                            print(f"  数据验证失败 [{item.get('word', 'unknown')}]: {e}")
-                            # 验证失败的单词跳过
-                            continue
-
-                    all_results.extend(validated_results)
-                    print(f"  成功处理 {len(validated_results)}/{len(batch_results)} 个单词")
-                else:
-                    print(f"  无法从响应中提取 JSON: {content[:200]}...")
-            except json.JSONDecodeError as e:
-                print(f"  JSON 解析失败: {e}")
-                print(f"  响应内容: {content[:300]}...")
-
-        except Exception as e:
-            print(f"  API 调用失败: {e}")
-            continue
-
-    return all_results
+    print(f"  成功处理 {len(validated_results)}/{len(batch_results)} 个单词")
+    return validated_results
 
 
 def save_vocabulary_data(data: List[Dict[str, Any]] or Dict[str, Any], filename: str = "data/ielts_complete.json"):

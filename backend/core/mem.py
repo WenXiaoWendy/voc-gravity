@@ -12,6 +12,9 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 start = time.time()
 
+# backend 根目录（core/mem.py 的上一级）
+_backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # 初始化 AI 记忆数据库
 # 使用本地模型避免HuggingFace认证问题
 # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -41,10 +44,10 @@ def get_vector_db(book_key='ielts'):
     """根据词书key值获取对应的向量数据库"""
 
     # 构建词书特定的数据库路径
-    db_path = f"faiss_index/{book_key}"
+    db_path = os.path.join(_backend_root, "faiss_index", book_key)
 
     # 确保目录存在
-    os.makedirs("faiss_index", exist_ok=True)
+    os.makedirs(os.path.join(_backend_root, "faiss_index"), exist_ok=True)
 
     # 判断本地是否已有该词书的向量数据库
     if os.path.exists(db_path):
@@ -57,7 +60,7 @@ def get_vector_db(book_key='ielts'):
         print(f"📌 本地无词书 '{VOCABULARY_BOOKS[book_key]['name']}' 的向量库，重新构建")
 
         # 读取词书对应的JSON文件
-        json_file_path = f"data/{VOCABULARY_BOOKS[book_key]['json_file']}"
+        json_file_path = os.path.join(_backend_root, "data", VOCABULARY_BOOKS[book_key]['json_file'])
 
         if not os.path.exists(json_file_path):
             print(f"❌ 词书JSON文件不存在: {json_file_path}")

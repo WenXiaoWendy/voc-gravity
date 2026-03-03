@@ -279,3 +279,6 @@ temp/
 # 个人配置文件
 .local_settings.py
 personal_config.ini
+
+# 个人开发追踪文档，不随开源代码发布
+ROADMAP.md

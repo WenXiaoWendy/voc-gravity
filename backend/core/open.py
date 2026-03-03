@@ -133,14 +133,14 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
         HumanMessage(content=user_prompt.strip()),
     ]
 
-    # 计算输入 tokens
-    input_text = SYSTEM.strip() + "\n" + user_prompt.strip()
-    input_tokens = token_stats.estimate_tokens(input_text)
-
     try:
         response = llm(messages)
         output_text = str(response.content)
-        output_tokens = token_stats.estimate_tokens(output_text)
+
+        # 优先使用 API 实际返回的 token 数，fallback 到估算
+        usage = response.response_metadata.get('token_usage', {})
+        input_tokens = usage.get('prompt_tokens') or token_stats.estimate_tokens(SYSTEM.strip() + "\n" + user_prompt.strip())
+        output_tokens = usage.get('completion_tokens') or token_stats.estimate_tokens(output_text)
 
         # 记录 token 统计
         token_stats.record_call(
