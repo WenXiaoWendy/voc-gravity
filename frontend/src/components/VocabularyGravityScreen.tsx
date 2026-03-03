@@ -1,21 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useErrorMessage } from '../hooks/useErrorMessage';
+import { useVocabularyDB } from '../hooks/useVocabularyDB';
 import { BubbleItem } from '../types/bubble';
 import { BACKGROUND_COLOR } from '../utils/theme';
+import { addToHistory } from '../utils/searchHistory';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
+import { ConfirmDialog } from './ConfirmDialog';
 import { HoverBubbleCard } from './HoverBubbleCard';
 import NavBar from './NavBar';
 import RelationLegend from './RelationLegend';
 
-// 导入本地词书数据
-import ieltsVocabulary from '../data/ielts_complete.json';
 // API基础URL
 const API_BASE_URL = 'http://localhost:8000/api';
-
-// 从本地JSON数据获取单词详细信息
-const getWordDetails = (word: string): any => {
-  return ieltsVocabulary[word] || null;
-};
 
 const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any }> => {
   const response = await fetch(`${API_BASE_URL}/retrieve`, {
@@ -70,6 +67,7 @@ const generateRelationType = (centerWord: string, neighborWord: string): string[
 const BOTTOM_BAR_CLASSES = 'fixed bottom-0 left-0 right-0 z-20 bg-black/20 backdrop-blur-lg p-3 text-center text-sm text-white/60 border-t border-white/5';
 
 export const VocabularyGravityScreen: React.FC = () => {
+  const { isLoaded, getWordDetails, fetchAndCacheWord } = useVocabularyDB();
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
   const [hoverItem, setHoverItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
@@ -78,14 +76,17 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [showRelationColors, setShowRelationColors] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { errorMessage, showError, clearError } = useErrorMessage();
+  const [confirmDialog, setConfirmDialog] = useState<{ lemma: string; originalWord: string; pos?: string; chineseMeaning: string; isGenerating?: boolean } | null>(null);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
 
-  // 挂载后默认搜索abandon
+  // 词库加载完成后触发默认搜索
   useEffect(() => {
-    handleSearch('abandon');
-  }, []);
+    if (isLoaded) {
+      handleSearch('abandon');
+    }
+  }, [isLoaded]);
 
   // 确保 showRelationColors 和 includeAnalysis 保持一致
   useEffect(() => {
@@ -215,31 +216,65 @@ export const VocabularyGravityScreen: React.FC = () => {
     }
 
     setIsLoading(true);
-    setErrorMessage(null);
+    clearError();
     currentQueryRef.current = query;
     const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
 
     try {
-      // 检查缓存
-      const cachedBubbleItems = bubbleCache.current.get(query);
+      // 确定最终搜索词（词书命中直接用，否则走验证流程）
+      let searchQuery = query;
 
-      // 同步发起检索请求（整合语义邻域分析）
+      if (!getWordDetails(query)) {
+        // 词书未命中 → 调验证接口
+        const validation = await fetch('/api/validate-word', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word: query }),
+        }).then(r => r.json());
+
+        if (!validation.valid) {
+          currentQueryRef.current = ''; // 重置，允许用户修正后重新搜索
+          showError(validation.error || '请输入正确的英文单词');
+          return;
+        }
+
+        const lemma: string = validation.lemma;
+
+        if (!getWordDetails(lemma)) {
+          // lemma 也不在词书 → 弹窗让用户决定，重置以便取消后可重试
+          currentQueryRef.current = '';
+          setConfirmDialog({ lemma, originalWord: query, pos: validation.pos, chineseMeaning: validation.chinese_meaning || '' });
+          return;
+        }
+
+        // lemma 在词书中（变形词命中，如 running → run）
+        searchQuery = lemma;
+      }
+
+      // 所有验证通过，确定发起搜索 → 此时才写入历史
+      addToHistory(searchQuery);
+      currentQueryRef.current = searchQuery;
+
+      // 检查缓存
+      const cachedBubbleItems = bubbleCache.current.get(searchQuery);
+
+      // 发起检索请求（整合语义邻域分析）
       const retrieveResult = await (cachedBubbleItems
         ? Promise.resolve({
-          words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
+          words: cachedBubbleItems.filter(item => item.word !== searchQuery).map(item => item.word),
           analysis: undefined
         })
-        : retrieveSimilarWords(query, 'ielts', shouldIncludeAnalysis)
+        : retrieveSimilarWords(searchQuery, 'ielts', shouldIncludeAnalysis)
       );
       console.log('检索结果:', retrieveResult);
 
       if (retrieveResult.words.length === 0) {
-        setErrorMessage('未检索到相关词汇，请尝试其他单词');
+        showError('未检索到相关词汇，请尝试其他单词');
         return;
       }
 
       // 生成气泡数据
-      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, query);
+      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, searchQuery);
 
       if (retrieveResult.analysis) {
         try {
@@ -264,7 +299,7 @@ export const VocabularyGravityScreen: React.FC = () => {
             return item;
           });
 
-          bubbleCache.current.set(query, updatedBubbleItems);
+          bubbleCache.current.set(searchQuery, updatedBubbleItems);
           setCurrentWords(updatedBubbleItems);
 
           const newCenterItem = updatedBubbleItems[0];
@@ -294,12 +329,25 @@ export const VocabularyGravityScreen: React.FC = () => {
 
     } catch (error) {
       console.error('搜索失败:', error);
-      setErrorMessage(error instanceof Error ? error.message : '搜索失败，请稍后重试');
+      showError(error instanceof Error ? error.message : '搜索失败，请稍后重试');
       setLoadingItemId(null);
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, includeAnalysis]);
+  }, [isLoading, includeAnalysis, showError, clearError]);
+
+  // 用户在弹窗中确认 AI 生成词汇详情
+  const handleConfirmGenerate = useCallback(async () => {
+    if (!confirmDialog || confirmDialog.isGenerating) return;
+    const { lemma } = confirmDialog;
+    // 弹窗内进入 loading 态，不关闭
+    setConfirmDialog(prev => prev ? { ...prev, isGenerating: true } : null);
+    await fetchAndCacheWord(lemma);
+    // 数据就绪后关闭弹窗并发起搜索
+    setConfirmDialog(null);
+    currentQueryRef.current = ''; // 清空以绕过重复搜索检查
+    handleSearch(lemma);
+  }, [confirmDialog, fetchAndCacheWord, handleSearch]);
 
   // 处理模式切换
   const handleModeChange = useCallback((newIncludeAnalysis: boolean) => {
@@ -373,7 +421,7 @@ export const VocabularyGravityScreen: React.FC = () => {
               </svg>
               <span className="text-white/90 text-sm">{errorMessage}</span>
               <button
-                onClick={() => setErrorMessage(null)}
+                onClick={clearError}
                 className="ml-2 text-white/60 hover:text-white transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,6 +469,19 @@ export const VocabularyGravityScreen: React.FC = () => {
           : '🫧 气泡颜色代表词性 • 点击气泡快速探索相邻语义空间 • 切换到AI模式获取关系分析'
         }
       </div>
+
+      {/* AI 生成确认弹窗 */}
+      {confirmDialog && (
+        <ConfirmDialog
+          word={confirmDialog.lemma}
+          originalWord={confirmDialog.originalWord}
+          pos={confirmDialog.pos}
+          chineseMeaning={confirmDialog.chineseMeaning}
+          isGenerating={confirmDialog.isGenerating}
+          onConfirm={handleConfirmGenerate}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
     </div>
   );
 };

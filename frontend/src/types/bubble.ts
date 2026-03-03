@@ -51,7 +51,7 @@ export interface WordEntry {
 // 气泡数据结构
 export interface BubbleItem extends WordEntry {
   id: string;
-  layer: 'center' | 'middle' | 'outer';
+  layer: Layer;
   score: number;
   relation_type: string | string[];
   reason?: string;
