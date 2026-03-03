@@ -84,7 +84,7 @@ const NavBar: React.FC<NavBarProps> = ({
 
         {/* 中：永远屏幕中心 */}
         <div className="justify-self-center w-[min(32rem,calc(100vw-2rem))]">
-          <SearchBar onSearch={onSearch} />
+          <SearchBar onSearch={onSearch} isLoading={isLoading} />
         </div>
 
         {/* 右：用户头像和模式切换 */}
