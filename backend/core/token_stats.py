@@ -3,12 +3,36 @@ import os
 from datetime import datetime
 from typing import Dict, Optional
 
-# 计费规则（单位：元/百万tokens）
-PRICING = {
-    "input_cached": 0.2,      # 输入（缓存命中）
-    "input_uncached": 2.0,    # 输入（缓存未命中）
-    "output": 3.0              # 输出
+# 计费规则（单位：元/百万 tokens）
+# 若切换或新增模型，在此添加对应条目即可，无需改动其他调用代码
+MODEL_PRICING = {
+    # DeepSeek Chat — 当前主力 LLM（语义分析、词汇生成、单词验证）
+    "deepseek-chat": {
+        "input_cached": 0.2,
+        "input_uncached": 2.0,
+        "output": 3.0,
+    },
+    # DeepSeek Reasoner — 当前与 Chat 同价，精度更高（P2-1 优化关系分析时可切换）
+    "deepseek-reasoner": {
+        "input_cached": 0.2,
+        "input_uncached": 2.0,
+        "output": 3.0,
+    },
+    # --- 预留：切换至其他模型时取消注释并填写当时最新定价 ---
+    # "gpt-4o": {
+    #     "input_cached": 9.0,     # $1.25/M
+    #     "input_uncached": 18.0,  # $2.5/M
+    #     "output": 72.0,          # $10/M
+    # },
+    # "claude-sonnet-4-6": {
+    #     "input_cached": 2.2,     # $0.3/M
+    #     "input_uncached": 21.7,  # $3/M
+    #     "output": 108.5,         # $15/M
+    # },
 }
+
+# 未知模型的 fallback 价格（回退到 deepseek-chat）
+_DEFAULT_PRICING = MODEL_PRICING["deepseek-chat"]
 
 # 使用绝对路径，确保从任意目录运行时都写入同一个文件
 _backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -52,9 +76,10 @@ class TokenStats:
         date_key = now.strftime("%Y-%m-%d")
         time_key = now.isoformat()
 
-        # 计算费用
-        input_cost = (input_tokens / 1_000_000) * (PRICING["input_cached"] if cache_hit else PRICING["input_uncached"])
-        output_cost = (output_tokens / 1_000_000) * PRICING["output"]
+        # 计算费用（按模型取价，未知模型回退到 deepseek-chat）
+        pricing = MODEL_PRICING.get(model, _DEFAULT_PRICING)
+        input_cost = (input_tokens / 1_000_000) * (pricing["input_cached"] if cache_hit else pricing["input_uncached"])
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
         total_cost = input_cost + output_cost
 
         # 更新总体统计

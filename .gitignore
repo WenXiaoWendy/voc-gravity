@@ -282,3 +282,7 @@ personal_config.ini
 
 # 个人开发追踪文档，不随开源代码发布
 ROADMAP.md
+
+# 运行时自动生成的统计数据（含本地 token 用量，不提交）
+backend/data/token_stats.json
+backend/data/batch_progress.json
