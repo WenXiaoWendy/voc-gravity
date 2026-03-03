@@ -54,9 +54,9 @@ curl "http://localhost:8000/api/token-stats?date=2026-03-02"
 
 ### Backend (Flask + FAISS + LangChain)
 
-**Vector search** (`core/mem.py`): FAISS index built from `backend/data/ielts.json` using OpenAI `text-embedding-3-large`. Indices stored in `backend/faiss_index/ielts/`. Rebuilt automatically on first run if missing. **Important:** Changing the embedding model requires deleting and rebuilding the index.
+**Vector search** (`core/retrieval.py`): FAISS index built from `backend/data/ielts.json` using OpenAI `text-embedding-3-large`. Indices stored in `backend/faiss_index/ielts/`. Rebuilt automatically on first run if missing. **Important:** Changing the embedding model requires deleting and rebuilding the index.
 
-**Semantic analysis** (`core/open.py`): DeepSeek Chat API categorizes FAISS neighbors into the 9 relationship types with explanations. Results returned as structured JSON.
+**Semantic analysis** (`core/semantic.py`): DeepSeek Chat API categorizes FAISS neighbors into the 9 relationship types with explanations. Results returned as structured JSON.
 
 **Token tracking** (`core/token_stats.py`): Wraps all LLM calls, persists usage to `backend/data/token_stats.json`. Billing rates: cached input 0.2元/M, uncached input 2.0元/M, output 3.0元/M.
 

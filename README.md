@@ -159,6 +159,20 @@ cd backend/api
 python app.py
 ```
 
+### 词书批量生成（新增词书时使用）
+
+当需要为新词书（如 TOEFL、GRE）生成完整词汇数据时，在 `backend/` 目录下运行：
+
+```bash
+source venv/bin/activate
+cd backend
+python -m core.batch_generate
+```
+
+- 进度自动保存至 `data/batch_progress.json`，中断后重新运行可续跑
+- 结果输出至 `backend/data/ielts_complete.json`，完成后同步到 `frontend/public/`
+- IELTS 词书数据已生成完毕，无需重新运行
+
 ### API接口
 
 #### 词汇检索

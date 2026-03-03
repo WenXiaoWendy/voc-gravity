@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 start = time.time()
 
-# backend 根目录（core/mem.py 的上一级）
+# backend 根目录（core/retrieval.py 的上一级）
 _backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 初始化 AI 记忆数据库

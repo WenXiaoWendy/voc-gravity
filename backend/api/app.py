@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import re
 import sys
 import os
 
@@ -8,14 +9,29 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 app = Flask(__name__)
+# 限制请求体最大 64 KB，防止超大 payload
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024
+
+# ── 输入校验工具 ────────────────────────────────────────────────
+# 只允许英文字母、空格、连字符、撇号（如 don't、well-known）
+_WORD_RE = re.compile(r"^[a-zA-Z][a-zA-Z\s\-']{0,49}$")
+_ALLOWED_BOOKS = {'ielts'}
+
+def _clean_word(raw) -> str | None:
+    """校验并返回清洗后的单词字符串；不合法返回 None。"""
+    if not isinstance(raw, str):
+        return None
+    word = raw.strip()
+    return word if _WORD_RE.match(word) else None
 CORS(app)
 
 # 导入现有的Python模块
 try:
-    from core.mem import query_memory, switch_vocabulary_book
-    from core.open import analyze_semantic_neighborhood
+    from core.retrieval import query_memory
+    from core.semantic import analyze_semantic_neighborhood
     from core.token_stats import token_stats
-    from core.generate_vocabulary import load_ielts_words, generate_vocabulary_data, save_vocabulary_data
+    from core.generate_vocabulary import generate_vocabulary_data
+    from core.validate import validate_and_normalize
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -38,14 +54,19 @@ def retrieve():
         }), 503
 
     try:
-        data = request.get_json()
-        query = data.get('query', '').strip()
-        book_key = data.get('book_key', 'ielts')
-        k = data.get('k', 56)  # 默认召回56个近邻
-        include_analysis = data.get('include_analysis', False)  # 默认不包含语义分析
-
+        data = request.get_json(silent=True) or {}
+        query = _clean_word(data.get('query', ''))
         if not query:
-            return jsonify({'error': 'Query is required'}), 400
+            return jsonify({'error': 'Invalid query: must be an English word or phrase'}), 400
+
+        book_key = data.get('book_key', 'ielts')
+        if book_key not in _ALLOWED_BOOKS:
+            return jsonify({'error': f'Unknown book_key: {book_key}'}), 400
+
+        k = data.get('k', 56)
+        if not isinstance(k, int) or not (1 <= k <= 100):
+            k = 56
+        include_analysis = bool(data.get('include_analysis', False))
 
         # 调用向量数据库检索
         results = query_memory(query, book_key=book_key, k=k)
@@ -94,42 +115,44 @@ def retrieve():
             'success': False
         }), 500
 
-@app.route('/api/analyze_neighborhood', methods=['POST'])
-def analyze_neighborhood():
-    """语义邻域分析接口"""
+
+@app.route('/api/validate-word', methods=['POST'])
+def validate_word():
+    """验证英文单词合法性，返回原形（lemma）及基础中文释义"""
     if not backend_available:
-        return jsonify({
-            'error': 'Backend not available',
-            'message': 'Python backend modules could not be loaded'
-        }), 503
+        return jsonify({'valid': False, 'error': 'Backend not available'}), 503
 
     try:
-        data = request.get_json()
-        center_word = data.get('center_word', '').strip()
-        neighbor_words = data.get('neighbor_words', [])
+        word = _clean_word((request.get_json(silent=True) or {}).get('word', ''))
+        if not word:
+            return jsonify({'valid': False, 'error': 'Invalid word'}), 400
 
-        if not center_word:
-            return jsonify({'error': 'Center word is required'}), 400
-
-        if not neighbor_words or not isinstance(neighbor_words, list):
-            return jsonify({'error': 'Neighbor words must be a non-empty list'}), 400
-
-        # 调用语义邻域分析函数
-        analysis_result = analyze_semantic_neighborhood(center_word, neighbor_words)
-
-        return jsonify({
-            'center_word': center_word,
-            'neighbor_words': neighbor_words,
-            'analysis': analysis_result,
-            'success': True
-        })
+        result = validate_and_normalize(word)
+        return jsonify(result)
 
     except Exception as e:
-        print(f"Error in analyze_neighborhood endpoint: {e}")
-        return jsonify({
-            'error': 'Internal server error',
-            'message': str(e)
-        }), 500
+        return jsonify({'valid': False, 'error': str(e)}), 500
+
+
+@app.route('/api/generate-word', methods=['POST'])
+def generate_word():
+    """为词库外的单词生成词汇数据，结果由前端缓存到 localStorage，不写入服务端 JSON，不嵌入 FAISS"""
+    if not backend_available:
+        return jsonify({'error': 'Backend not available'}), 503
+
+    try:
+        word = _clean_word((request.get_json(silent=True) or {}).get('word', ''))
+        if not word:
+            return jsonify({'success': False, 'error': 'Invalid word'}), 400
+
+        results = generate_vocabulary_data([word])
+        if not results:
+            return jsonify({'success': False, 'error': 'generation failed'}), 500
+
+        return jsonify({'success': True, 'word_data': results[0]})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/token-stats', methods=['GET'])
@@ -154,58 +177,6 @@ def get_token_stats():
             'success': False
         }), 500
 
-
-@app.route('/api/generate-vocabulary', methods=['POST'])
-def generate_vocabulary():
-    """生成完整的雅思词汇数据接口"""
-    if not backend_available:
-        return jsonify({
-            'error': 'Backend not available',
-            'message': 'Python backend modules could not be loaded'
-        }), 503
-
-    try:
-        data = request.get_json()
-        batch_size = data.get('batch_size', 15)
-        start_index = data.get('start_index', 0)
-        end_index = data.get('end_index', None)
-
-        # 加载现有单词
-        words = load_ielts_words()
-
-        # 如果指定了范围，截取对应部分
-        if end_index is not None:
-            words = words[start_index:end_index]
-        elif start_index > 0:
-            words = words[start_index:]
-
-        print(f"开始生成 {len(words)} 个单词的完整词汇数据...")
-
-        # 生成完整数据
-        vocabulary_data = generate_vocabulary_data(words, batch_size=batch_size)
-
-        # 保存结果
-        if vocabulary_data:
-            output_filename = "data/ielts_complete.json"
-            save_vocabulary_data(vocabulary_data, output_filename)
-            return jsonify({
-                'success': True,
-                'message': f"成功生成 {len(vocabulary_data)} 个单词的完整词汇数据",
-                'count': len(vocabulary_data),
-                'output_file': output_filename
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': '未能生成任何词汇数据'
-            }), 500
-
-    except Exception as e:
-        print(f"Error in generate_vocabulary endpoint: {e}")
-        return jsonify({
-            'error': 'Internal server error',
-            'message': str(e)
-        }), 500
 
 
 if __name__ == '__main__':

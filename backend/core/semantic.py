@@ -13,10 +13,6 @@ llm = ChatOpenAI(
     base_url="https://api.deepseek.com/v1",
     api_key=os.getenv("DEEPSEEK_API_KEY") # type: ignore
 )
-embedding = OpenAIEmbeddings(
-    model="text-embedding-3-large",
-    api_key=os.getenv("OPENAI_API_KEY") # type: ignore
-)
 
 # 新的在线问答功能：分析语义邻域
 def analyze_semantic_neighborhood(center_word, neighbor_words):
