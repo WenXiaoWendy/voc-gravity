@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { getRelationChinese, relationTypeColorMap } from '@/utils/relations';
+import { GLASS_CARD, TEXT_PRIMARY, TEXT_BODY, TEXT_SECONDARY, TEXT_LABEL, TEXT_MUTED } from '@/utils/theme';
 import { wordFormChineseMap } from '@/utils/wordForms';
 
 interface HoverBubbleCardProps {
@@ -81,12 +82,7 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
   return (
     <div
       ref={cardRef}
-      className={`
-        fixed z-50 pointer-events-none
-        bg-white/10 backdrop-blur-xl rounded-xl
-        border border-white/10 shadow-xl
-        transition-opacity duration-200 ease-out
-      `}
+      className={`fixed z-50 pointer-events-none ${GLASS_CARD} rounded-xl shadow-xl transition-opacity duration-200 ease-out`}
       style={{
         opacity: opacity,
         width: '280px',
@@ -98,11 +94,11 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
         <div className="p-3.5">
           {/* 单词、发音、词频一行 */}
           <div className="flex items-center gap-2 mb-2.5">
-            <h3 className="text-lg font-serif font-semibold text-white/95">
+            <h3 className={`text-lg font-serif font-semibold ${TEXT_PRIMARY}`}>
               {item.word}
             </h3>
             {item.pronunciation && (
-              <span className="text-white/60 text-xs font-mono">
+              <span className={`${TEXT_LABEL} text-xs font-mono`}>
                 {Array.isArray(item.pronunciation) ? item.pronunciation[0] : item.pronunciation}
               </span>
             )}
@@ -134,24 +130,24 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
                 <div className="flex flex-wrap gap-1">
                   {Array.isArray(item.pos) ? (
                     item.pos.map((p, idx) => (
-                      <span key={idx} className="text-xs font-medium text-white/60 mt-0.5">{p}</span>
+                      <span key={idx} className={`text-xs font-medium ${TEXT_LABEL} mt-0.5`}>{p}</span>
                     ))
                   ) : (
-                    <span className="text-xs font-medium text-white/60 mt-0.5">{item.pos}</span>
+                    <span className={`text-xs font-medium ${TEXT_LABEL} mt-0.5`}>{item.pos}</span>
                   )}
                 </div>
               )}
-              <p className="text-white/90 text-sm leading-relaxed flex-1">{item.chinese_gloss}</p>
+              <p className={`${TEXT_BODY} text-sm leading-relaxed flex-1`}>{item.chinese_gloss}</p>
             </div>
           </div>
 
           {/* 例句（英文+中文） */}
           {item.examples && item.examples.length > 0 && (
             <div className="mb-2.5">
-              <p className="text-white/70 text-xs leading-relaxed italic mb-1">
+              <p className={`${TEXT_SECONDARY} text-xs leading-relaxed italic mb-1`}>
                 "{item.examples[0].sentence}"
               </p>
-              <p className="text-white/60 text-xs leading-relaxed">
+              <p className={`${TEXT_LABEL} text-xs leading-relaxed`}>
                 {item.examples[0].chinese_translation}
               </p>
             </div>
@@ -162,7 +158,7 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
             <div className="flex flex-wrap gap-1">
               {Object.entries(item.word_forms).map(([key, value], idx) => (
                 <div key={idx} className="bg-white/5 px-2 py-1 rounded-lg">
-                  <span className="text-white/50 text-[10px] mr-0.5">{wordFormChineseMap[key] || key}:</span>
+                  <span className={`${TEXT_MUTED} text-[10px] mr-0.5`}>{wordFormChineseMap[key] || key}:</span>
                   <span className="text-white/80 text-xs font-medium">{value}</span>
                 </div>
               ))}

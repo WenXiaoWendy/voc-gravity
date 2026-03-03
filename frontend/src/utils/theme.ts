@@ -191,6 +191,11 @@ export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): Bubb
 // 背景颜色配置
 export const BACKGROUND_COLOR = '#0B0C10';
 
+// 毛玻璃 / Glassmorphism 公共样式
+// 适用于悬浮卡片、搜索历史下拉、确认弹窗等所有浮层
+// 注意：需通过 createPortal 渲染到 document.body，否则父级 backdrop-filter 会阻断模糊效果
+export const GLASS_CARD = 'bg-white/10 backdrop-blur-xl border border-white/10';
+
 // 阴影配置
 export const SHADOW_CONFIG = {
   normal: '0 8px 24px rgba(0, 0, 0, 0.35)',
@@ -203,3 +208,10 @@ export const BORDER_CONFIG = {
   normal: '1px solid rgba(255, 255, 255, 0.08)',
   selected: '1px solid rgba(255, 255, 255, 0.15)'
 };
+
+// 文字颜色层级 — 以 HoverBubbleCard 为基准，跨组件统一对比度
+export const TEXT_PRIMARY   = 'text-white/95';  // 词汇标题
+export const TEXT_BODY      = 'text-white/90';  // 主体内容（中文释义）
+export const TEXT_SECONDARY = 'text-white/70';  // 次级内容（例句英文）
+export const TEXT_LABEL     = 'text-white/60';  // 标签（词性、音标）
+export const TEXT_MUTED     = 'text-white/50';  // 弱化信息（词形标签等）
