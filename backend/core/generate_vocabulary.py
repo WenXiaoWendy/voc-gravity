@@ -338,19 +338,6 @@ usage_notes: 使用注意事项（字符串数组，可选）
 """
 
 
-def load_ielts_words() -> List[str]:
-    """从现有 ielts.json 加载单词列表"""
-    file_path = "data/ielts.json"
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"文件 {file_path} 不存在")
-
-    with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    words = [item['word'] for item in data]
-    return words
-
-
 def generate_vocabulary_data(words: List[str], batch_size: int = 25) -> List[Dict[str, Any]]:
     """调用 DeepSeek API 生成完整的词汇数据（单次 API 调用，由调用方控制批次大小）"""
     llm = ChatOpenAI(
@@ -404,45 +391,4 @@ def generate_vocabulary_data(words: List[str], batch_size: int = 25) -> List[Dic
     return validated_results
 
 
-def save_vocabulary_data(data: List[Dict[str, Any]] or Dict[str, Any], filename: str = "data/ielts_complete.json"):
-    """保存生成的词汇数据到文件（支持数组或键值对格式）"""
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-    # 如果是数组格式，先转换为键值对
-    if isinstance(data, list):
-        key_value_data = {}
-        for item in data:
-            word = item["word"]
-            key_value_data[word] = item
-        data_to_save = key_value_data
-        count = len(key_value_data)
-    else:
-        data_to_save = data
-        count = len(data)
-
-    with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(data_to_save, f, ensure_ascii=False, indent=2)
-    print(f"已保存 {count} 个单词到 {filename}")
-
-
-def main():
-    """主函数"""
-    print("开始生成完整的雅思词汇数据...")
-
-    # 1. 加载现有单词
-    words = load_ielts_words()
-    print(f"从 ielts.json 加载了 {len(words)} 个单词")
-
-    # 2. 生成完整数据
-    vocabulary_data = generate_vocabulary_data(words, batch_size=15)
-
-    # 3. 保存结果
-    if vocabulary_data:
-        save_vocabulary_data(vocabulary_data)
-        print("完成！")
-    else:
-        print("未能生成任何词汇数据")
-
-
-if __name__ == "__main__":
-    main()
+# 批量生成与词书管理相关函数见 core/batch_generate.py
