@@ -221,50 +221,16 @@ export const VocabularyGravityScreen: React.FC = () => {
     const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
 
     try {
-      // 确定最终搜索词（词书命中直接用，否则走验证流程）
-      let searchQuery = query;
-
-      if (!getWordDetails(query)) {
-        // 词书未命中 → 调验证接口
-        const validation = await fetch('/api/validate-word', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word: query }),
-        }).then(r => r.json());
-
-        if (!validation.valid) {
-          currentQueryRef.current = ''; // 重置，允许用户修正后重新搜索
-          showError(validation.error || '请输入正确的英文单词');
-          return;
-        }
-
-        const lemma: string = validation.lemma;
-
-        if (!getWordDetails(lemma)) {
-          // lemma 也不在词书 → 弹窗让用户决定，重置以便取消后可重试
-          currentQueryRef.current = '';
-          setConfirmDialog({ lemma, originalWord: query, pos: validation.pos, chineseMeaning: validation.chinese_meaning || '' });
-          return;
-        }
-
-        // lemma 在词书中（变形词命中，如 running → run）
-        searchQuery = lemma;
-      }
-
-      // 所有验证通过，确定发起搜索 → 此时才写入历史
-      addToHistory(searchQuery);
-      currentQueryRef.current = searchQuery;
-
       // 检查缓存
-      const cachedBubbleItems = bubbleCache.current.get(searchQuery);
+      const cachedBubbleItems = bubbleCache.current.get(query);
 
       // 发起检索请求（整合语义邻域分析）
       const retrieveResult = await (cachedBubbleItems
         ? Promise.resolve({
-          words: cachedBubbleItems.filter(item => item.word !== searchQuery).map(item => item.word),
+          words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
           analysis: undefined
         })
-        : retrieveSimilarWords(searchQuery, 'ielts', shouldIncludeAnalysis)
+        : retrieveSimilarWords(query, 'ielts', shouldIncludeAnalysis)
       );
       console.log('检索结果:', retrieveResult);
 
@@ -274,7 +240,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       }
 
       // 生成气泡数据
-      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, searchQuery);
+      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, query);
 
       if (retrieveResult.analysis) {
         try {
@@ -299,7 +265,7 @@ export const VocabularyGravityScreen: React.FC = () => {
             return item;
           });
 
-          bubbleCache.current.set(searchQuery, updatedBubbleItems);
+          bubbleCache.current.set(query, updatedBubbleItems);
           setCurrentWords(updatedBubbleItems);
 
           const newCenterItem = updatedBubbleItems[0];
@@ -336,6 +302,47 @@ export const VocabularyGravityScreen: React.FC = () => {
     }
   }, [isLoading, includeAnalysis, showError, clearError]);
 
+  // 搜索框入口：负责词汇验证、历史写入，再调公共 handleSearch
+  const handleSearchFromBar = useCallback(async (rawQuery: string) => {
+    if (isLoading) return;
+    const query = rawQuery.trim();
+    if (!query) return;
+
+    clearError();
+
+    if (getWordDetails(query)) {
+      addToHistory(query);
+      handleSearch(query);
+      return;
+    }
+
+    try {
+      const validation = await fetch('/api/validate-word', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word: query }),
+      }).then(r => r.json());
+
+      if (!validation.valid) {
+        showError(validation.error || '请输入正确的英文单词');
+        return;
+      }
+
+      const lemma: string = validation.lemma;
+
+      if (!getWordDetails(lemma)) {
+        setConfirmDialog({ lemma, originalWord: query, pos: validation.pos, chineseMeaning: validation.chinese_meaning || '' });
+        return;
+      }
+
+      // lemma 在词书中（词形变化命中，如 running → run）
+      addToHistory(lemma);
+      handleSearch(lemma);
+    } catch (error) {
+      showError(error instanceof Error ? error.message : '验证失败，请稍后重试');
+    }
+  }, [isLoading, getWordDetails, clearError, showError, handleSearch]);
+
   // 用户在弹窗中确认 AI 生成词汇详情
   const handleConfirmGenerate = useCallback(async () => {
     if (!confirmDialog || confirmDialog.isGenerating) return;
@@ -343,6 +350,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     // 弹窗内进入 loading 态，不关闭
     setConfirmDialog(prev => prev ? { ...prev, isGenerating: true } : null);
     await fetchAndCacheWord(lemma);
+    addToHistory(lemma);
     // 数据就绪后关闭弹窗并发起搜索
     setConfirmDialog(null);
     currentQueryRef.current = ''; // 清空以绕过重复搜索检查
@@ -406,7 +414,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     >
       {/* 顶部状态栏 */}
       <NavBar
-        onSearch={handleSearch}
+        onSearch={handleSearchFromBar}
         onModeChange={handleModeChange}
         isLoading={isLoading}
       />
