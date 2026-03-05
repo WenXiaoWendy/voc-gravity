@@ -479,17 +479,16 @@ export const VocabularyGravityScreen: React.FC = () => {
       </div>
 
       {/* AI 生成确认弹窗 */}
-      {confirmDialog && (
-        <ConfirmDialog
-          word={confirmDialog.lemma}
-          originalWord={confirmDialog.originalWord}
-          pos={confirmDialog.pos}
-          chineseMeaning={confirmDialog.chineseMeaning}
-          isGenerating={confirmDialog.isGenerating}
-          onConfirm={handleConfirmGenerate}
-          onCancel={() => setConfirmDialog(null)}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={!!confirmDialog}
+        word={confirmDialog?.lemma ?? ''}
+        originalWord={confirmDialog?.originalWord ?? ''}
+        pos={confirmDialog?.pos}
+        chineseMeaning={confirmDialog?.chineseMeaning ?? ''}
+        isGenerating={confirmDialog?.isGenerating}
+        onConfirm={handleConfirmGenerate}
+        onCancel={() => setConfirmDialog(null)}
+      />
     </div>
   );
 };

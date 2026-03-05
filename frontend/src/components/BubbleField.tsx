@@ -62,8 +62,8 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             includeAnalysis={includeAnalysis}
             isLoading={isLoading}
             isLoadingItem={loadingItemId === item.id}
-            onMouseEnter={onHoverItem ? (item) => onHoverItem(item) : undefined}
-            onMouseLeave={onHoverItem ? () => onHoverItem(null) : undefined}
+            onMouseEnter={onHoverItem && !isBlurred ? (item) => onHoverItem(item) : undefined}
+            onMouseLeave={onHoverItem && !isBlurred ? () => onHoverItem(null) : undefined}
           />
         );
       })}

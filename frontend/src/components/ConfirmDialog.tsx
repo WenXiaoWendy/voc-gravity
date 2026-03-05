@@ -1,4 +1,5 @@
 interface ConfirmDialogProps {
+  isOpen: boolean;
   word: string;
   originalWord: string;
   pos?: string;
@@ -10,10 +11,10 @@ interface ConfirmDialogProps {
 
 import { GLASS_CARD, TEXT_BODY, TEXT_LABEL, TEXT_MUTED, TEXT_SECONDARY } from '../utils/theme';
 
-export function ConfirmDialog({ word, originalWord, pos, chineseMeaning, onConfirm, onCancel, isGenerating = false }: ConfirmDialogProps) {
+export function ConfirmDialog({ isOpen, word, originalWord, pos, chineseMeaning, onConfirm, onCancel, isGenerating = false }: ConfirmDialogProps) {
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       onClick={isGenerating ? undefined : onCancel}
     >
       <div
