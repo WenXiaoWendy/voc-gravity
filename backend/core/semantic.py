@@ -3,6 +3,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 import json
+import re
 import os
 from core.token_stats import token_stats
 
@@ -14,21 +15,7 @@ llm = ChatOpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY") # type: ignore
 )
 
-# 新的在线问答功能：分析语义邻域
-def analyze_semantic_neighborhood(center_word, neighbor_words):
-    """
-    分析中心词和其语义邻域的关系
-
-    Args:
-        center_word: 中心词
-        neighbor_words: 语义邻域词汇列表
-
-    Returns:
-        DeepSeek的分析结果
-    """
-
-    # 设置更明确的系统提示
-    SYSTEM = """
+_SYSTEM_PROMPT = """
 你是一个专业的语义关系分析助手。请严格按照以下规则分析中心词和其语义邻域的关系。
 
 【核心规则 - 必须遵守】
@@ -99,8 +86,8 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 - 按输入顺序处理词汇
 
 【输出格式说明】
+注意：relation 字段必须在 reason 字段之前输出。
 {
- "reason": "本次分析围绕中心词 'abandon' 展开，邻域词汇可分为以下几类：\n1. 同义词（synonym）：desert、forsake 与 abandon 意思高度接近，都表示'离开、放弃'，在多数语境下可互换使用。\n2. 同场景词（frame）：quit、resign 都与'离开某个位置或状态'相关，quit 更口语化，resign 更正式，常用于辞去职位。\n3. 语体差异（register）：ditch 是口语化表达，与 abandon 同义，但更随意。\n4. 噪声（noise）：bishop 与 abandon 完全无关，属于召回误差。\n学习建议：注意区分正式与非正式用词，如 quit 与 resign 的使用场景差异。",
  "relation": {
     "desert": ["synonym"],
     "forsake": ["synonym"],
@@ -108,11 +95,26 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
     "resign": ["frame"],
     "ditch": ["register", "synonym"],
     "bishop": ["noise"]
-  }
+  },
+ "reason": "本次分析围绕中心词 'abandon' 展开，邻域词汇可分为以下几类：\n1. 同义词（synonym）：desert、forsake 与 abandon 意思高度接近，都表示'离开、放弃'，在多数语境下可互换使用。\n2. 同场景词（frame）：quit、resign 都与'离开某个位置或状态'相关，quit 更口语化，resign 更正式，常用于辞去职位。\n3. 语体差异（register）：ditch 是口语化表达，与 abandon 同义，但更随意。\n4. 噪声（noise）：bishop 与 abandon 完全无关，属于召回误差。\n学习建议：注意区分正式与非正式用词，如 quit 与 resign 的使用场景差异。"
 }
 
 现在请开始分析，严格遵守以上规则！
 """
+
+
+# 新的在线问答功能：分析语义邻域
+def analyze_semantic_neighborhood(center_word, neighbor_words):
+    """
+    分析中心词和其语义邻域的关系
+
+    Args:
+        center_word: 中心词
+        neighbor_words: 语义邻域词汇列表
+
+    Returns:
+        DeepSeek的分析结果
+    """
 
     # 构建更明确的用户提示
     user_prompt = f"""
@@ -125,7 +127,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 """
 
     messages = [
-        SystemMessage(content=SYSTEM.strip()),
+        SystemMessage(content=_SYSTEM_PROMPT.strip()),
         HumanMessage(content=user_prompt.strip()),
     ]
 
@@ -135,7 +137,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 
         # 优先使用 API 实际返回的 token 数，fallback 到估算
         usage = response.response_metadata.get('token_usage', {})
-        input_tokens = usage.get('prompt_tokens') or token_stats.estimate_tokens(SYSTEM.strip() + "\n" + user_prompt.strip())
+        input_tokens = usage.get('prompt_tokens') or token_stats.estimate_tokens(_SYSTEM_PROMPT.strip() + "\n" + user_prompt.strip())
         output_tokens = usage.get('completion_tokens') or token_stats.estimate_tokens(output_text)
 
         # 记录 token 统计
@@ -166,7 +168,6 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
                 content = content[json_start:json_end+1]
 
             # 清理无效控制字符和格式化问题
-            import re
             # 移除所有控制字符
             content = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', content)
             # 修复reason字段中的换行符问题（更安全的方式）
@@ -187,7 +188,7 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
 
             parsed_response = json.loads(content)
 
-            # 处理新的格式 {reason: "...", relation: {...}}
+            # 处理新的格式 {relation: {...}, reason: "..."}
             result = {
                 "reason": parsed_response.get("reason", ""),
                 "relation": {}
@@ -232,3 +233,97 @@ def analyze_semantic_neighborhood(center_word, neighbor_words):
         for word in neighbor_words:
             error_response["relation"][word] = ["noise"]
         return error_response
+
+
+def analyze_semantic_neighborhood_stream(center_word, neighbor_words):
+    """
+    流式版本：先 yield relation 事件，再逐 token yield reason_chunk 事件。
+    依赖 prompt 中的输出顺序：{"relation":{...},"reason":"..."}
+    """
+    user_prompt = f"""
+请分析以下中心词和其邻域词汇的语义关系：
+
+中心词: {center_word}
+邻域词汇: {', '.join(neighbor_words)}
+
+请按照上述要求输出JSON格式的分析结果。
+"""
+    messages = [
+        SystemMessage(content=_SYSTEM_PROMPT.strip()),
+        HumanMessage(content=user_prompt.strip()),
+    ]
+
+    # 匹配完整的 "word": ["rel1", "rel2"] 条目（数组内无嵌套）
+    _entry_re = re.compile(r'"([\w\s\'\-]+)"\s*:\s*(\[[^\[\]]+\])')
+
+    buffer = ""
+    relation_sent = False
+    sent_words: set[str] = set()
+    neighbor_set = set(neighbor_words)
+
+    try:
+        for chunk in llm.stream(messages):
+            token = chunk.content if isinstance(chunk.content, str) else ''
+            buffer += token
+
+            if not relation_sent:
+                # 逐词检测：每发现一个完整条目立即推送
+                for match in _entry_re.finditer(buffer):
+                    word = match.group(1)
+                    if word in neighbor_set and word not in sent_words:
+                        try:
+                            relations = json.loads(match.group(2))
+                            yield {"type": "relation", "data": {word: relations}}
+                            sent_words.add(word)
+                        except json.JSONDecodeError:
+                            pass
+
+                # ,"reason" 出现意味着 relation 块已完整
+                m = re.search(r',\s*"reason"', buffer)
+                if m:
+                    # 发送未被逐词捕获到的剩余词
+                    try:
+                        rel_json = buffer[:m.start()] + '}'
+                        parsed = json.loads(rel_json)
+                        relation_obj = parsed.get('relation', {})
+                        remaining = {
+                            w: relation_obj.get(w, ['noise'])
+                            for w in neighbor_words
+                            if w not in sent_words
+                        }
+                        if remaining:
+                            yield {"type": "relation", "data": remaining}
+                    except json.JSONDecodeError:
+                        pass
+                    relation_sent = True
+                    # 已缓冲的 reason 文本（从开头引号之后开始）
+                    val_m = re.search(r'"reason"\s*:\s*"', buffer)
+                    if val_m:
+                        already = buffer[val_m.end():]
+                        if already:
+                            yield {"type": "reason_chunk", "data": already}
+            else:
+                # reason 值正在流式输出
+                yield {"type": "reason_chunk", "data": token}
+
+        # 流完成：若 relation 从未发送（格式异常），fallback
+        if not relation_sent:
+            try:
+                parsed = json.loads(buffer)
+                relation_obj = parsed.get('relation', {})
+                for word in neighbor_words:
+                    if word not in relation_obj:
+                        relation_obj[word] = ['noise']
+                yield {"type": "relation", "data": relation_obj}
+                reason = parsed.get('reason', '')
+                if reason:
+                    yield {"type": "reason_chunk", "data": reason}
+            except json.JSONDecodeError:
+                yield {"type": "relation", "data": {w: ['noise'] for w in neighbor_words}}
+
+        yield {"type": "done"}
+
+    except Exception as e:
+        print(f"[STREAM] 调用失败: {e}")
+        yield {"type": "relation", "data": {w: ['noise'] for w in neighbor_words}}
+        yield {"type": "done"}

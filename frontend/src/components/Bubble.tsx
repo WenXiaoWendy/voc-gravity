@@ -56,6 +56,7 @@ interface BubbleProps {
   isSelected: boolean;
   onClick: (item: BubbleItem) => void;
   isBlurred?: boolean;
+  isPending?: boolean;
   includeAnalysis?: boolean;
   isLoading?: boolean;
   isLoadingItem?: boolean;
@@ -68,7 +69,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, onMouseEnter, onMouseLeave }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, isPending = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, onMouseEnter, onMouseLeave }) => {
   const theme = getBubbleTheme(item, includeAnalysis);
 
   // 计算合适的字体大小，确保文字不超出边界
@@ -100,7 +101,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     height: layout.r * 2,
     padding: '15px',
     background: 'transparent',
-    opacity: isBlurred ? 0.3 : (item.layer === 'center' ? 0.95 : 0.85),
+    opacity: isBlurred ? 0.3 : isPending ? 0.12 : (item.layer === 'center' ? 0.95 : 0.85),
     border: isLoading && isLoadingItem
       ? '2px solid rgba(255, 255, 255, 0.8)'
       : isSelected

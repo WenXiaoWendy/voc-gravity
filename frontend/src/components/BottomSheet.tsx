@@ -6,13 +6,15 @@ import { wordFormChineseMap } from '../utils/wordForms';
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
   includeAnalysis: boolean;
+  isStreaming?: boolean;
+  streamingReason?: string;
 }
 
 // 右侧信息抽屉组件 - iOS 毛玻璃效果
 // Apple Health / iOS 17 风格
 // 毛玻璃 + 细边框 + 柔和阴影 + 可收起动画
 
-export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeAnalysis }) => {
+export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeAnalysis, isStreaming, streamingReason }) => {
   const formatReason = (reason: string) => {
     if (!reason) return null;
 
@@ -258,12 +260,18 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
                 </div>
               )}
 
-              {includeAnalysis && selectedItem.reason && (
+              {includeAnalysis && (selectedItem.reason || streamingReason) && (
                 <div className="pt-4 border-t border-white/10 flex-shrink-0 min-h-0 mb-3">
                   <h4 className="text-xs font-medium text-white/60 mb-2">AI语义分析</h4>
                   <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-4 border border-white/10 shadow-inner overflow-y-auto max-h-48">
                     <div className="space-y-0.5">
-                      {formatReason(selectedItem.reason)}
+                      {isStreaming && streamingReason ? (
+                        <p className="text-white/80 text-sm leading-relaxed">
+                          {streamingReason}<span className="animate-pulse">▋</span>
+                        </p>
+                      ) : (
+                        formatReason(selectedItem.reason ?? '')
+                      )}
                     </div>
                   </div>
                 </div>

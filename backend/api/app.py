@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import re
 import sys
 import os
+import json
 
 # 添加项目根目录到Python路径
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,7 +29,7 @@ CORS(app)
 # 导入现有的Python模块
 try:
     from core.retrieval import query_memory
-    from core.semantic import analyze_semantic_neighborhood
+    from core.semantic import analyze_semantic_neighborhood, analyze_semantic_neighborhood_stream
     from core.token_stats import token_stats
     from core.generate_vocabulary import generate_vocabulary_data
     from core.validate import validate_and_normalize
@@ -114,6 +115,49 @@ def retrieve():
             'error': str(e),
             'success': False
         }), 500
+
+
+@app.route('/api/retrieve-stream', methods=['POST'])
+def retrieve_stream():
+    """AI 模式 SSE 流式接口：先推 FAISS 词汇，再流式输出 relation + reason"""
+    if not backend_available:
+        return jsonify({'error': 'Backend not available'}), 503
+
+    data = request.get_json(silent=True) or {}
+    query = _clean_word(data.get('query', ''))
+    book_key = data.get('book_key', 'ielts')
+    try:
+        k = min(max(int(data.get('k', 56)), 1), 100)
+    except (TypeError, ValueError):
+        k = 56
+    if not query or book_key not in _ALLOWED_BOOKS:
+        return jsonify({'error': 'invalid params'}), 400
+
+    def generate():
+        results = query_memory(query, book_key=book_key, k=k)
+        words = []
+        seen = set()
+        for r in results:
+            content = r.page_content
+            if "单词: " in content:
+                w_start = content.index("单词: ") + 4
+                w_end = content.find(" | ", w_start)
+                word = content[w_start:w_end if w_end != -1 else len(content)].strip()
+                if word and word not in seen:
+                    seen.add(word)
+                    words.append(word)
+        words = words[:56]
+        # 第一阶段：推送词汇，前端立即渲染气泡
+        yield f"data: {json.dumps({'type': 'words', 'words': words}, ensure_ascii=False)}\n\n"
+        # 第二、三阶段：流式 DeepSeek（relation → reason_chunk → done）
+        for event in analyze_semantic_neighborhood_stream(query, words):
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        content_type='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
+    )
 
 
 @app.route('/api/validate-word', methods=['POST'])

@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useErrorMessage } from '../hooks/useErrorMessage';
 import { useVocabularyDB } from '../hooks/useVocabularyDB';
 import { BubbleItem } from '../types/bubble';
-import { BACKGROUND_COLOR } from '../utils/theme';
 import { addToHistory } from '../utils/searchHistory';
+import { BACKGROUND_COLOR } from '../utils/theme';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -44,23 +44,31 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', in
   }
 };
 
-// 简单的字符串哈希函数，用于生成确定性值
-const simpleHash = (str: string): number => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // 转换为32位整数
+// SSE 流式获取（AI 模式专用），yield 每个事件对象
+async function* retrieveWithSSE(query: string, bookKey: string) {
+  const response = await fetch('/api/retrieve-stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, book_key: bookKey, k: 56 }),
+  });
+  if (!response.ok || !response.body) throw new Error(`SSE 请求失败 (${response.status})`);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const parts = buf.split('\n\n');
+    buf = parts.pop()!;
+    for (const part of parts) {
+      if (part.startsWith('data: ')) {
+        try { yield JSON.parse(part.slice(6)); } catch { /* 跳过格式异常事件 */ }
+      }
+    }
   }
-  return Math.abs(hash);
-};
+}
 
-// 确定性关系类型生成，基于中心词和邻居词
-const generateRelationType = (centerWord: string, neighborWord: string): string[] => {
-  const relationTypes = ['synonym', 'antonym', 'hypernym', 'hyponym', 'cohyponym', 'collocation', 'frame', 'register', 'noise'];
-  const hash = simpleHash(centerWord + '_' + neighborWord);
-  return [relationTypes[hash % relationTypes.length]];
-};
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
 
@@ -77,6 +85,9 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [showRelationColors, setShowRelationColors] = useState(false);
   const { errorMessage, showError, clearError } = useErrorMessage();
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingReason, setStreamingReason] = useState('');
+  const [isRelationPending, setIsRelationPending] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ lemma: string; originalWord: string; pos?: string; chineseMeaning: string; isGenerating?: boolean } | null>(null);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
@@ -189,13 +200,12 @@ export const VocabularyGravityScreen: React.FC = () => {
 
         if (word === centerWord) continue; // 跳过中心词
 
-        const relationType = generateRelationType(centerWord, word);
         bubbleItems.push(createBubbleItem(
           word,
           `word-${uniqueId++}`,
           layer,
           0.95 - (wordIndex * 0.003),
-          relationType
+          [] // 不生成伪关系类型，等待后端返回真实关系类型
         ));
         addedInLayer++;
       }
@@ -205,15 +215,8 @@ export const VocabularyGravityScreen: React.FC = () => {
   };
 
   const handleSearch = useCallback(async (query: string, includeAnalysisParam?: boolean) => {
-    if (!query.trim() || isLoading) {
-      return;
-    }
-
-    // 只有当查询词改变时才跳过重复搜索
-    // 模式切换时即使查询词相同也需要重新搜索
-    if (currentQueryRef.current === query && includeAnalysisParam === undefined) {
-      return;
-    }
+    if (!query.trim() || isLoading) return;
+    if (currentQueryRef.current === query && includeAnalysisParam === undefined) return;
 
     setIsLoading(true);
     clearError();
@@ -221,78 +224,82 @@ export const VocabularyGravityScreen: React.FC = () => {
     const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
 
     try {
-      // 检查缓存
+      // 缓存命中：直接使用缓存数据
       const cachedBubbleItems = bubbleCache.current.get(query);
-
-      // 发起检索请求（整合语义邻域分析）
-      const retrieveResult = await (cachedBubbleItems
-        ? Promise.resolve({
-          words: cachedBubbleItems.filter(item => item.word !== query).map(item => item.word),
-          analysis: undefined
-        })
-        : retrieveSimilarWords(query, 'ielts', shouldIncludeAnalysis)
-      );
-      console.log('检索结果:', retrieveResult);
-
-      if (retrieveResult.words.length === 0) {
-        showError('未检索到相关词汇，请尝试其他单词');
+      if (cachedBubbleItems) {
+        setCurrentWords(cachedBubbleItems);
+        setSelectedItem(cachedBubbleItems[0]);
+        setLoadingItemId(null);
+        if (shouldIncludeAnalysis) setShowRelationColors(true);
         return;
       }
 
-      // 生成气泡数据
-      const bubbleItems = cachedBubbleItems || generateBubbleItems(retrieveResult.words, query);
+      if (shouldIncludeAnalysis) {
+        // AI 模式：SSE 流式路径
+        setIsStreaming(true);
+        let localItems: BubbleItem[] = [];
+        let localReason = '';
+        let streamDone = false;
 
-      if (retrieveResult.analysis) {
         try {
-          const analysisData = retrieveResult.analysis;
+          for await (const event of retrieveWithSSE(query, 'ielts')) {
+            if (currentQueryRef.current !== query) break; // 搜索词已变更，放弃此流
 
-          const updatedBubbleItems = bubbleItems.map(item => {
-            if (item.id === 'center') {
-              return {
-                ...item,
-                reason: analysisData.reason
-              };
+            if (event.type === 'words') {
+              if (!event.words?.length) { showError('未检索到相关词汇，请尝试其他单词'); break; }
+              localItems = generateBubbleItems(event.words, query);
+              setCurrentWords(localItems);
+              setSelectedItem(localItems[0]);
+              // isLoading 保持 true，直到 done 才关闭，期间禁止操作
+              setLoadingItemId('center'); // 中心气泡持续呼吸灯
+              setIsRelationPending(true); // 非中心气泡先置暗
+            } else if (event.type === 'relation') {
+              localItems = localItems.map(item => {
+                const rel = event.data[item.word];
+                return rel ? { ...item, relation_type: rel } : item;
+              });
+              setCurrentWords([...localItems]);
+              setShowRelationColors(true);
+            } else if (event.type === 'reason_chunk') {
+              localReason += event.data;
+              setStreamingReason(localReason);
+            } else if (event.type === 'done') {
+              // 清理流末尾的 JSON 残留字符（"} 等）
+              localReason = localReason.replace(/["}\s\n]+$/, '');
+              localItems = localItems.map(item =>
+                item.id === 'center' ? { ...item, reason: localReason } : item
+              );
+              bubbleCache.current.set(query, localItems);
+              setCurrentWords([...localItems]);
+              // 若用户仍在看中心词，同步更新 selectedItem 使 reason 生效
+              const centerItem = localItems.find(i => i.id === 'center');
+              if (centerItem) setSelectedItem(prev => prev?.id === 'center' ? centerItem : prev);
+              setStreamingReason('');
+              setIsStreaming(false);
+              setIsRelationPending(false);
+              setLoadingItemId(null); // 呼吸灯停止
+              setIsLoading(false);    // 恢复操作（移到 done 事件）
+              streamDone = true;
             }
-
-            const relations = analysisData.relation?.[item.word];
-            if (relations && relations.length > 0) {
-              return {
-                ...item,
-                relation_type: relations,
-              };
-            }
-
-            return item;
-          });
-
-          bubbleCache.current.set(query, updatedBubbleItems);
-          setCurrentWords(updatedBubbleItems);
-
-          const newCenterItem = updatedBubbleItems[0];
-          setSelectedItem(newCenterItem);
-          setLoadingItemId(null);
-
-          if (shouldIncludeAnalysis) {
-            setShowRelationColors(true);
           }
-
-        } catch (e) {
-          setCurrentWords(bubbleItems);
-          setSelectedItem(bubbleItems[0]);
-          setLoadingItemId(null);
-          if (shouldIncludeAnalysis) {
-            setShowRelationColors(true);
+        } finally {
+          if (!streamDone) {
+            setIsStreaming(false);
+            setStreamingReason('');
+            setIsRelationPending(false);
+            setLoadingItemId(null);
           }
         }
       } else {
-        setCurrentWords(bubbleItems);
-        setSelectedItem(bubbleItems[0]);
+        // 快速模式：非流式
+        const result = await retrieveSimilarWords(query, 'ielts', false);
+        if (!result.words.length) { showError('未检索到相关词汇，请尝试其他单词'); return; }
+        const items = generateBubbleItems(result.words, query);
+        bubbleCache.current.set(query, items);
+        setCurrentWords(items);
+        setSelectedItem(items[0]);
         setLoadingItemId(null);
-        if (shouldIncludeAnalysis) {
-          setShowRelationColors(true);
-        }
       }
-
     } catch (error) {
       console.error('搜索失败:', error);
       showError(error instanceof Error ? error.message : '搜索失败，请稍后重试');
@@ -452,6 +459,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           includeAnalysis={showRelationColors}
           isLoading={isLoading}
           loadingItemId={loadingItemId}
+          isRelationPending={isRelationPending}
           onHoverItem={setHoverItem}
         />
 
@@ -468,7 +476,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       />
 
       {/* 右侧信息抽屉 */}
-      <BottomSheet selectedItem={selectedItem} includeAnalysis={showRelationColors} />
+      <BottomSheet selectedItem={selectedItem} includeAnalysis={showRelationColors} isStreaming={isStreaming} streamingReason={streamingReason} />
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>

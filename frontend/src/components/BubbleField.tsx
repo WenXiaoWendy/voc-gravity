@@ -11,11 +11,12 @@ interface BubbleFieldProps {
   includeAnalysis?: boolean;
   isLoading?: boolean;
   loadingItemId?: string | null;
+  isRelationPending?: boolean;
   onHoverItem?: (item: BubbleItem | null) => void;
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null, onHoverItem }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null, isRelationPending = false, onHoverItem }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -33,10 +34,15 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // 计算布局
+  // 仅在词汇集合（ID + score）变化时重新计算布局，忽略 relation_type 等展示属性的变动
+  const itemsKey = useMemo(
+    () => items.map(i => `${i.id}:${i.score.toFixed(4)}`).join('|'),
+    [items]
+  );
   const layouts = useMemo(() => {
     return layoutBubbles(items, viewport);
-  }, [items, viewport]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemsKey, viewport]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
@@ -51,6 +57,9 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             !selectedRelationTypes.includes(item.relation_type)
           ) : false;
 
+        // relation 待接收时，非中心气泡先置暗，收到 relation 后自动亮起
+        const isPending = isRelationPending && item.layer !== 'center' && !item.relation_type?.length;
+
         return (
           <Bubble
             key={item.id}
@@ -59,6 +68,7 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             isSelected={selectedItem?.id === item.id}
             onClick={onSelectItem}
             isBlurred={isBlurred}
+            isPending={isPending}
             includeAnalysis={includeAnalysis}
             isLoading={isLoading}
             isLoadingItem={loadingItemId === item.id}
