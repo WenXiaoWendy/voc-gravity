@@ -103,7 +103,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     background: 'transparent',
     opacity: isBlurred ? 0.3 : isPending ? 0.12 : (item.layer === 'center' ? 0.95 : 0.85),
     border: isLoading && isLoadingItem
-      ? '2px solid rgba(255, 255, 255, 0.8)'
+      ? 'none'
       : isSelected
         ? BORDER_CONFIG.selected
         : BORDER_CONFIG.normal,

@@ -94,7 +94,6 @@ def health_check():
     })
 
 @app.route('/api/retrieve', methods=['POST'])
-@limiter.limit("120/hour", key_func=_get_generate_limit_key)
 def retrieve():
     """检索相似词汇接口（整合语义邻域分析）"""
     if not backend_available:
