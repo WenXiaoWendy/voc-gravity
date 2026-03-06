@@ -76,11 +76,12 @@ _SYSTEM_PROMPT = """
 - 只返回 JSON，不要任何其他文本、解释或markdown标记
 - 不要添加任何前缀或后缀，直接返回JSON对象
 - 必须返回严格有效的 JSON 格式
-- reason：用中文提供专业的教学讲解（100-300字），包含：
-  1. 整体分组概览
-  2. 每个关系类型的代表性词汇举例
-  3. 为什么这些词汇属于该类型的解释
-  4. 学习建议或注意事项
+- reason：用自然流畅的中文讲解（200-400字），像一位老师向学生介绍这些词汇：
+  - 不要以"本次分析围绕中心词XX展开"之类的套话开头，直接从最有趣的词汇关系切入
+  - 按关系类型或语义主题分段，段与段之间用 \n 分隔（不要用编号列表）
+  - 每段聚焦一个话题：同义词差异、反义对照、搭配用法、场景词群等，行文有节奏感
+  - 点出各关系类型中最典型的词，解释其中微妙的语义差异（用破折号、举例等方式）
+  - 最后单独一段给出实用的学习提示
 - relation：每个邻域词汇作为键，对应关系标签数组作为值
 - 确保所有 neighbor_words 中的词汇都出现在 relation 对象中
 - 按输入顺序处理词汇
@@ -96,7 +97,7 @@ _SYSTEM_PROMPT = """
     "ditch": ["register", "synonym"],
     "bishop": ["noise"]
   },
- "reason": "本次分析围绕中心词 'abandon' 展开，邻域词汇可分为以下几类：\n1. 同义词（synonym）：desert、forsake 与 abandon 意思高度接近，都表示'离开、放弃'，在多数语境下可互换使用。\n2. 同场景词（frame）：quit、resign 都与'离开某个位置或状态'相关，quit 更口语化，resign 更正式，常用于辞去职位。\n3. 语体差异（register）：ditch 是口语化表达，与 abandon 同义，但更随意。\n4. 噪声（noise）：bishop 与 abandon 完全无关，属于召回误差。\n学习建议：注意区分正式与非正式用词，如 quit 与 resign 的使用场景差异。"
+ "reason": "desert 和 forsake 是 abandon 最近的同义词——三者都能表达"抛弃"，但细看之下各有侧重。desert 常带有"背弃责任或承诺"的含义，情感色彩较重，如 desert one's family 或 desert one's post；forsake 则更书面、更古典，带有文学或宗教语体的气息，在现代日常英语中已不常用。\n\nquit 和 resign 虽同样涉及"离开"，却并非真正的同义词——它们指向的是主动退出某个职位或状态，属于 abandon 的场景近邻。两者也有差异：quit 更口语、适用范围更广（quit a job / quit smoking），resign 则更正式，专指辞去职务，且往往含有一定的庄重感。\n\nditch 是 abandon 的口语替代，语气轻巧随意，常见于非正式语境（如 ditch a boring class）。bishop 与这组词无明显关联，是向量检索时因语义空间邻近而召回的噪声词。\n\n学习时留意：abandon 既可以接人（abandon a child），也可以接事物（abandon a plan / abandon hope），使用范围比 desert 更广；而 desert 接人时情感色彩最强，暗示对方因此受到了伤害。"
 }
 
 现在请开始分析，严格遵守以上规则！

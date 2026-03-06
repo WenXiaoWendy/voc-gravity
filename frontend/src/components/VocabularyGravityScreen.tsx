@@ -247,6 +247,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       if (shouldIncludeAnalysis) {
         // AI 模式：SSE 流式路径
+        setStreamingReason(''); // 新搜索前重置，避免显示上一次的分析内容
         setIsStreaming(true);
         let localItems: BubbleItem[] = [];
         let localReason = '';
@@ -273,10 +274,17 @@ export const VocabularyGravityScreen: React.FC = () => {
               setShowRelationColors(true);
             } else if (event.type === 'reason_chunk') {
               localReason += event.data;
-              setStreamingReason(localReason);
+              // LLM 输出的是 JSON 原始字符流，\n 是 JSON 转义序列，需要还原为真实换行符
+              setStreamingReason(
+                localReason.replace(/^[\s"]+/, '').replace(/\\n/g, '\n').replace(/\\"/g, '"')
+              );
             } else if (event.type === 'done') {
-              // 清理流末尾的 JSON 残留字符（"} 等）
-              localReason = localReason.replace(/["}\s\n]+$/, '');
+              // 清理首尾 JSON 残留，并还原 JSON 转义序列
+              localReason = localReason
+                .replace(/^[\s"]+/, '')
+                .replace(/\\n/g, '\n')
+                .replace(/\\"/g, '"')
+                .replace(/["}]+$/, '').trimEnd();
               localItems = localItems.map(item =>
                 item.id === 'center' ? { ...item, reason: localReason } : item
               );
@@ -285,7 +293,7 @@ export const VocabularyGravityScreen: React.FC = () => {
               // 若用户仍在看中心词，同步更新 selectedItem 使 reason 生效
               const centerItem = localItems.find(i => i.id === 'center');
               if (centerItem) setSelectedItem(prev => prev?.id === 'center' ? centerItem : prev);
-              setStreamingReason('');
+              setStreamingReason(localReason); // 保留最终 reason，供第2页持续显示
               setIsStreaming(false);
               setIsRelationPending(false);
               setLoadingItemId(null); // 呼吸灯停止
@@ -484,16 +492,23 @@ export const VocabularyGravityScreen: React.FC = () => {
         <HoverBubbleCard item={hoverItem} includeAnalysis={showRelationColors} />
       </div>
 
-      {/* 关系类型图例 - 固定在右上方 */}
-      <RelationLegend
-        selectedRelationTypes={selectedRelationTypes}
-        filteredWordsCount={calculateFilteredWordsCount()}
-        onRelationTypeChange={setSelectedRelationTypes}
-        includeAnalysis={showRelationColors}
-      />
-
-      {/* 右侧信息抽屉 */}
-      <BottomSheet selectedItem={selectedItem} includeAnalysis={showRelationColors} isStreaming={isStreaming} streamingReason={streamingReason} />
+      {/* 右侧面板：关系类型图例 + 词汇详情面板，共享固定容器 */}
+      <div
+        className="fixed right-3 top-24 z-30 w-[432px] flex flex-col gap-2"
+        style={{ bottom: '48px' }}
+      >
+        <div className="flex-shrink-0">
+          <RelationLegend
+            selectedRelationTypes={selectedRelationTypes}
+            filteredWordsCount={calculateFilteredWordsCount()}
+            onRelationTypeChange={setSelectedRelationTypes}
+            includeAnalysis={showRelationColors}
+          />
+        </div>
+        <div className="flex-1 min-h-0">
+          <BottomSheet selectedItem={selectedItem} includeAnalysis={showRelationColors} isStreaming={isStreaming} streamingReason={streamingReason} />
+        </div>
+      </div>
 
       {/* 底部信息栏 - 半透明 */}
       <div className={BOTTOM_BAR_CLASSES}>

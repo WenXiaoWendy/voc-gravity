@@ -29,8 +29,8 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
   };
 
   return (
-    <div className={`${className} fixed top-24 right-3 z-30 ${!includeAnalysis ? 'pointer-events-none' : ''}`}>
-      <div className={`bg-black/30 backdrop-blur-xl rounded-lg shadow-xl p-2 w-60 ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
+    <div className={`${className} ${!includeAnalysis ? 'pointer-events-none' : ''}`}>
+      <div className={`bg-black/30 backdrop-blur-xl rounded-lg shadow-xl p-2 w-full ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
         <div className="grid grid-cols-2 gap-1.5">
           {Object.entries(relationTypeChineseMap).map(([key, chinese]) => {
             const isSelected = selectedRelationTypes.includes(key);
