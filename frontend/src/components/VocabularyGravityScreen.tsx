@@ -98,6 +98,7 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingReason, setStreamingReason] = useState('');
   const [isRelationPending, setIsRelationPending] = useState(false);
+  const [recallMode, setRecallMode] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ lemma: string; originalWord: string; pos?: string; chineseMeaning: string; isGenerating?: boolean } | null>(null);
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
@@ -437,6 +438,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       <NavBar
         onSearch={handleSearchFromBar}
         onModeChange={handleModeChange}
+        onRecallModeChange={setRecallMode}
         isLoading={isLoading}
       />
 
@@ -474,6 +476,7 @@ export const VocabularyGravityScreen: React.FC = () => {
           isLoading={isLoading}
           loadingItemId={loadingItemId}
           isRelationPending={isRelationPending}
+          recallMode={recallMode}
           onHoverItem={setHoverItem}
         />
 

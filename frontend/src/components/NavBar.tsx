@@ -24,6 +24,7 @@ const SWITCH_BUTTON_CLASSES = (active: boolean, disabled: boolean) =>
 interface NavBarProps {
   onSearch: (query: string) => void;
   onModeChange?: (includeAnalysis: boolean) => void;
+  onRecallModeChange?: (recallMode: boolean) => void;
   className?: string;
   isLoading?: boolean;
 }
@@ -32,10 +33,20 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({
   onSearch,
   onModeChange,
+  onRecallModeChange,
   className = '',
   isLoading = false
 }) => {
   const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
+  const [recallMode, setRecallMode] = React.useState(false);
+
+  const handleRecallModeToggle = () => {
+    const newMode = !recallMode;
+    setRecallMode(newMode);
+    if (onRecallModeChange) {
+      onRecallModeChange(newMode);
+    }
+  };
 
   const handleModeToggle = () => {
     // 加载中不允许切换模式
@@ -108,6 +119,20 @@ const NavBar: React.FC<NavBarProps> = ({
               AI 深度解析
             </button>
           </div>
+
+          {/* 回忆模式按钮 */}
+          <button
+            type="button"
+            onClick={handleRecallModeToggle}
+            title={recallMode ? '退出回忆模式' : '回忆模式：隐藏中文，仅显示英文'}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-all duration-200 ${
+              recallMode
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
+                : 'bg-gray-800/80 text-gray-400 border-gray-700/50 hover:text-white hover:border-gray-500'
+            }`}
+          >
+            {recallMode ? '回忆中' : '回忆'}
+          </button>
 
           {/* 用户头像占位符 */}
           <div className={AVATAR_CLASSES}>

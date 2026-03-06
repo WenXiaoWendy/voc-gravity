@@ -69,6 +69,7 @@ interface BubbleProps {
   includeAnalysis?: boolean;
   isLoading?: boolean;
   isLoadingItem?: boolean;
+  recallMode?: boolean;
   onMouseEnter?: (item: BubbleItem) => void;
   onMouseLeave?: () => void;
 }
@@ -78,7 +79,7 @@ interface BubbleProps {
 // 玻璃感 + 轻阴影 + 细描边 + 半透明
 // 克制、精致、高级
 
-export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, isPending = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, onMouseEnter, onMouseLeave }) => {
+export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, isPending = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, recallMode = false, onMouseEnter, onMouseLeave }) => {
   const theme = getBubbleTheme(item, includeAnalysis);
 
   // 按层独立配置字号，填满气泡同时防止长词变形
@@ -269,8 +270,8 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
           {item.word}
         </span>
 
-        {/* 中文释义：center/inner/middle 显示词性+中文，outer 只显示一个中文 */}
-        {item.chinese_gloss && (
+        {/* 中文释义：回忆模式下隐藏；center/inner/middle 显示词性+中文，outer 只显示一个中文 */}
+        {item.chinese_gloss && !recallMode && (
           <div
             className="mt-1 leading-tight whitespace-nowrap"
             style={{

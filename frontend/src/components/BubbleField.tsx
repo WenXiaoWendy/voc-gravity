@@ -12,11 +12,12 @@ interface BubbleFieldProps {
   isLoading?: boolean;
   loadingItemId?: string | null;
   isRelationPending?: boolean;
+  recallMode?: boolean;
   onHoverItem?: (item: BubbleItem | null) => void;
 }
 
 // 气泡场组件
-export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null, isRelationPending = false, onHoverItem }) => {
+export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, onSelectItem, selectedRelationTypes = [], includeAnalysis = false, isLoading = false, loadingItemId = null, isRelationPending = false, recallMode = false, onHoverItem }) => {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1200,
     height: typeof window !== 'undefined' ? window.innerHeight : 800
@@ -35,8 +36,9 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
   }, []);
 
   // 仅在词汇集合（ID + score）变化时重新计算布局，忽略 relation_type 等展示属性的变动
+  // word 内容也纳入 key，确保切换中心词时触发重新布局
   const itemsKey = useMemo(
-    () => items.map(i => `${i.id}:${i.score.toFixed(4)}`).join('|'),
+    () => items.map(i => `${i.word}:${i.id}:${i.score.toFixed(4)}`).join('|'),
     [items]
   );
   const layouts = useMemo(() => {
@@ -72,6 +74,7 @@ export const BubbleField = React.memo<BubbleFieldProps>(({ items, selectedItem, 
             includeAnalysis={includeAnalysis}
             isLoading={isLoading}
             isLoadingItem={loadingItemId === item.id}
+            recallMode={recallMode}
             onMouseEnter={onHoverItem && !isBlurred ? (item) => onHoverItem(item) : undefined}
             onMouseLeave={onHoverItem && !isBlurred ? () => onHoverItem(null) : undefined}
           />
