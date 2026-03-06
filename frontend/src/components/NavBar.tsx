@@ -1,5 +1,6 @@
 import React from 'react';
 import { SearchBar } from './SearchBar';
+import { DonateButton } from './DonateButton';
 
 // 词书配置
 const VOCABULARY_BOOKS = [
@@ -133,6 +134,9 @@ const NavBar: React.FC<NavBarProps> = ({
           >
             {recallMode ? '回忆中' : '回忆'}
           </button>
+
+          {/* 打赏按钮 */}
+          <DonateButton />
 
           {/* 用户头像占位符 */}
           <div className={AVATAR_CLASSES}>
