@@ -97,7 +97,7 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
             <h3 className={`text-lg font-serif font-semibold ${TEXT_PRIMARY}`}>
               {item.word}
             </h3>
-            {item.pronunciation && (
+{item.pronunciation && (
               <span className={`${TEXT_LABEL} text-xs font-mono`}>
                 {Array.isArray(item.pronunciation) ? item.pronunciation[0] : item.pronunciation}
               </span>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { getBubbleTheme } from '../utils/theme';
 import { wordFormChineseMap } from '../utils/wordForms';
+import { PronunciationButton } from './PronunciationButton';
 
 interface BottomSheetProps {
   selectedItem: BubbleItem | null;
@@ -113,6 +114,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
                 <h3 className="text-xl font-serif font-semibold text-white/95">
                   {selectedItem.word}
                 </h3>
+                <PronunciationButton word={selectedItem.word} size={16} />
                 {selectedItem.pos && (
                   <div className="flex items-center gap-1">
                     {Array.isArray(selectedItem.pos) ? (
