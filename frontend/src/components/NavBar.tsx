@@ -1,6 +1,7 @@
 import React from 'react';
-import { SearchBar } from './SearchBar';
 import { DonateButton } from './DonateButton';
+import { FavoritesPanel } from './FavoritesPanel';
+import { SearchBar } from './SearchBar';
 
 // 词书配置
 const VOCABULARY_BOOKS = [
@@ -40,6 +41,7 @@ const NavBar: React.FC<NavBarProps> = ({
 }) => {
   const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
   const [recallMode, setRecallMode] = React.useState(false);
+  const [showFavorites, setShowFavorites] = React.useState(false);
 
   const handleRecallModeToggle = () => {
     const newMode = !recallMode;
@@ -135,6 +137,22 @@ const NavBar: React.FC<NavBarProps> = ({
             {recallMode ? '回忆中' : '回忆'}
           </button>
 
+          {/* 收藏/历史面板按钮 */}
+          <button
+            type="button"
+            onClick={() => setShowFavorites(v => !v)}
+            title="收藏与历史"
+            className={`w-8 h-8 flex items-center justify-center rounded-full border transition-all duration-200 ${
+              showFavorites
+                ? 'bg-white/20 text-white border-white/40'
+                : 'bg-gray-800/80 text-gray-400 border-gray-700/50 hover:text-white hover:border-gray-500'
+            }`}
+          >
+            <svg className="w-4 h-4" fill={showFavorites ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </button>
+
           {/* 打赏按钮 */}
           <DonateButton />
 
@@ -144,6 +162,13 @@ const NavBar: React.FC<NavBarProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 收藏/历史面板 */}
+      <FavoritesPanel
+        isOpen={showFavorites}
+        onClose={() => setShowFavorites(false)}
+        onSearch={onSearch}
+      />
     </div>
   );
 };

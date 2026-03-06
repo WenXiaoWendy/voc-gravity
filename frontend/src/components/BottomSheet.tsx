@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
+import { isFavorited, toggleFavorite } from '../utils/favorites';
 import { wordFormChineseMap } from '../utils/wordForms';
 import { PronunciationButton } from './PronunciationButton';
 
@@ -13,6 +14,7 @@ interface BottomSheetProps {
 export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeAnalysis, isStreaming, streamingReason }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isVisible, setIsVisible] = useState(false);
+  const [favorited, setFavorited] = useState(false);
 
   const hasTwoPages = includeAnalysis;
 
@@ -46,6 +48,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
       setCurrentPage(1);
     }
   }, [selectedItem?.word]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 同步收藏状态
+  useEffect(() => {
+    setFavorited(isFavorited(selectedItem?.word ?? ''));
+  }, [selectedItem?.word]);
 
   // 将 **text** 转为带加粗标签的 React 节点数组
   const renderWithBold = (text: string): React.ReactNode[] => {
@@ -144,6 +151,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
                     <h3 className="text-xl font-serif font-semibold text-white/95 shrink-0">
                       {selectedItem.word}
                     </h3>
+                    <button
+                      onClick={() => setFavorited(toggleFavorite(selectedItem.word))}
+                      title={favorited ? '取消收藏' : '加入收藏'}
+                      className="text-base leading-none transition-colors shrink-0 hover:scale-110 active:scale-95"
+                      style={{ color: favorited ? '#f87171' : 'rgba(255,255,255,0.35)' }}
+                    >
+                      {favorited ? '♥' : '♡'}
+                    </button>
                     {selectedItem.pronunciation && (
                       <span className="text-white/55 text-sm font-mono truncate">
                         {Array.isArray(selectedItem.pronunciation)
