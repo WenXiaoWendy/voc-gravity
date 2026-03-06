@@ -89,19 +89,19 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
       center: { radiusRatio: 0.72, min: 26, max: 42 },
       inner:  { radiusRatio: 0.70, min: 24, max: 34 },
       middle: { radiusRatio: 0.68, min: 21, max: 29 },
-      outer:  { radiusRatio: 0.66, min: 18, max: 25 },
+      outer:  { radiusRatio: 0.56, min: 15, max: 21 },
     };
     const cfg = LAYER_CONFIG[item.layer] ?? LAYER_CONFIG.outer;
 
     // 半径驱动：优先填满气泡
     const radiusBased = layout.r * cfg.radiusRatio;
 
-    // 字符宽度适配：保留 8px 内边距，每字符约占 0.52 个字号宽度
-    const availableWidth = layout.r * 2 - 8;
-    const widthBased = availableWidth / Math.max(1, item.word.length * 0.52);
+    // 字符宽度适配：气泡 padding 15px 两侧共 30px，再留 6px 安全边距
+    const availableWidth = layout.r * 2 - 36;
+    const widthBased = availableWidth / Math.max(1, item.word.length * 0.65);
 
-    // min 保底，widthBased 防溢出，clamp 到层级范围
-    const raw = Math.max(cfg.min, Math.min(radiusBased, widthBased));
+    // widthBased 优先级最高（保证词完整显示），在此基础上再应用 min 保底和 max 上限
+    const raw = Math.min(Math.max(cfg.min, Math.min(radiusBased, widthBased)), widthBased);
     return Math.min(cfg.max, raw);
   };
 
@@ -283,24 +283,14 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
             }}
           >
             {(() => {
-              const firstMeaning = item.chinese_gloss.split(/[，；、]/)[0];
-              if (item.layer === 'outer') {
-                return firstMeaning;
-              }
+              const meanings = item.chinese_gloss.split(/[，；、]/);
               const maxMeanings = item.layer === 'center'
                 ? (fontSize > 22 ? 3 : 2)
-                : item.layer === 'inner'
-                  ? (fontSize > 18 ? 3 : 2)
-                  : item.layer === 'middle'
-                    ? 2
-                    : 1;
-              const displayMeanings = item.chinese_gloss.split(/[，；、]/).slice(0, maxMeanings);
-              const posValue = item.pos
-                ? (Array.isArray(item.pos) ? item.pos[0] : item.pos.split('/')[0])
-                : '';
-              const posPrefix = item.layer === 'center'
-                ? (item.pos ? `${Array.isArray(item.pos) ? item.pos.join(' ') : item.pos} ` : '')
-                : (posValue ? `${posValue} ` : '');
+                : (fontSize > 18 ? 3 : 2);
+              const displayMeanings = meanings.slice(0, maxMeanings);
+              const posRaw = item.pos ? (Array.isArray(item.pos) ? item.pos : item.pos.split('/')) : [];
+              const posStr = item.layer === 'center' ? posRaw.join(' ') : (posRaw[0] ?? '');
+              const posPrefix = posStr ? `${posStr} ` : '';
               return posPrefix + displayMeanings.join('; ');
             })()}
           </div>
