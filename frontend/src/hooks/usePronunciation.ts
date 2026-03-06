@@ -2,12 +2,27 @@ import { useState, useCallback, useRef } from 'react';
 
 // 缓存：word -> audio URL（null 表示该词无录音）
 const audioCache = new Map<string, string | null>();
+// 缓存：word -> 已预加载的 Audio 对象
+const audioObjectCache = new Map<string, HTMLAudioElement>();
+
+function _preloadAudioObject(word: string, url: string): void {
+  if (!audioObjectCache.has(word)) {
+    const audio = new Audio(url);
+    audio.preload = 'auto';
+    audioObjectCache.set(word, audio);
+  }
+}
 
 // 导出供组件预取使用
 export function prefetchAudioUrl(word: string): void {
-  if (!audioCache.has(word)) {
-    fetchAudioUrl(word); // fire and forget
+  if (audioCache.has(word)) {
+    const url = audioCache.get(word);
+    if (url) _preloadAudioObject(word, url);
+    return;
   }
+  fetchAudioUrl(word).then(url => {
+    if (url) _preloadAudioObject(word, url);
+  });
 }
 
 async function fetchAudioUrl(word: string): Promise<string | null> {
@@ -76,8 +91,9 @@ export function usePronunciation() {
 
         if (audioUrl) {
           audioRef.current?.pause();
-          const audio = new Audio(audioUrl);
+          const audio = audioObjectCache.get(word) ?? new Audio(audioUrl);
           audioRef.current = audio;
+          audio.currentTime = 0;
           setIsLoading(false);
           setIsPlaying(true);
           await new Promise<void>((resolve, reject) => {
