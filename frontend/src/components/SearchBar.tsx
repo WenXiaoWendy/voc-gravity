@@ -111,13 +111,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
             onFocus={handleFocus}
             placeholder="搜索词汇..."
             disabled={isLoading}
-            className="w-full pl-4 pr-20 py-2.5 bg-white/5 text-white/90 rounded-lg border border-white/10 focus:outline-none focus:border-[#5E8698]/70 placeholder:text-white/25 disabled:opacity-50 transition-colors duration-200"
+            className="w-full pl-4 pr-[100px] py-2.5 bg-white/5 text-white/90 rounded-lg border border-white/10 focus:outline-none focus:border-[#5E8698]/70 placeholder:text-white/25 disabled:opacity-50 transition-colors duration-200"
           />
           {query && !isLoading && (
             <button
               type="button"
-              onClick={() => { setQuery(''); setShowHistory(false); inputRef.current?.focus(); }}
-              className="absolute right-[60px] top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-white/30 hover:text-white/60 transition-colors duration-150"
+              onClick={() => { setQuery(''); inputRef.current?.focus(); openHistory(); }}
+              className="absolute right-[76px] top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-white/30 hover:text-white/60 transition-colors duration-150"
               tabIndex={-1}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">

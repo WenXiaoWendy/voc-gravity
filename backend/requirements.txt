@@ -1,5 +1,6 @@
 flask==2.3.3
 flask-cors==4.0.0
+flask-limiter==4.1.1
 langchain-community
 faiss-cpu
 openai

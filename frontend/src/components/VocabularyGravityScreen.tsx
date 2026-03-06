@@ -29,6 +29,10 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', in
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      const data = await response.json();
+      throw new Error(data.message || '请求过于频繁，请稍后再试');
+    }
     throw new Error(`服务器错误 (${response.status})`);
   }
 
@@ -51,7 +55,13 @@ async function* retrieveWithSSE(query: string, bookKey: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, book_key: bookKey, k: 56 }),
   });
-  if (!response.ok || !response.body) throw new Error(`SSE 请求失败 (${response.status})`);
+  if (!response.ok || !response.body) {
+    if (response.status === 429) {
+      const data = await response.json();
+      throw new Error(data.message || '请求过于频繁，请稍后再试');
+    }
+    throw new Error(`SSE 请求失败 (${response.status})`);
+  }
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buf = '';
@@ -316,6 +326,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     if (!query) return;
 
     clearError();
+    setIsLoading(true);
 
     if (getWordDetails(query)) {
       addToHistory(query);
@@ -332,6 +343,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       if (!validation.valid) {
         showError(validation.error || '请输入正确的英文单词');
+        setIsLoading(false);
         return;
       }
 
@@ -339,6 +351,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       if (!getWordDetails(lemma)) {
         setConfirmDialog({ lemma, originalWord: query, pos: validation.pos, chineseMeaning: validation.chinese_meaning || '' });
+        setIsLoading(false);
         return;
       }
 
@@ -347,6 +360,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       handleSearch(lemma);
     } catch (error) {
       showError(error instanceof Error ? error.message : '验证失败，请稍后重试');
+      setIsLoading(false);
     }
   }, [isLoading, getWordDetails, clearError, showError, handleSearch]);
 

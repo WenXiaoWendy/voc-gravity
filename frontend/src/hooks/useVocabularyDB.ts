@@ -23,6 +23,15 @@ export function useVocabularyDB() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ word })
     });
+    
+    if (!res.ok) {
+      if (res.status === 429) {
+        const data = await res.json();
+        throw new Error(data.message || '请求过于频繁，请稍后再试');
+      }
+      throw new Error(`服务器错误 (${res.status})`);
+    }
+    
     const data = await res.json();
     if (data.success && data.word_data) {
       vocabRef.current[word] = data.word_data;

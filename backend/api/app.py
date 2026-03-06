@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import re
 import sys
 import os
 import json
+from functools import wraps
 
 # 添加项目根目录到Python路径
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,6 +15,14 @@ sys.path.insert(0, project_root)
 app = Flask(__name__)
 # 限制请求体最大 64 KB，防止超大 payload
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1024
+
+# 初始化限速器
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=[],
+    storage_uri="memory://"
+)
 
 # ── 输入校验工具 ────────────────────────────────────────────────
 # 只允许英文字母、空格、连字符、撇号（如 don't、well-known）
@@ -24,7 +35,44 @@ def _clean_word(raw) -> str | None:
         return None
     word = raw.strip()
     return word if _WORD_RE.match(word) else None
+
 CORS(app)
+
+def _get_generate_limit_key():
+    """始终返回IP地址进行限速"""
+    return get_remote_address()
+
+def _localhost_only(f):
+    """装饰器：仅允许 localhost 调用，其余 IP 返回 403"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        remote = get_remote_address()
+        if remote not in ('127.0.0.1', '::1'):
+            return jsonify({'error': 'Forbidden'}), 403
+        return f(*args, **kwargs)
+    return decorated
+
+# 限速错误处理
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    desc = str(e.description)  # e.g. "20 per 1 hour"
+    limit_map = {
+        'hour': ('每小时', '一小时后'),
+        'day':  ('每天',   '明天'),
+        'minute': ('每分钟', '分钟后'),
+    }
+    period_key = next((k for k in limit_map if k in desc), None)
+    if period_key and desc.split()[0].isdigit():
+        count = desc.split()[0]
+        label, reset_hint = limit_map[period_key]
+        message = f'AI 分析{label}最多使用 {count} 次，已达上限，请{reset_hint}再试'
+    else:
+        message = f'请求过于频繁（限制：{desc}），请稍后再试'
+    return jsonify({
+        'error': '请求过于频繁',
+        'message': message,
+        'retry_after': desc
+    }), 429
 
 # 导入现有的Python模块
 try:
@@ -46,6 +94,7 @@ def health_check():
     })
 
 @app.route('/api/retrieve', methods=['POST'])
+@limiter.limit("120/hour", key_func=_get_generate_limit_key)
 def retrieve():
     """检索相似词汇接口（整合语义邻域分析）"""
     if not backend_available:
@@ -65,7 +114,7 @@ def retrieve():
             return jsonify({'error': f'Unknown book_key: {book_key}'}), 400
 
         k = data.get('k', 56)
-        if not isinstance(k, int) or not (1 <= k <= 100):
+        if not isinstance(k, int) or not (1 <= k <= 56):
             k = 56
         include_analysis = bool(data.get('include_analysis', False))
 
@@ -111,13 +160,13 @@ def retrieve():
             'success': True
         })
     except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
+        print(f"[retrieve] error: {e}")
+        return jsonify({'error': 'Internal server error', 'success': False}), 500
 
 
 @app.route('/api/retrieve-stream', methods=['POST'])
+@limiter.limit("20/hour", key_func=_get_generate_limit_key)
+@limiter.limit("100/day", key_func=_get_generate_limit_key)
 def retrieve_stream():
     """AI 模式 SSE 流式接口：先推 FAISS 词汇，再流式输出 relation + reason"""
     if not backend_available:
@@ -127,7 +176,7 @@ def retrieve_stream():
     query = _clean_word(data.get('query', ''))
     book_key = data.get('book_key', 'ielts')
     try:
-        k = min(max(int(data.get('k', 56)), 1), 100)
+        k = min(max(int(data.get('k', 56)), 1), 56)
     except (TypeError, ValueError):
         k = 56
     if not query or book_key not in _ALLOWED_BOOKS:
@@ -161,6 +210,7 @@ def retrieve_stream():
 
 
 @app.route('/api/validate-word', methods=['POST'])
+@limiter.limit("60/hour", key_func=_get_generate_limit_key)
 def validate_word():
     """验证英文单词合法性，返回原形（lemma）及基础中文释义"""
     if not backend_available:
@@ -175,10 +225,12 @@ def validate_word():
         return jsonify(result)
 
     except Exception as e:
-        return jsonify({'valid': False, 'error': str(e)}), 500
+        print(f"[validate-word] error: {e}")
+        return jsonify({'valid': False, 'error': 'Internal server error'}), 500
 
 
 @app.route('/api/generate-word', methods=['POST'])
+@limiter.limit("10/day", key_func=_get_generate_limit_key)
 def generate_word():
     """为词库外的单词生成词汇数据，结果由前端缓存到 localStorage，不写入服务端 JSON，不嵌入 FAISS"""
     if not backend_available:
@@ -196,10 +248,12 @@ def generate_word():
         return jsonify({'success': True, 'word_data': results[0]})
 
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"[generate-word] error: {e}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 
 @app.route('/api/token-stats', methods=['GET'])
+@_localhost_only
 def get_token_stats():
     """获取 token 用量统计接口"""
     if not backend_available:
@@ -216,11 +270,8 @@ def get_token_stats():
             'stats': stats
         })
     except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'success': False
-        }), 500
-
+        print(f"[token-stats] error: {e}")
+        return jsonify({'error': 'Internal server error', 'success': False}), 500
 
 
 if __name__ == '__main__':
