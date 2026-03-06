@@ -58,21 +58,21 @@ export const getBubbleTheme = (item: any, includeAnalysis: boolean = true): Bubb
       textColor: 'rgba(255, 255, 255, 0.95)',
       badgeColor: '#7E838A'
     },
-    // 同场景 - 暖灰
+    // 同场景 - 灰尘薰衣草
     'frame': {
-      baseColor: '#9EA3AA',
-      gradientFrom: '#9EA3AA',
-      gradientTo: '#8E939A',
+      baseColor: '#A897B0',
+      gradientFrom: '#A897B0',
+      gradientTo: '#987FA0',
       textColor: 'rgba(255, 255, 255, 0.95)',
-      badgeColor: '#7E838A'
+      badgeColor: '#886F90'
     },
-    // 语体差异 - 暖灰
+    // 语体差异 - 灰尘玫瑰紫
     'register': {
-      baseColor: '#9EA3AA',
-      gradientFrom: '#9EA3AA',
-      gradientTo: '#8E939A',
+      baseColor: '#A880A0',
+      gradientFrom: '#A880A0',
+      gradientTo: '#987090',
       textColor: 'rgba(255, 255, 255, 0.95)',
-      badgeColor: '#7E838A'
+      badgeColor: '#886080'
     },
     // 噪声/漂移 - 灰尘琥珀
     'noise': {
@@ -205,8 +205,8 @@ export const SHADOW_CONFIG = {
 
 // 边框配置
 export const BORDER_CONFIG = {
-  normal: '1px solid rgba(255, 255, 255, 0.08)',
-  selected: '1px solid rgba(255, 255, 255, 0.15)'
+  normal: '1px solid rgba(255, 255, 255, 0.22)',
+  selected: '1px solid rgba(255, 255, 255, 0.40)'
 };
 
 // 文字颜色层级 — 以 HoverBubbleCard 为基准，跨组件统一对比度

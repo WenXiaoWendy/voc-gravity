@@ -28,11 +28,20 @@ import { BORDER_CONFIG, getBubbleTheme, SHADOW_CONFIG } from '../utils/theme';
 //   }
 // };
 
-// 更强的立体感
+// iOS 17 液态玻璃风格 - 多层高光+背光+边缘发光
 const GRADIENT_CONFIG = {
-  baseGradient: { darkenPercent: 25, gradientPosition: '20% 20%', gradientStops: '60%' },
-  innerGlow: { opacity: 0.35, position: '15% 15%', stops: '50%', intensity: 0.8 },
-  edgeShadow: { opacity: 0.25, position: '85% 85%', stops: '60%', intensity: 0.5 }
+  // 基础渐变 - 左上亮、右下暗，增大加深幅度
+  baseGradient: { darkenPercent: 38, gradientPosition: '22% 22%', gradientStops: '50%' },
+  // 主高光区域 - 左上 1/4 区域的玻璃漫反射
+  primaryHighlight: { opacity: 0.50, position: '16% 16%', stops: '46%', intensity: 0.88 },
+  // 镜面尖点 - 左上角极小亮斑，模拟曲面玻璃高光焦点
+  specularTip: { opacity: 0.42, position: '10% 10%', stops: '20%', intensity: 1.0 },
+  // 右下深度阴影 - 强化立体感
+  depthShadow: { opacity: 0.38, position: '84% 84%', stops: '55%', intensity: 0.62 },
+  // 中心环境光 - 玻璃透光感
+  centerAmbient: { opacity: 0.10, position: '46% 42%', stops: '60%', intensity: 0.7 },
+  // 底部边缘背光 - 模拟背面光源穿透玻璃
+  bottomRim: { opacity: 0.22, position: '50% 92%', stops: '30%', intensity: 0.5 },
 };
 
 // 颜色处理函数 - 加深颜色
@@ -72,25 +81,49 @@ interface BubbleProps {
 export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onClick, isBlurred = false, isPending = false, includeAnalysis = false, isLoading = false, isLoadingItem = false, onMouseEnter, onMouseLeave }) => {
   const theme = getBubbleTheme(item, includeAnalysis);
 
-  // 计算合适的字体大小，确保文字不超出边界
+  // 按层独立配置字号，填满气泡同时防止长词变形
   const calculateFontSize = () => {
-    const maxWidth = layout.r * 2 - 30; // 预留15px边距 * 2
-    const wordLength = item.word.length;
+    // radiusRatio: 理想字号 = r * ratio（填满气泡）
+    // min/max: 该层字号范围（px）
+    const LAYER_CONFIG: Record<string, { radiusRatio: number; min: number; max: number }> = {
+      center: { radiusRatio: 0.72, min: 26, max: 42 },
+      inner:  { radiusRatio: 0.70, min: 24, max: 34 },
+      middle: { radiusRatio: 0.68, min: 21, max: 29 },
+      outer:  { radiusRatio: 0.66, min: 18, max: 25 },
+    };
+    const cfg = LAYER_CONFIG[item.layer] ?? LAYER_CONFIG.outer;
 
-    // 根据单词长度和气泡大小计算字体大小
-    const baseSize = Math.min(layout.r * 0.4, maxWidth / Math.max(1, wordLength * 0.6));
-    return Math.max(12, Math.min(24, baseSize)); // 限制在12-24px之间
+    // 半径驱动：优先填满气泡
+    const radiusBased = layout.r * cfg.radiusRatio;
+
+    // 字符宽度适配：保留 8px 内边距，每字符约占 0.52 个字号宽度
+    const availableWidth = layout.r * 2 - 8;
+    const widthBased = availableWidth / Math.max(1, item.word.length * 0.52);
+
+    // min 保底，widthBased 防溢出，clamp 到层级范围
+    const raw = Math.max(cfg.min, Math.min(radiusBased, widthBased));
+    return Math.min(cfg.max, raw);
   };
 
   const fontSize = calculateFontSize();
+
+  // 玻璃内壁边缘发光 - 模拟 iOS 17 液态玻璃折射高光
+  // inset 0 0 0 1px : 全周亮边（玻璃厚度感）
+  // inset 3px 3px 8px : 左上强方向高光
+  // inset -2px -2px 5px : 右下内壁阴影
+  const RIM_LIGHT = [
+    'inset 0 0 0 1px rgba(255,255,255,0.28)',
+    'inset 3px 3px 8px rgba(255,255,255,0.55)',
+    'inset -2px -2px 5px rgba(0,0,0,0.28)',
+  ].join(', ');
 
   // 呼吸灯边框样式 - 白色光圈，透明度变化
   const breathingBorder = {
     boxShadow: isLoading && isLoadingItem
       ? 'none'  // 呼吸灯模式下，让动画完全控制box-shadow
       : isSelected
-        ? `${SHADOW_CONFIG.normal}, ${SHADOW_CONFIG.selected}, ${SHADOW_CONFIG.glow}`
-        : SHADOW_CONFIG.normal,
+        ? `${RIM_LIGHT}, ${SHADOW_CONFIG.normal}, ${SHADOW_CONFIG.selected}, ${SHADOW_CONFIG.glow}`
+        : `${RIM_LIGHT}, ${SHADOW_CONFIG.normal}`,
   };
 
   // 气泡基础样式 - Apple 质感
@@ -136,7 +169,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
 
   // 中心气泡的特殊效果（在呼吸灯模式下禁用，避免干扰白色光圈）
   const centerGlowEffect = item.layer === 'center' && !(isLoading && isLoadingItem) ? {
-    boxShadow: `${SHADOW_CONFIG.normal}, 0 0 60px rgba(167, 166, 191, 0.3)`
+    boxShadow: `${RIM_LIGHT}, ${SHADOW_CONFIG.normal}, 0 0 60px rgba(167, 166, 191, 0.3)`
   } : {};
 
   return (
@@ -155,8 +188,8 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* 多层渐变效果 - 增强立体感 */}
-      {/* 基础渐变层 */}
+      {/* 多层渐变效果 - iOS 17 液态玻璃立体感 */}
+      {/* 基础渐变层 - 左上亮右下暗 */}
       <div
         className="absolute inset-0 rounded-full pointer-events-none"
         style={{
@@ -164,21 +197,56 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
         }}
       />
 
-      {/* 内高光效果 - 增强玻璃质感 */}
+      {/* 主高光区域 - 左上漫反射 */}
       <div
         className="absolute inset-0 rounded-full pointer-events-none"
         style={{
-          opacity: GRADIENT_CONFIG.innerGlow.opacity,
-          background: `radial-gradient(circle at ${GRADIENT_CONFIG.innerGlow.position}, rgba(255,255,255,${GRADIENT_CONFIG.innerGlow.intensity}), transparent ${GRADIENT_CONFIG.innerGlow.stops})`
+          opacity: GRADIENT_CONFIG.primaryHighlight.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.primaryHighlight.position}, rgba(255,255,255,${GRADIENT_CONFIG.primaryHighlight.intensity}), transparent ${GRADIENT_CONFIG.primaryHighlight.stops})`
         }}
       />
 
-      {/* 边缘阴影效果 - 增强立体感 */}
+      {/* 镜面尖点 - 左上角极小亮斑 */}
       <div
         className="absolute inset-0 rounded-full pointer-events-none"
         style={{
-          opacity: GRADIENT_CONFIG.edgeShadow.opacity,
-          background: `radial-gradient(circle at ${GRADIENT_CONFIG.edgeShadow.position}, transparent ${GRADIENT_CONFIG.edgeShadow.stops}, rgba(0,0,0,${GRADIENT_CONFIG.edgeShadow.intensity}) 100%)`
+          opacity: GRADIENT_CONFIG.specularTip.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.specularTip.position}, rgba(255,255,255,${GRADIENT_CONFIG.specularTip.intensity}), transparent ${GRADIENT_CONFIG.specularTip.stops})`
+        }}
+      />
+
+      {/* 右下深度阴影 - 增强立体感 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          opacity: GRADIENT_CONFIG.depthShadow.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.depthShadow.position}, transparent ${GRADIENT_CONFIG.depthShadow.stops}, rgba(0,0,0,${GRADIENT_CONFIG.depthShadow.intensity}) 100%)`
+        }}
+      />
+
+      {/* 中心环境光 - 玻璃透光感 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          opacity: GRADIENT_CONFIG.centerAmbient.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.centerAmbient.position}, rgba(255,255,255,${GRADIENT_CONFIG.centerAmbient.intensity}), transparent ${GRADIENT_CONFIG.centerAmbient.stops})`
+        }}
+      />
+
+      {/* 底部背光 - 模拟背面透光 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          opacity: GRADIENT_CONFIG.bottomRim.opacity,
+          background: `radial-gradient(circle at ${GRADIENT_CONFIG.bottomRim.position}, rgba(255,255,255,${GRADIENT_CONFIG.bottomRim.intensity}), transparent ${GRADIENT_CONFIG.bottomRim.stops})`
+        }}
+      />
+
+      {/* 内壁亮环 - 模拟玻璃边缘折射光圈 */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, transparent 62%, rgba(255,255,255,0.14) 70%, rgba(255,255,255,0.06) 78%, transparent 84%)'
         }}
       />
 
@@ -201,27 +269,38 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
           {item.word}
         </span>
 
-        {/* 中文释义 - 优化显示清晰度和可辨认度 */}
+        {/* 中文释义：center/inner/middle 显示词性+中文，outer 只显示一个中文 */}
         {item.chinese_gloss && (
           <div
             className="mt-1 leading-tight whitespace-nowrap"
             style={{
-              fontSize: Math.max(10, fontSize * 0.5), // 增大字体
-              lineHeight: '1.1', // 增加行高
-              color: 'rgba(255, 255, 255, 0.95)', // 提高对比度
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)', // 增强阴影
-              fontWeight: 500, // 增加字体权重
-              letterSpacing: '0.02em', // 增加字间距
-              //   fontFamily: 'system-ui, -apple-system, sans-serif' // 使用系统字体
+              fontSize: Math.max(10, fontSize * (item.layer === 'center' ? 0.30 : 0.38)),
+              lineHeight: '1.1',
+              color: 'rgba(255, 255, 255, 0.95)',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)',
+              fontWeight: 500,
+              letterSpacing: '0.02em',
             }}
           >
             {(() => {
-              const allMeanings = item.chinese_gloss.split(/[，；、]/);
-              // 根据气泡大小决定显示几个释义
-              const maxMeanings = fontSize > 20 ? 3 : fontSize > 14 ? 2 : 1;
-              const displayMeanings = allMeanings.slice(0, maxMeanings);
-              // 如果有词性，在中文释义前加上词性
-              const posPrefix = item.pos ? `${Array.isArray(item.pos) ? item.pos.join(' ') : item.pos} ` : '';
+              const firstMeaning = item.chinese_gloss.split(/[，；、]/)[0];
+              if (item.layer === 'outer') {
+                return firstMeaning;
+              }
+              const maxMeanings = item.layer === 'center'
+                ? (fontSize > 22 ? 3 : 2)
+                : item.layer === 'inner'
+                  ? (fontSize > 18 ? 3 : 2)
+                  : item.layer === 'middle'
+                    ? 2
+                    : 1;
+              const displayMeanings = item.chinese_gloss.split(/[，；、]/).slice(0, maxMeanings);
+              const posValue = item.pos
+                ? (Array.isArray(item.pos) ? item.pos[0] : item.pos.split('/')[0])
+                : '';
+              const posPrefix = item.layer === 'center'
+                ? (item.pos ? `${Array.isArray(item.pos) ? item.pos.join(' ') : item.pos} ` : '')
+                : (posValue ? `${posValue} ` : '');
               return posPrefix + displayMeanings.join('; ');
             })()}
           </div>

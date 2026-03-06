@@ -17,8 +17,8 @@ export const relationTypeColorMap: Record<string, string> = {
   'hyponym': '#7FA58A',
   'cohyponym': '#8F98B6',
   'collocation': '#9EA3AA',
-  'frame': '#9EA3AA',
-  'register': '#9EA3AA',
+  'frame': '#A897B0',
+  'register': '#A880A0',
   'noise': '#B79A7A'
 };
 
