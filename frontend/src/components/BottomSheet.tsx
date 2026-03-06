@@ -110,43 +110,37 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
           <>
             {/* 标题区域 - 固定 */}
             <div className="p-5 pb-3 border-b border-white/10 flex-shrink-0">
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <h3 className="text-xl font-serif font-semibold text-white/95">
+              <div className="flex items-center gap-2 mb-1.5">
+                <h3 className="text-xl font-serif font-semibold text-white/95 shrink-0">
                   {selectedItem.word}
                 </h3>
-                <PronunciationButton word={selectedItem.word} size={16} />
-                {selectedItem.pos && (
-                  <div className="flex items-center gap-1">
-                    {Array.isArray(selectedItem.pos) ? (
-                      selectedItem.pos.map((p, idx) => (
-                        <span key={idx} className="text-sm font-medium text-white/60">{p}</span>
-                      ))
-                    ) : (
-                      <span className="text-sm font-medium text-white/60">{selectedItem.pos}</span>
-                    )}
-                  </div>
+                {selectedItem.pronunciation && (
+                  <span className="text-white/55 text-sm font-mono truncate">
+                    {Array.isArray(selectedItem.pronunciation)
+                      ? selectedItem.pronunciation[0]
+                      : selectedItem.pronunciation}
+                  </span>
                 )}
+                <PronunciationButton word={selectedItem.word} size={16} />
                 {selectedItem.frequency && (
-                  <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/60">
+                  <span className="ml-auto shrink-0 text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/60">
                     词频 {selectedItem.frequency}/10
                   </span>
                 )}
               </div>
-              {selectedItem.pronunciation && (
-                <div className="mb-2">
-                  {Array.isArray(selectedItem.pronunciation) ? (
-                    selectedItem.pronunciation.map((pron, idx) => (
-                      <p key={idx} className="text-white/70 text-sm font-mono">{pron}</p>
-                    ))
-                  ) : (
-                    <p className="text-white/70 text-sm font-mono">{selectedItem.pronunciation}</p>
+              {(selectedItem.pos || (selectedItem.category && selectedItem.category.length > 0)) && (
+                <div className="flex flex-wrap items-center gap-1">
+                  {selectedItem.pos && (
+                    Array.isArray(selectedItem.pos) ? (
+                      selectedItem.pos.map((p, idx) => (
+                        <span key={idx} className="text-xs font-medium text-white/60">{p}</span>
+                      ))
+                    ) : (
+                      <span className="text-xs font-medium text-white/60">{selectedItem.pos}</span>
+                    )
                   )}
-                </div>
-              )}
-              {selectedItem.category && selectedItem.category.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {selectedItem.category.map((cat, index) => (
-                    <span key={index} className="text-xs bg-white/5 px-1.5 py-0.5 rounded text-white/60">
+                  {selectedItem.category && selectedItem.category.map((cat, index) => (
+                    <span key={index} className="text-xs bg-white/5 px-1.5 py-0.5 rounded text-white/50">
                       {cat}
                     </span>
                   ))}

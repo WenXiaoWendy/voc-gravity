@@ -221,7 +221,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
               const maxMeanings = fontSize > 20 ? 3 : fontSize > 14 ? 2 : 1;
               const displayMeanings = allMeanings.slice(0, maxMeanings);
               // 如果有词性，在中文释义前加上词性
-              const posPrefix = item.pos ? `${item.pos} ` : '';
+              const posPrefix = item.pos ? `${Array.isArray(item.pos) ? item.pos.join(' ') : item.pos} ` : '';
               return posPrefix + displayMeanings.join('; ');
             })()}
           </div>
