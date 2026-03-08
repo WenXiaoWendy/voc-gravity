@@ -7,10 +7,16 @@ import re
 import os
 from core.token_stats import token_stats
 
+# ── LLM 配置（可替换为任意 OpenAI 兼容接口）─────────────────────────────────────
+# 提供商      base_url                                  model 示例
+# DeepSeek    https://api.deepseek.com/v1               deepseek-chat
+# Qwen        https://dashscope.aliyuncs.com/compatible-mode/v1  qwen-plus
+# 智谱 GLM    https://open.bigmodel.cn/api/paas/v4/     glm-4-flash
+# Kimi        https://api.moonshot.cn/v1                moonshot-v1-8k
+# OpenAI      https://api.openai.com/v1                 gpt-4o-mini
 llm = ChatOpenAI(
     model="deepseek-chat",
     temperature=0.1,
-    # 出于与 OpenAI 兼容考虑，您也可以将 base_url 设置为 https://api.deepseek.com/v1 来使用，但注意，此处 v1 与模型版本无关
     base_url="https://api.deepseek.com/v1",
     api_key=os.getenv("DEEPSEEK_API_KEY") # type: ignore
 )

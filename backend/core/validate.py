@@ -79,7 +79,7 @@ def validate_and_normalize(word: str) -> dict:
         # 网络超时等异常：跳过词典验证，交由 AI 判断
         dict_ok = None
 
-    # Step 2: DeepSeek 获取 lemma + 中文
+    # Step 2: LLM 获取 lemma + 中文（可替换为任意 OpenAI 兼容接口，参见 semantic.py 注释）
     llm = ChatOpenAI(
         model="deepseek-chat",
         temperature=0,

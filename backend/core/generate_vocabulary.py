@@ -339,7 +339,8 @@ usage_notes: 使用注意事项（字符串数组，可选）
 
 
 def generate_vocabulary_data(words: List[str], batch_size: int = 25) -> List[Dict[str, Any]]:
-    """调用 DeepSeek API 生成完整的词汇数据（单次 API 调用，由调用方控制批次大小）"""
+    """调用 LLM API 生成完整的词汇数据（单次 API 调用，由调用方控制批次大小）
+    可替换为任意 OpenAI 兼容接口，参见 semantic.py 注释"""
     llm = ChatOpenAI(
         model="deepseek-chat",
         temperature=0.3,

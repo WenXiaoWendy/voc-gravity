@@ -18,11 +18,15 @@ _backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 初始化 AI 记忆数据库
 # 使用本地模型避免HuggingFace认证问题
 # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-# 使用OpenAI text-embedding-3-large模型（DeepSeek不提供embedding服务）
+# ── Embedding 配置──────────────────────────────────────────────────────────────────
+# 推荐 text-embedding-3-large（3072 维），召回精度高；也可换其他 embedding 模型
+# 注意：更改嵌入模型后需删除 faiss_index 目录以重建索引
 embeddings = OpenAIEmbeddings(
     model="text-embedding-3-large",
     api_key=os.getenv("OPENAI_API_KEY") # type: ignore
 )
+
+# ── LLM 配置（可替换为任意 OpenAI 兼容接口，参见 semantic.py 注释）─────────────────
 llm = ChatOpenAI(
     model="deepseek-chat",
     base_url="https://api.deepseek.com/v1",
