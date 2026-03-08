@@ -1,30 +1,49 @@
-// 基于 d3-force 的力导向布局算法 - 统一互斥 + 智能边界展开
+// 基于 d3-force 的力导向布局算法 - 放射状散开 + 软边界扩散
 import { forceCenter, forceCollide, forceManyBody, forceRadial, forceSimulation } from 'd3-force';
+
+interface ForceNode {
+  id: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  fx?: number;
+  fy?: number;
+  radius: number;
+  layer: string;
+  score: number;
+  item: any;
+  isCenter: boolean;
+  targetRadius: number;
+}
 
 export const layoutBubbles = (items: any[], viewport: { width: number; height: number }) => {
   const layoutMap = new Map<string, any>();
+  // 上下留白：避开 NavBar(80px) + 面包屑(~40px) 和底部栏(48px)
+  const MARGIN_TOP = 140;
+  const MARGIN_BOTTOM = 60;
+  const MARGIN_X = 10;
   const centerX = viewport.width / 2;
-  const centerY = viewport.height / 2;
-  const GAP = 10; // 统一间隙：10px
+  // 布局中心偏移到可用区域的垂直中心
+  const centerY = (MARGIN_TOP + viewport.height - MARGIN_BOTTOM) / 2;
+  const GAP = 10;
 
-  // 气泡配置
+  // 可用区域半高，用于自适应缩放
+  const availableHalfH = (viewport.height - MARGIN_TOP - MARGIN_BOTTOM) / 2;
+  // 当可用高度不足时，按比例缩小各层半径
+  const scale = Math.min(1, availableHalfH / 550);
+
   const bubbleConfig = {
     sizes: { center: 90, inner: 80, middle: 60, outer: 45 },
     baseRadii: {
       center: 0,
-      inner: 250,    // 增大内层半径：中心半径 45 + 间隙 10 + 内层半径 40 + 额外空间 155
-      middle: 400,   // 内层 250 + 间隙 10 + 中层半径 30 + 额外空间 110
-      outer: 550     // 中层 400 + 间隙 10 + 外层半径 22.5 + 额外空间 117.5
+      inner: Math.round(250 * scale),
+      middle: Math.round(400 * scale),
+      outer: Math.round(550 * scale),
     },
-    maxCount: {
-      center: 1,
-      inner: 7,
-      middle: 16,
-      outer: 32
-    }
+    maxCount: { center: 1, inner: 7, middle: 16, outer: 32 }
   };
 
-  // 气泡大小配置
   const getBubbleSize = (item: any) => {
     const baseSize = bubbleConfig.sizes[item.layer as keyof typeof bubbleConfig.sizes] || 50;
     return Math.max(40, baseSize * (0.7 + item.score * 0.6));
@@ -34,32 +53,25 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
   const itemsByLayer = new Map<string, any[]>();
   items.forEach(item => {
     const layer = item.layer || 'outer';
-    if (!itemsByLayer.has(layer)) {
-      itemsByLayer.set(layer, []);
-    }
+    if (!itemsByLayer.has(layer)) itemsByLayer.set(layer, []);
     itemsByLayer.get(layer)!.push(item);
   });
 
-  // 根据配置限制每层气泡数量
   const filteredItems: any[] = [];
   itemsByLayer.forEach((layerItems, layer) => {
     const maxCount = bubbleConfig.maxCount[layer as keyof typeof bubbleConfig.maxCount] || 32;
-    // 按相似度排序，取前 N 个
     const sorted = layerItems.sort((a, b) => b.score - a.score);
-    const selected = sorted.slice(0, maxCount);
-    filteredItems.push(...selected);
+    filteredItems.push(...sorted.slice(0, maxCount));
   });
 
-  // 准备 d3-force 的数据结构
-  const nodes = filteredItems.map(item => {
+  // 准备节点
+  const nodes: ForceNode[] = filteredItems.map(item => {
     const radius = getBubbleSize(item);
     const isCenter = item.layer === 'center';
-    const baseRadius = bubbleConfig.baseRadii[item.layer as keyof typeof bubbleConfig.baseRadii] || 440;
+    const baseRadius = bubbleConfig.baseRadii[item.layer as keyof typeof bubbleConfig.baseRadii] || Math.round(440 * scale);
 
-    // 根据层级和相似度设置初始位置
     let initialX = centerX;
     let initialY = centerY;
-
     if (!isCenter) {
       const angle = Math.random() * 2 * Math.PI;
       initialX = centerX + Math.cos(angle) * baseRadius;
@@ -67,135 +79,78 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
     }
 
     return {
-      id: item.id,
-      x: initialX,
-      y: initialY,
-      vx: 0,
-      vy: 0,
-      fx: isCenter ? centerX : undefined, // 固定中心节点位置
+      id: item.id, x: initialX, y: initialY, vx: 0, vy: 0,
+      fx: isCenter ? centerX : undefined,
       fy: isCenter ? centerY : undefined,
-      radius: radius,
-      layer: item.layer,
-      score: item.score,
-      item: item,
-      isCenter: isCenter,
-      targetRadius: baseRadius
+      radius, layer: item.layer, score: item.score, item,
+      isCenter, targetRadius: baseRadius
     };
   });
 
-  // 定义节点类型
-  interface ForceNode {
-    id: string;
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    fx?: number;
-    fy?: number;
-    radius: number;
-    layer: string;
-    score: number;
-    item: any;
-    isCenter: boolean;
-    targetRadius: number;
+  // 自定义软边界力：气泡中心接近边界时被弹回
+  // 气泡体可以部分超出（形成 backdrop-blur 模糊透出效果）
+  function boundaryForce() {
+    let _nodes: ForceNode[];
+    function force() {
+      for (const node of _nodes) {
+        if (node.isCenter) continue;
+        const k = 0.5; // 边界弹力强度
+        // 上边界
+        if (node.y < MARGIN_TOP) node.vy += (MARGIN_TOP - node.y) * k;
+        // 下边界
+        if (node.y > viewport.height - MARGIN_BOTTOM) node.vy += (viewport.height - MARGIN_BOTTOM - node.y) * k;
+        // 左边界
+        if (node.x < MARGIN_X) node.vx += (MARGIN_X - node.x) * k;
+        // 右边界
+        if (node.x > viewport.width - MARGIN_X) node.vx += (viewport.width - MARGIN_X - node.x) * k;
+      }
+    }
+    force.initialize = (n: ForceNode[]) => { _nodes = n; };
+    return force;
   }
 
-  // 创建力导向模拟 - 使用统一的互斥算法
-  const simulation = forceSimulation(nodes as ForceNode[])
-    // 分层的电荷力：中心气泡有更强的排斥力
+  // 创建力导向模拟
+  const simulation = forceSimulation(nodes)
     .force('charge', forceManyBody<ForceNode>()
-      .strength((d: ForceNode) => {
-        if (d.isCenter) return -5000; // 增强中心气泡排斥力
-        if (d.layer === 'inner') return -1800; // 增强内层气泡排斥力
-        if (d.layer === 'middle') return -1000; // 增强中层气泡排斥力
-        return -700;                            // 增强外层气泡排斥力
+      .strength((d) => {
+        if (d.isCenter) return -2000;
+        if (d.layer === 'inner') return -1000;
+        if (d.layer === 'middle') return -300;
+        return -300;
       })
     )
-    // 统一的碰撞检测：所有气泡间隙统一为 10px
     .force('collide', forceCollide<ForceNode>()
-      .radius((d: ForceNode) => d.radius + GAP) // 统一间隙 10px
-      .strength(1.0) // 最强碰撞强度，确保不重叠
-      .iterations(5) // 增加碰撞检测迭代次数
+      .radius((d) => d.radius + GAP)
+      .strength(1.0)
+      .iterations(8)
     )
-    // 轻微的中心力，保持整体向心性
-    .force('center', forceCenter(centerX, centerY).strength(0.03))
-    // 径向力：保持分层结构
+    // 向心力：整体聚拢
+    .force('center', forceCenter(centerX, centerY).strength(0.05))
     .force('radial', forceRadial<ForceNode>(
-      (d: ForceNode) => d.targetRadius,
-      centerX,
-      centerY
-    ).strength((d: ForceNode) => {
+      (d) => d.targetRadius,
+      centerX, centerY
+    ).strength((d) => {
       if (d.isCenter) return 0;
-      // 内层气泡径向力最强，确保不靠近中心
-      if (d.layer === 'inner') return 1.8; // 增强内层径向力
-      if (d.layer === 'middle') return 1.0; // 增强中层径向力
-      return 0.7;                            // 增强外层径向力
+      if (d.layer === 'inner') return 1.8;
+      if (d.layer === 'middle') return 1.2;
+      return 0.9;
     }))
-    .alphaMin(0.0001) // 降低alpha阈值，让模拟运行更久
-    .alphaDecay(0.01) // 降低alpha衰减速度，让模拟更充分
-    .velocityDecay(0.4)
+    // 软边界力：气泡自然远离边界并向四角扩散
+    .force('boundary', boundaryForce() as any)
+    .alphaMin(0.0001)
+    .alphaDecay(0.008) // 更慢衰减，让模拟更充分
+    .velocityDecay(0.35)
     .stop();
 
-  // 手动运行模拟，确保收敛
-  for (let i = 0; i < 1000; i++) {  // 增加模拟迭代次数
+  // 运行模拟
+  for (let i = 0; i < 1500; i++) {
     simulation.tick();
-
-    // 检查是否收敛
     const maxVelocity = Math.max(...nodes.map(n => Math.sqrt(n.vx * n.vx + n.vy * n.vy)));
-    if (maxVelocity < 0.01) {  // 降低收敛阈值
-      break;
-    }
+    if (maxVelocity < 0.01) break;
   }
 
-  // 边界约束和智能展开逻辑
-  const viewportMargin = GAP;
-  const maxRadius = Math.min(viewport.width, viewport.height) / 2 - viewportMargin;
-
-  nodes.forEach(node => {
-    // 中心节点保持固定位置
-    if (node.isCenter) {
-      node.x = centerX;
-      node.y = centerY;
-      return;
-    }
-
-    // 计算到中心的距离
-    const dx = node.x - centerX;
-    const dy = node.y - centerY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx);
-
-    // 检查是否超出边界
-    if (distance + node.radius > maxRadius) {
-      // 超出边界，沿着当前角度向外展开
-      const targetDistance = maxRadius - node.radius;
-      node.x = centerX + Math.cos(angle) * targetDistance;
-      node.y = centerY + Math.sin(angle) * targetDistance;
-    }
-
-    // 确保不超出视口边界
-    const margin = viewportMargin;
-
-    // 左边界
-    if (node.x - node.radius < margin) {
-      node.x = margin + node.radius;
-    }
-    // 右边界
-    if (node.x + node.radius > viewport.width - margin) {
-      node.x = viewport.width - margin - node.radius;
-    }
-    // 上边界
-    if (node.y - node.radius < margin) {
-      node.y = margin + node.radius;
-    }
-    // 下边界
-    if (node.y + node.radius > viewport.height - margin) {
-      node.y = viewport.height - margin - node.radius;
-    }
-  });
-
-  // 二次碰撞检查：确保边界调整后仍然没有重叠
-  for (let iter = 0; iter < 200; iter++) {  // 增加迭代次数
+  // 二次碰撞检查：最终保障，绝对不允许重叠
+  for (let iter = 0; iter < 300; iter++) {
     let hasOverlap = false;
 
     for (let i = 0; i < nodes.length; i++) {
@@ -207,30 +162,19 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
         const dy = n2.y - n1.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // 如果涉及中心气泡，增加额外间隙
         let extraGap = 0;
-        if (n1.isCenter || n2.isCenter) {
-          extraGap = 15;  // 中心气泡与其他气泡额外增加5px间隙
-        }
+        if (n1.isCenter || n2.isCenter) extraGap = 15;
 
         const minDist = n1.radius + n2.radius + GAP + extraGap;
 
         if (dist < minDist && dist > 0) {
           hasOverlap = true;
-          // 沿连线方向推开
           const overlap = minDist - dist;
           const pushX = (dx / dist) * overlap * 0.5;
           const pushY = (dy / dist) * overlap * 0.5;
 
-          // 如果不是中心节点，则移动
-          if (!n1.isCenter) {
-            n1.x -= pushX;
-            n1.y -= pushY;
-          }
-          if (!n2.isCenter) {
-            n2.x += pushX;
-            n2.y += pushY;
-          }
+          if (!n1.isCenter) { n1.x -= pushX; n1.y -= pushY; }
+          if (!n2.isCenter) { n2.x += pushX; n2.y += pushY; }
         }
       }
     }
@@ -240,11 +184,7 @@ export const layoutBubbles = (items: any[], viewport: { width: number; height: n
 
   // 构建布局映射
   nodes.forEach(node => {
-    layoutMap.set(node.id, {
-      x: node.x,
-      y: node.y,
-      r: node.radius
-    });
+    layoutMap.set(node.id, { x: node.x, y: node.y, r: node.radius });
   });
 
   return layoutMap;

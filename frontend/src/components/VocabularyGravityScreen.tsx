@@ -3,7 +3,9 @@ import { useErrorMessage } from '../hooks/useErrorMessage';
 import { useVocabularyDB } from '../hooks/useVocabularyDB';
 import { BubbleItem } from '../types/bubble';
 import { addToHistory } from '../utils/searchHistory';
+import { loadPath, pushToPath } from '../utils/pathStack';
 import { BACKGROUND_COLOR } from '../utils/theme';
+import BreadcrumbPath from './BreadcrumbPath';
 import { BottomSheet } from './BottomSheet';
 import { BubbleField } from './BubbleField';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -100,8 +102,13 @@ export const VocabularyGravityScreen: React.FC = () => {
   const [isRelationPending, setIsRelationPending] = useState(false);
   const [recallMode, setRecallMode] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{ lemma: string; originalWord: string; pos?: string; chineseMeaning: string; isGenerating?: boolean } | null>(null);
+  const [pathStack, setPathStack] = useState<string[]>(() => loadPath());
   const currentQueryRef = useRef<string>('');
   const bubbleCache = useRef<Map<string, BubbleItem[]>>(new Map());
+
+  const updatePath = useCallback((word: string) => {
+    setPathStack(prev => pushToPath(prev, word));
+  }, []);
 
   // 词库加载完成后触发默认搜索
   useEffect(() => {
@@ -240,6 +247,7 @@ export const VocabularyGravityScreen: React.FC = () => {
       if (cachedBubbleItems) {
         setCurrentWords(cachedBubbleItems);
         setSelectedItem(cachedBubbleItems[0]);
+        updatePath(query);
         setLoadingItemId(null);
         if (shouldIncludeAnalysis) setShowRelationColors(true);
         return;
@@ -262,6 +270,7 @@ export const VocabularyGravityScreen: React.FC = () => {
               localItems = generateBubbleItems(event.words, query);
               setCurrentWords(localItems);
               setSelectedItem(localItems[0]);
+              updatePath(query);
               // isLoading 保持 true，直到 done 才关闭，期间禁止操作
               setLoadingItemId('center'); // 中心气泡持续呼吸灯
               setIsRelationPending(true); // 非中心气泡先置暗
@@ -317,6 +326,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         bubbleCache.current.set(query, items);
         setCurrentWords(items);
         setSelectedItem(items[0]);
+        updatePath(query);
         setLoadingItemId(null);
       }
     } catch (error) {
@@ -326,7 +336,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, includeAnalysis, showError, clearError]);
+  }, [isLoading, includeAnalysis, showError, clearError, updatePath]);
 
   // 搜索框入口：负责词汇验证、历史写入，再调公共 handleSearch
   const handleSearchFromBar = useCallback(async (rawQuery: string) => {
@@ -472,9 +482,11 @@ export const VocabularyGravityScreen: React.FC = () => {
         </div>
       )}
 
-      {/* 气泡场 */}
-      <div className="pt-20 relative">
-        {/* 气泡场 */}
+      {/* 面包屑探索路径 */}
+      <BreadcrumbPath pathStack={pathStack} onNavigateTo={handleSearch} isLoading={isLoading} />
+
+      {/* 气泡场：覆盖全屏，让 NavBar/面包屑的 backdrop-blur 能模糊到气泡 */}
+      <div className="relative">
         <BubbleField
           items={currentWords}
           selectedItem={selectedItem}
@@ -494,8 +506,8 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       {/* 右侧面板：关系类型图例 + 词汇详情面板，共享固定容器 */}
       <div
-        className="fixed right-3 top-24 z-30 w-[432px] flex flex-col gap-2"
-        style={{ bottom: '48px' }}
+        className="fixed right-3 z-30 w-[432px] flex flex-col gap-2"
+        style={{ top: pathStack.length >= 2 ? '128px' : '96px', bottom: '48px' }}
       >
         <div className="flex-shrink-0">
           <RelationLegend
