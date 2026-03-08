@@ -123,7 +123,3 @@ Core interfaces in `frontend/src/types/bubble.ts`:
 ### 完成功能后
 
 将 ROADMAP.md 对应条目从 `- [ ]` 改为 `- [x]`，并更新末尾的"最后更新"日期。
-
-### 语言
-
-**思考链（reasoning）和所有回复统一使用中文。**
