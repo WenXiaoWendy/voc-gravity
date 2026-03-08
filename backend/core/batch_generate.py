@@ -140,7 +140,6 @@ def batch_generate_all(
     single_words = get_single_words(all_words)
 
     output_backend = os.path.join(BACKEND_ROOT, 'data', 'ielts_complete.json')
-    output_frontend = os.path.join(BACKEND_ROOT, '..', 'frontend', 'public', 'ielts_complete.json')
 
     print(f"雅思词库总单词数: {len(all_words)}")
     print(f"单个单词数（不含复合词）: {len(single_words)}")
@@ -205,9 +204,6 @@ def batch_generate_all(
 
             print(f"总进度: {len(completed_words)}/{len(single_words)} ({len(completed_words)/len(single_words)*100:.1f}%)")
 
-    # 全部完成后同步到前端
-    save_vocabulary_data(all_results, output_frontend)
-    print(f"已同步到前端: {output_frontend}")
 
     print("\n" + "=" * 50)
     print("分批处理完成!")

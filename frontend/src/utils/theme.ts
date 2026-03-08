@@ -215,3 +215,11 @@ export const TEXT_BODY      = 'text-white/90';  // 主体内容（中文释义�
 export const TEXT_SECONDARY = 'text-white/70';  // 次级内容（例句英文）
 export const TEXT_LABEL     = 'text-white/60';  // 标签（词性、音标）
 export const TEXT_MUTED     = 'text-white/50';  // 弱化信息（词形标签等）
+
+// ── NavBar 设计 Token ──────────────────────────────────────────────────────────
+// 图标按钮激活色（Morandi 色系）
+export const NAV_ACTIVE_COLORS = {
+  recall:    '#B79A7A',  // 琥珀
+  favorites: '#A7A6BF',  // 紫罗兰
+  donate:    '#B4848F',  // 玫瑰
+} as const;

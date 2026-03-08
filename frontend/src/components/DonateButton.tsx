@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -12,7 +12,7 @@ const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
@@ -69,24 +69,7 @@ const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </a>
         </div>
       </div>
-    </div>
-  );
-};
-
-export const DonateButton: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        title="请我喝杯咖啡"
-        className="px-3 py-1.5 text-sm font-medium rounded-full border transition-all duration-200 bg-gray-800/80 text-gray-400 border-gray-700/50 hover:text-white hover:border-gray-500"
-      >
-        ☕
-      </button>
-      {open && createPortal(<DonateModal onClose={() => setOpen(false)} />, document.body)}
-    </>
+    </div>,
+    document.body
   );
 };

@@ -258,10 +258,10 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
       }}>
         {/* Word - 最大字号、居中、占主视觉，不换行 */}
         <span
-          className={`font-medium leading-none whitespace-nowrap`}
+          className={`font-medium whitespace-nowrap`}
           style={{
             fontSize: fontSize,
-            lineHeight: '1',
+            lineHeight: '1.15',
             color: theme.textColor,
             textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
             fontWeight: item.layer === 'center' ? 600 : 500

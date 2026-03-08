@@ -81,7 +81,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
             zIndex: 9999,
           }}
         >
-          <div className="px-3 py-1.5 text-[11px] text-white/25 border-b border-white/5 tracking-wider uppercase">
+          <div className="px-3 py-1.5 text-[11px] text-white/35 border-b border-white/10 tracking-wider uppercase">
             最近搜索
           </div>
           {history.map((word) => (
@@ -89,7 +89,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
               key={word}
               type="button"
               onMouseDown={(e) => { e.preventDefault(); doSearch(word); }}
-              className="w-full text-left px-4 py-2 text-white/60 hover:text-white/90 hover:bg-white/5 text-sm transition-colors"
+              className="w-full text-left px-4 py-2 text-white/70 hover:text-white/95 hover:bg-white/8 text-sm transition-colors"
             >
               {word}
             </button>
@@ -111,13 +111,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
             onFocus={handleFocus}
             placeholder="搜索词汇..."
             disabled={isLoading}
-            className="w-full pl-4 pr-[100px] py-2.5 bg-white/5 text-white/90 rounded-lg border border-white/10 focus:outline-none focus:border-[#5E8698]/70 placeholder:text-white/25 disabled:opacity-50 transition-colors duration-200"
+            className="w-full pl-4 pr-[100px] py-2.5 bg-white/5 text-white/90 rounded-lg border border-white/20 focus:outline-none focus:border-[#7FA8B8]/80 placeholder:text-white/40 disabled:opacity-70 transition-colors duration-200"
           />
           {query && !isLoading && (
             <button
               type="button"
               onClick={() => { setQuery(''); inputRef.current?.focus(); openHistory(); }}
-              className="absolute right-[76px] top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-white/30 hover:text-white/60 transition-colors duration-150"
+              className="absolute right-[76px] top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-white/50 hover:text-white/80 transition-colors duration-150"
               tabIndex={-1}
             >
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
@@ -128,8 +128,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
           <button
             type="submit"
             disabled={isLoading || !query.trim()}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-md text-white text-sm font-medium transition-all duration-200 disabled:opacity-40 flex items-center justify-center min-w-[52px]"
-            style={{ backgroundColor: '#7FA8B8' }}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center min-w-[52px]"
+            style={{ backgroundColor: '#7FA8B8', color: '#fff' }}
           >
             {isLoading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -135,12 +135,6 @@ cd backend
 python -m core.batch_generate_all --book your_book_key
 ```
 
-完成后同步到前端：
-
-```bash
-cp backend/data/your_book_complete.json frontend/src/data/
-```
-
 **Step 3 — 重建 FAISS 索引**
 
 修改 `backend/core/retrieval.py` 中的 `book_key`，删除旧索引目录 `backend/faiss_index/`，重启后端，索引自动重建。
@@ -177,7 +171,7 @@ voc-gravity/
 │   ├── api/app.py                  # Flask 入口
 │   └── core/
 │       ├── retrieval.py            # FAISS 向量检索
-│       ├── semantic.py             # DeepSeek 语义关系分析
+│       ├── semantic.py             # LLM 语义关系分析
 │       ├── token_stats.py          # Token 用量追踪
 │       ├── validate.py             # 新词验证
 │       └── batch_generate_all.py   # 批量词汇生成脚本 ← 核心工具
@@ -211,8 +205,7 @@ Nginx 关键配置：
 ```nginx
 location / { try_files $uri $uri/ /index.html; }
 location /api/ { proxy_pass http://127.0.0.1:8000; }
-# ielts_complete.json ≈ 4.6MB，建议开启 gzip
-gzip on; gzip_types application/json;
+gzip on; gzip_types application/json text/plain;
 ```
 
 ---

@@ -16,7 +16,7 @@ const BreadcrumbPath: React.FC<BreadcrumbPathProps> = ({ pathStack, onNavigateTo
   const visibleItems = hasHidden ? pathStack.slice(-MAX_VISIBLE) : pathStack;
 
   return (
-    <div className="fixed top-20 left-0 right-0 z-20"
+    <div className="fixed top-[70px] left-0 right-0 z-20"
       style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
       <div className="flex items-center gap-1 px-6 py-2.5 overflow-x-auto scrollbar-none min-w-0">
