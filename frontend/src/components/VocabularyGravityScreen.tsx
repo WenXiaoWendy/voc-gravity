@@ -16,7 +16,7 @@ import RelationLegend from './RelationLegend';
 // API基础URL
 const API_BASE_URL = 'http://localhost:8000/api';
 
-const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any }> => {
+const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any, wordDetails?: Record<string, any> }> => {
   const response = await fetch(`${API_BASE_URL}/retrieve`, {
     method: 'POST',
     headers: {
@@ -43,7 +43,8 @@ const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', in
   if (data.success) {
     return {
       words: data.words || [],
-      analysis: data.analysis
+      analysis: data.analysis,
+      wordDetails: data.word_details,
     };
   } else {
     throw new Error(data.error || '检索失败');
@@ -87,7 +88,7 @@ async function* retrieveWithSSE(query: string, bookKey: string) {
 const BOTTOM_BAR_CLASSES = 'fixed bottom-0 left-0 right-0 z-20 bg-black/20 backdrop-blur-lg p-3 text-center text-sm text-white/60 border-t border-white/5';
 
 export const VocabularyGravityScreen: React.FC = () => {
-  const { isLoaded, getWordDetails, fetchAndCacheWord } = useVocabularyDB();
+  const { getWordDetails, cacheWordDetails, fetchAndCacheWord } = useVocabularyDB();
   const [selectedItem, setSelectedItem] = useState<BubbleItem | null>(null);
   const [hoverItem, setHoverItem] = useState<BubbleItem | null>(null);
   const [currentWords, setCurrentWords] = useState<BubbleItem[]>([]);
@@ -110,12 +111,10 @@ export const VocabularyGravityScreen: React.FC = () => {
     setPathStack(prev => pushToPath(prev, word));
   }, []);
 
-  // 词库加载完成后触发默认搜索
+  // 组件挂载后触发默认搜索
   useEffect(() => {
-    if (isLoaded) {
-      handleSearch('abandon');
-    }
-  }, [isLoaded]);
+    handleSearch('abandon');
+  }, []);
 
   // 确保 showRelationColors 和 includeAnalysis 保持一致
   useEffect(() => {
@@ -267,6 +266,7 @@ export const VocabularyGravityScreen: React.FC = () => {
 
             if (event.type === 'words') {
               if (!event.words?.length) { showError('未检索到相关词汇，请尝试其他单词'); break; }
+              if (event.word_details) cacheWordDetails(event.word_details);
               localItems = generateBubbleItems(event.words, query);
               setCurrentWords(localItems);
               setSelectedItem(localItems[0]);
@@ -322,6 +322,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         // 快速模式：非流式
         const result = await retrieveSimilarWords(query, 'ielts', false);
         if (!result.words.length) { showError('未检索到相关词汇，请尝试其他单词'); return; }
+        if (result.wordDetails) cacheWordDetails(result.wordDetails);
         const items = generateBubbleItems(result.words, query);
         bubbleCache.current.set(query, items);
         setCurrentWords(items);
@@ -347,12 +348,6 @@ export const VocabularyGravityScreen: React.FC = () => {
     clearError();
     setIsLoading(true);
 
-    if (getWordDetails(query)) {
-      addToHistory(query);
-      handleSearch(query);
-      return;
-    }
-
     try {
       const validation = await fetch('/api/validate-word', {
         method: 'POST',
@@ -368,20 +363,20 @@ export const VocabularyGravityScreen: React.FC = () => {
 
       const lemma: string = validation.lemma;
 
-      if (!getWordDetails(lemma)) {
+      if (!validation.in_vocab) {
         setConfirmDialog({ lemma, originalWord: query, pos: validation.pos, chineseMeaning: validation.chinese_meaning || '' });
         setIsLoading(false);
         return;
       }
 
-      // lemma 在词书中（词形变化命中，如 running → run）
+      // lemma 在词书中
       addToHistory(lemma);
       handleSearch(lemma);
     } catch (error) {
       showError(error instanceof Error ? error.message : '验证失败，请稍后重试');
       setIsLoading(false);
     }
-  }, [isLoading, getWordDetails, clearError, showError, handleSearch]);
+  }, [isLoading, clearError, showError, handleSearch]);
 
   // 用户在弹窗中确认 AI 生成词汇详情
   const handleConfirmGenerate = useCallback(async () => {

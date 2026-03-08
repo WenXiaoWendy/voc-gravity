@@ -81,6 +81,7 @@ try:
     from core.token_stats import token_stats
     from core.generate_vocabulary import generate_vocabulary_data
     from core.validate import validate_and_normalize
+    from core.vocabulary import get_words_details, has_word, get_word_details
     backend_available = True
 except ImportError as e:
     print(f"Warning: Could not import backend modules: {e}")
@@ -150,12 +151,16 @@ def retrieve():
                 print(f"语义邻域分析失败: {analysis_error}")
                 # 分析失败不影响主要功能
 
+        # 批量查询所有词的详情
+        word_details = get_words_details([query] + final_words)
+
         return jsonify({
             'query': query,
             'words': final_words,
             'count': len(final_words),
             'analysis': analysis_result,
             'include_analysis': include_analysis,
+            'word_details': word_details,
             'success': True
         })
     except Exception as e:
@@ -195,8 +200,10 @@ def retrieve_stream():
                     seen.add(word)
                     words.append(word)
         words = words[:56]
-        # 第一阶段：推送词汇，前端立即渲染气泡
-        yield f"data: {json.dumps({'type': 'words', 'words': words}, ensure_ascii=False)}\n\n"
+        # 批量查询所有词的详情
+        details = get_words_details([query] + words)
+        # 第一阶段：推送词汇 + 详情，前端立即渲染气泡
+        yield f"data: {json.dumps({'type': 'words', 'words': words, 'word_details': details}, ensure_ascii=False)}\n\n"
         # 第二、三阶段：流式 DeepSeek（relation → reason_chunk → done）
         for event in analyze_semantic_neighborhood_stream(query, words):
             yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
@@ -220,7 +227,22 @@ def validate_word():
         if not word:
             return jsonify({'valid': False, 'error': 'Invalid word'}), 400
 
+        # 快速路径：词直接在词书中，跳过 DeepSeek 调用
+        lower = word.lower()
+        if has_word(lower):
+            details = get_word_details(lower)
+            return jsonify({
+                'valid': True,
+                'lemma': lower,
+                'pos': details.get('pos', '') if details else '',
+                'chinese_meaning': details.get('chinese_meaning', '') if details else '',
+                'in_vocab': True
+            })
+
+        # 慢路径：走 DeepSeek 验证
         result = validate_and_normalize(word)
+        if result.get('valid') and result.get('lemma'):
+            result['in_vocab'] = has_word(result['lemma'])
         return jsonify(result)
 
     except Exception as e:
