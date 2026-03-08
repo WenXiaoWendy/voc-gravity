@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useErrorMessage } from '../hooks/useErrorMessage';
 import { useVocabularyDB } from '../hooks/useVocabularyDB';
 import { BubbleItem } from '../types/bubble';
-import { addToHistory } from '../utils/searchHistory';
 import { loadPath, pushToPath } from '../utils/pathStack';
+import { addToHistory } from '../utils/searchHistory';
 import { BACKGROUND_COLOR } from '../utils/theme';
-import BreadcrumbPath from './BreadcrumbPath';
 import { BottomSheet } from './BottomSheet';
+import BreadcrumbPath from './BreadcrumbPath';
 import { BubbleField } from './BubbleField';
 import { ConfirmDialog } from './ConfirmDialog';
 import { HoverBubbleCard } from './HoverBubbleCard';
@@ -14,7 +14,7 @@ import NavBar from './NavBar';
 import RelationLegend from './RelationLegend';
 
 // API基础URL
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = '/api';
 
 const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any, wordDetails?: Record<string, any> }> => {
   const response = await fetch(`${API_BASE_URL}/retrieve`, {
