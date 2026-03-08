@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { getRelationChinese, relationTypeColorMap } from '@/utils/relations';
-import { GLASS_CARD, TEXT_PRIMARY, TEXT_BODY, TEXT_SECONDARY, TEXT_LABEL, TEXT_MUTED } from '@/utils/theme';
+import { GLASS_CARD_STYLE, TEXT_PRIMARY, TEXT_BODY, TEXT_SECONDARY, TEXT_LABEL, TEXT_MUTED } from '@/utils/theme';
 import { wordFormChineseMap } from '@/utils/wordForms';
 
 interface HoverBubbleCardProps {
@@ -82,12 +82,13 @@ export const HoverBubbleCard: React.FC<HoverBubbleCardProps> = ({ item, includeA
   return (
     <div
       ref={cardRef}
-      className={`fixed z-50 pointer-events-none ${GLASS_CARD} rounded-xl shadow-xl transition-opacity duration-200 ease-out`}
+      className={`fixed z-50 pointer-events-none rounded-xl shadow-xl transition-opacity duration-200 ease-out`}
       style={{
+        ...GLASS_CARD_STYLE,
         opacity: opacity,
         width: '280px',
         left: `${position.x}px`,
-        top: `${position.y}px`
+        top: `${position.y}px`,
       }}
     >
       {item && (

@@ -194,7 +194,13 @@ export const BACKGROUND_COLOR = '#0B0C10';
 // 毛玻璃 / Glassmorphism 公共样式
 // 适用于悬浮卡片、搜索历史下拉、确认弹窗等所有浮层
 // 注意：需通过 createPortal 渲染到 document.body，否则父级 backdrop-filter 会阻断模糊效果
-export const GLASS_CARD = 'bg-white/10 backdrop-blur-xl border border-white/10';
+// 深色玻璃浮层 — 暗底 + 模糊，保证白字在任意背景上可读
+export const GLASS_CARD_STYLE = {
+  background: 'rgba(15, 17, 22, 0.38)',
+  backdropFilter: 'blur(24px)',
+  WebkitBackdropFilter: 'blur(24px)',
+  border: '1px solid rgba(255, 255, 255, 0.10)',
+} as const;
 
 // 阴影配置
 export const SHADOW_CONFIG = {

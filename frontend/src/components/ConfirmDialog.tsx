@@ -9,7 +9,7 @@ interface ConfirmDialogProps {
   isGenerating?: boolean;
 }
 
-import { GLASS_CARD, TEXT_BODY, TEXT_LABEL, TEXT_MUTED, TEXT_SECONDARY } from '../utils/theme';
+import { GLASS_CARD_STYLE, TEXT_BODY, TEXT_LABEL, TEXT_MUTED, TEXT_SECONDARY } from '../utils/theme';
 
 export function ConfirmDialog({ isOpen, word, originalWord, pos, chineseMeaning, onConfirm, onCancel, isGenerating = false }: ConfirmDialogProps) {
   return (
@@ -18,7 +18,8 @@ export function ConfirmDialog({ isOpen, word, originalWord, pos, chineseMeaning,
       onClick={isGenerating ? undefined : onCancel}
     >
       <div
-        className={`${GLASS_CARD} rounded-2xl shadow-2xl w-80 mx-4 overflow-hidden`}
+        className="rounded-2xl shadow-2xl w-80 mx-4 overflow-hidden"
+        style={GLASS_CARD_STYLE}
         onClick={e => e.stopPropagation()}
       >
         {/* 词汇信息区 */}

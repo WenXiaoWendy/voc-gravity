@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { FavoriteItem, getFavorites, removeFromFavorites } from '../utils/favorites';
 import { getHistory } from '../utils/searchHistory';
+import { GLASS_CARD_STYLE } from '../utils/theme';
 
 interface FavoritesPanelProps {
   isOpen: boolean;
@@ -52,12 +53,7 @@ export const FavoritesPanel: React.FC<FavoritesPanelProps> = ({ isOpen, onClose,
     <div
       ref={panelRef}
       className="fixed top-[70px] right-3 md:right-4 z-[200] w-64 rounded-xl overflow-hidden shadow-2xl"
-      style={{
-        background: 'rgba(255,255,255,0.10)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.10)',
-      }}
+      style={GLASS_CARD_STYLE}
     >
       {/* Tab 切换 */}
       <div className="flex border-b border-white/10">

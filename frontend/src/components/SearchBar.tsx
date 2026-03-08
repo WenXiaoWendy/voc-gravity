@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { GLASS_CARD } from '../utils/theme';
+import { GLASS_CARD_STYLE } from '../utils/theme';
 import { getHistory } from '../utils/searchHistory';
 
 // 只允许英文字母、空格、连字符、撇号（如 don't、well-known）
@@ -72,8 +72,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
   const dropdown = showHistory && history.length > 0 && dropdownRect
     ? createPortal(
         <div
-          className={`${GLASS_CARD} rounded-xl shadow-2xl overflow-hidden`}
+          className="rounded-xl shadow-2xl overflow-hidden"
           style={{
+            ...GLASS_CARD_STYLE,
             position: 'fixed',
             top: dropdownRect.bottom + 4,
             left: dropdownRect.left,
