@@ -33,7 +33,7 @@ const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="flex flex-col items-center gap-2">
           <div className="w-44 h-44 rounded-xl overflow-hidden bg-white flex items-center justify-center">
             <img
-              src="/qrcode-wechat.png"
+              src="/qrcode-wechat.jpg"
               alt="微信收款码"
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -43,7 +43,7 @@ const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             />
             <div className="hidden w-full h-full items-center justify-center text-gray-400 text-xs text-center p-3 flex-col gap-1">
               <span className="text-3xl">📷</span>
-              <span>请将微信收款码<br />放入 public/qrcode-wechat.png</span>
+              <span>请将微信收款码<br />放入 public/qrcode-wechat.jpg</span>
             </div>
           </div>
           <span className="text-white/40 text-xs">微信扫码</span>
