@@ -1,15 +1,16 @@
 flask==2.3.3
 flask-cors==4.0.0
-flask-limiter==4.1.1
+flask-limiter==3.11.0
 langchain-community
 faiss-cpu
 openai
 langchain-openai
-torch==2.0.1
-torchvision==0.15.2
-transformers==4.38.2
-sentence-transformers==2.2.2
-huggingface-hub==0.22.2
+# 暂时该用openai嵌入,不使用以下库，等后续需要再安装
+# torch==2.0.1
+# torchvision==0.15.2
+# transformers==4.38.2
+# sentence-transformers==2.2.2
+# huggingface-hub==0.22.2
 langchain==0.3
 numpy==1.24.4
 
