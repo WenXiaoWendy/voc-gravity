@@ -11,33 +11,34 @@
 
 ---
 
-<!-- 截图 1：快速探索模式，展示气泡场全貌 -->
+<!-- 截图 1：快速探索模式，毫秒级响应 -->
 ![快速探索模式](docs/screenshot-fast.png)
 
-<!-- 截图 2：AI 深度解析模式，展示关系着色与底部抽屉 -->
+<!-- 截图 2：AI 深度解析模式，渐进式关系着色 -->
 ![AI 深度解析模式](docs/screenshot-ai.png)
 
+<!-- 截图 3：AI 深度解析模式，语义关系筛选与分析流式输出 -->
+![AI 深度解析模式](docs/screenshot-filter.png)
+
+<!-- 截图 2：背诵 -->
+![AI 深度解析模式](docs/screenshot-recite.png)
 ---
 
 ## 为什么做这个 / The story behind this
 
-我有 ADHD，思维习惯在关联之间跳跃，不太擅长按线性路径学东西。
+我是一名 ADHDer，思维跳跃，大脑天生抗拒线性的词汇表。
+面对传统背单词软件，我总陷入一种无力感：很多词明明似曾相识（形近、义近，或存在某种模糊的关联），但我却摸不透它们之间的确切边界。背了忘，忘了背，这片语义空间对我来说始终是个黑盒。
+于是我写了 Voc Gravity。它用 AI 模拟了我的非线性思维：将一个词置于中心，让相关的词汇像受引力吸引般在周围展开，把抽象的关联变成可视化的力导向气泡。
+最核心的体验在于“动态生长”：点击屏幕上的任意一个单词，系统会以它为新原点，实时拉扯出下一层语义网络。你的每一次点击，都在这片未知的词汇空间中铺展出一条只属于你的探索路径。
 
-用传统软件背单词时，总觉得很多词似曾相识——有些形近，有些义近，有些有某种说不清的关联——但不知道它们之间的关系到底是什么，差异在哪里，什么语境用哪个。背了忘，忘了背，却始终没有真正搞清楚那片语义空间。
+虽然内置了雅思词库，但这套架构是完全解耦的——只需要一份词表和你的 API Key，你就能为任何语言、任何领域构建同样的语义引力场。
 
-于是我想，能不能用 AI 来模拟我理解语言的方式：把一个词放在中心，把与它语义相邻的词围绕它展开，用力导向布局让关系变得可见。不是一个个单词，而是一张语义网络。
+I am an ADHDer. My mind jumps across concepts and naturally resists linear, A-to-Z vocabulary lists.
+Traditional language apps always left me frustrated. I kept encountering words that felt vaguely familiar—similar in spelling, close in meaning, or conceptually linked—but I could never pin down their exact boundaries. Memorize, forget, repeat. The semantic space remained a black box.
+So I built Voc Gravity to simulate how my brain actually works: put a word at the center, and let AI pull in its semantic neighbors using a force-directed layout. It turns invisible relationships into a visual, interactive bubble field.
+The real magic happens when you click. Select any word in the network, and it instantly becomes the new center, dynamically expanding a fresh layer of semantic branches. Your clicks carve out an infinite, personalized path of exploration.
 
-这个项目内置的是雅思词库，但架构支持任意语言的任意词汇集——**只需要一份词表和自己的 API Key，你可以为任何语言构建同样的语义探索工具**。
-
----
-
-*I have ADHD. My mind tends to move between associations rather than down a linear list.*
-
-*When studying vocabulary with traditional apps, I kept running into words that felt somehow familiar — some looked alike, some meant nearly the same thing, some were connected in ways I couldn't quite articulate. I'd studied them before, but I never really understood how they related to each other, what distinguished them, or which one belonged in which context.*
-
-*So I built this: put a word at the center, let word embeddings surface its semantic neighbors, and visualize the whole neighborhood as a force-directed bubble graph. Not a list. A space.*
-
-*It's built around IELTS vocabulary, but the architecture supports any language and any word list — **bring your own vocabulary file and API key, and you can build the same semantic explorer for any language**.*
+While it ships with an IELTS vocabulary, the architecture is completely agnostic—bring your own word list and API key, and you can generate this exact semantic gravity field for any language.
 
 ---
 
