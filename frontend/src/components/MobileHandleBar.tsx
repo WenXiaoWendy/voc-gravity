@@ -78,13 +78,13 @@ export const MobileHandleBar: React.FC<MobileHandleBarProps> = ({ selectedItem, 
                 <span onClick={e => e.stopPropagation()}>
                   <PronunciationButton word={selectedItem.word} size={14} />
                 </span>
+              </div>
+              <p className="text-white/55 text-xs truncate mt-0.5">
                 {selectedItem.pos && (
-                  <span className="text-white/40 text-[11px] shrink-0">
+                  <span className="text-white/40 mr-1">
                     {Array.isArray(selectedItem.pos) ? selectedItem.pos[0] : selectedItem.pos}
                   </span>
                 )}
-              </div>
-              <p className="text-white/55 text-xs truncate mt-0.5">
                 {selectedItem.chinese_gloss}
               </p>
             </div>
@@ -99,7 +99,8 @@ export const MobileHandleBar: React.FC<MobileHandleBarProps> = ({ selectedItem, 
             ) : selectedItem.layer !== 'center' ? (
               <button
                 onClick={handleExplore}
-                className="flex items-center gap-0.5 text-xs text-white/70 active:text-white shrink-0 px-2 py-1 rounded-full bg-white/10 active:bg-white/20 transition-all"
+                className="flex items-center gap-0.5 text-xs shrink-0 px-2 py-1 rounded-full font-medium transition-all active:opacity-80"
+                style={{ backgroundColor: '#7FA8B8', color: '#fff' }}
               >
                 探索
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">

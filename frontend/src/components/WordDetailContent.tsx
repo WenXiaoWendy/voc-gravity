@@ -6,9 +6,11 @@ import { PronunciationButton } from './PronunciationButton';
 
 interface WordDetailContentProps {
   item: BubbleItem;
+  onExplore?: () => void;
+  canExplore?: boolean;
 }
 
-export const WordDetailContent: React.FC<WordDetailContentProps> = ({ item }) => {
+export const WordDetailContent: React.FC<WordDetailContentProps> = ({ item, onExplore, canExplore }) => {
   const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
@@ -39,13 +41,20 @@ export const WordDetailContent: React.FC<WordDetailContentProps> = ({ item }) =>
             </span>
           )}
           <PronunciationButton word={item.word} size={16} />
-          {item.frequency && (
-            <span className="ml-auto shrink-0 text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/60">
-              词频 {item.frequency}/10
-            </span>
+          {canExplore && onExplore && (
+            <button
+              onClick={onExplore}
+              className="ml-auto shrink-0 flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full font-medium transition-all active:opacity-80"
+              style={{ backgroundColor: '#7FA8B8', color: '#fff' }}
+            >
+              探索
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
           )}
         </div>
-        {(item.pos || (item.category && item.category.length > 0)) && (
+        {(item.pos || (item.category && item.category.length > 0) || item.frequency) && (
           <div className="flex flex-wrap items-center gap-1">
             {item.pos && (
               Array.isArray(item.pos) ? (
@@ -61,6 +70,11 @@ export const WordDetailContent: React.FC<WordDetailContentProps> = ({ item }) =>
                 {cat}
               </span>
             ))}
+            {item.frequency && (
+              <span className="ml-auto shrink-0 text-xs bg-white/10 px-1.5 py-0.5 rounded-full text-white/50">
+                词频 {item.frequency}/10
+              </span>
+            )}
           </div>
         )}
       </div>

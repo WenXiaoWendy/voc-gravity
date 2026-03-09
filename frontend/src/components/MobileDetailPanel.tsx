@@ -90,28 +90,9 @@ export const MobileDetailPanel: React.FC<MobileDetailPanelProps> = ({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 顶栏：拖拽条 + 探索按钮 */}
-        <div className="flex items-center justify-between px-4 pt-2 pb-1 flex-shrink-0">
-          <div className="flex-1" />
+        {/* 顶栏：拖拽条 */}
+        <div className="flex justify-center px-4 pt-2 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-white/30" />
-          <div className="flex-1 flex justify-end">
-            {selectedItem && selectedItem.layer !== 'center' && (
-              <button
-                onClick={handleExplore}
-                disabled={isLoading}
-                className={`flex items-center gap-0.5 text-xs px-3 py-1.5 rounded-full transition-all ${
-                  isLoading
-                    ? 'bg-white/5 text-white/30 cursor-default'
-                    : 'bg-white/15 text-white/90 active:bg-white/25'
-                }`}
-              >
-                探索此词
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-            )}
-          </div>
         </div>
 
         {/* 分页指示器（AI 模式） */}
@@ -145,7 +126,13 @@ export const MobileDetailPanel: React.FC<MobileDetailPanelProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto">
           {selectedItem && (
             <>
-              {currentPage === 1 && <WordDetailContent item={selectedItem} />}
+              {currentPage === 1 && (
+                <WordDetailContent
+                  item={selectedItem}
+                  onExplore={handleExplore}
+                  canExplore={!isLoading && selectedItem.layer !== 'center'}
+                />
+              )}
               {currentPage === 2 && <AIAnalysisContent isStreaming={isStreaming} streamingReason={streamingReason} />}
             </>
           )}
