@@ -15,6 +15,27 @@ start = time.time()
 # backend 根目录（core/retrieval.py 的上一级）
 _backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# ── 查询向量缓存 ──────────────────────────────────────────────────────────────────
+# 持久化到 data/query_embedding_cache.json，避免对相同 query 重复调用 OpenAI Embedding API
+_EMBEDDING_CACHE_PATH = os.path.join(_backend_root, "data", "query_embedding_cache.json")
+
+def _load_embedding_cache() -> dict:
+    if os.path.exists(_EMBEDDING_CACHE_PATH):
+        try:
+            with open(_EMBEDDING_CACHE_PATH, 'r') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def _save_embedding_cache(cache: dict):
+    os.makedirs(os.path.dirname(_EMBEDDING_CACHE_PATH), exist_ok=True)
+    with open(_EMBEDDING_CACHE_PATH, 'w') as f:
+        json.dump(cache, f)
+
+_embedding_cache: dict = _load_embedding_cache()
+print(f"📦 查询向量缓存已加载，共 {len(_embedding_cache)} 条")
+
 # 初始化 AI 记忆数据库
 # 使用本地模型避免HuggingFace认证问题
 # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -141,12 +162,21 @@ def store_memory(text, book_key='ielts'):
 
 # 查询相关记忆
 def query_memory(query, book_key='ielts', k=5):
-    """查询指定词书的相关记忆"""
-    global db
-    if db:
-        results = db.similarity_search(query, k=k)
-        return results
-    return []
+    """查询指定词书的相关记忆，对 query 向量做本地缓存，命中时不调用 OpenAI"""
+    global db, _embedding_cache
+    if not db:
+        return []
+
+    cache_key = f"{book_key}:{query.lower().strip()}"
+    if cache_key in _embedding_cache:
+        vector = _embedding_cache[cache_key]
+    else:
+        vector = embeddings.embed_query(query)
+        _embedding_cache[cache_key] = vector
+        _save_embedding_cache(_embedding_cache)
+        print(f"🔑 新词向量已缓存: {cache_key}")
+
+    return db.similarity_search_by_vector(vector, k=k)
 
 # 切换词书
 def switch_vocabulary_book(book_key):
