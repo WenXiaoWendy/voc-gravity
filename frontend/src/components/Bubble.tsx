@@ -97,9 +97,9 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     // 半径驱动：优先填满气泡
     const radiusBased = layout.r * cfg.radiusRatio;
 
-    // 字符宽度适配：气泡 padding 15px 两侧共 30px，再留 6px 安全边距
-    const availableWidth = layout.r * 2 - 36;
-    const widthBased = availableWidth / Math.max(1, item.word.length * 0.65);
+    // 字符宽度适配：圆形气泡中可用水平宽度约为直径的 80%（文字偏离圆心时弦更短）
+    const availableWidth = layout.r * 1.6;
+    const widthBased = availableWidth / Math.max(1, item.word.length * 0.62);
 
     // widthBased 优先级最高（保证词完整显示），在此基础上再应用 min 保底和 max 上限
     const raw = Math.min(Math.max(cfg.min, Math.min(radiusBased, widthBased)), widthBased);
@@ -133,7 +133,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     top: layout.y - layout.r,
     width: layout.r * 2,
     height: layout.r * 2,
-    padding: '15px',
+    padding: `${Math.max(4, Math.round(layout.r * (item.layer === 'center' ? 0.12 : 0.2)))}px`,
     background: 'transparent',
     opacity: isBlurred ? 0.3 : isPending ? 0.12 : (item.layer === 'center' ? 0.95 : 0.85),
     border: isLoading && isLoadingItem
@@ -145,8 +145,12 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
     transform: isBlurred ? 'scale(0.9)' : (isSelected ? 'scale(1.15)' : 'scale(1)'),
     zIndex: isSelected ? 20 : item.layer === 'center' ? 15 : 10,
     filter: isBlurred ? 'blur(4px)' : 'none',
-    // 呼吸灯效果 - 加载状态下被选中的气泡微弱发光
-    animation: isLoading && isLoadingItem ? 'bubbleBreathing 3s ease-in-out infinite' : 'none',
+    // 呼吸灯效果 - center 强呼吸，其他气泡微弱脉动
+    animation: isLoading && isLoadingItem
+      ? 'bubbleBreathing 3s ease-in-out infinite'
+      : isLoading && !isLoadingItem && !isBlurred
+        ? 'bubblePulse 2s ease-in-out infinite'
+        : 'none',
   };
 
   // 处理点击事件 - 加载状态下不可点击
@@ -176,7 +180,7 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
   return (
     <div
       className={`
-        absolute rounded-full flex items-center justify-center
+        absolute rounded-full flex items-center justify-center overflow-hidden
         ${isLoading && isLoadingItem ? '' : 'transition-all duration-300'} font-serif backdrop-blur-sm
         ${isBlurred ? 'cursor-default' : (isLoading ? 'cursor-default' : 'cursor-pointer hover:scale-105 hover:opacity-95 active:scale-100')}
       `}
@@ -251,10 +255,9 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
         }}
       />
 
-      <div className="text-center relative z-10" style={{
-        maxWidth: '100%',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis'
+      <div className="relative z-10" style={{
+        overflow: 'visible',
+        textAlign: 'center',
       }}>
         {/* Word - 最大字号、居中、占主视觉，不换行 */}
         <span
@@ -270,24 +273,35 @@ export const Bubble = React.memo<BubbleProps>(({ item, layout, isSelected, onCli
           {item.word}
         </span>
 
-        {/* 中文释义：回忆模式下隐藏；center/inner/middle 显示词性+中文，outer 只显示一个中文 */}
+        {/* 中文释义：回忆模式下隐藏；左对齐、小字号、紧贴英文 */}
         {item.chinese_gloss && !recallMode && (
           <div
-            className="mt-1 leading-tight whitespace-nowrap"
+            className="leading-tight"
             style={{
-              fontSize: Math.max(10, fontSize * (item.layer === 'center' ? 0.30 : 0.38)),
+              fontSize: (() => {
+                const ratio = { center: 0.28, inner: 0.30, middle: 0.32, outer: 0.36 }[item.layer] ?? 0.36;
+                const min = { center: 10, inner: 9, middle: 8, outer: 7 }[item.layer] ?? 7;
+                return Math.max(min, fontSize * ratio);
+              })(),
               lineHeight: '1.1',
-              color: 'rgba(255, 255, 255, 0.95)',
+              marginTop: 1,
+              color: 'rgba(255, 255, 255, 0.9)',
               textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)',
-              fontWeight: 500,
-              letterSpacing: '0.02em',
+              fontWeight: 400,
+              letterSpacing: '0.01em',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              direction: 'ltr',
+              maxWidth: layout.r * 2 - Math.max(8, Math.round(layout.r * (item.layer === 'center' ? 0.12 : 0.2))) * 2,
             }}
           >
             {(() => {
               const meanings = item.chinese_gloss.split(/[，；、]/);
               const maxMeanings = item.layer === 'center'
                 ? (fontSize > 22 ? 3 : 2)
-                : (fontSize > 18 ? 3 : 2);
+                : (fontSize > 18 ? 2 : 1);
               const displayMeanings = meanings.slice(0, maxMeanings);
               const posRaw = item.pos ? (Array.isArray(item.pos) ? item.pos : item.pos.split('/')) : [];
               const posStr = item.layer === 'center' ? posRaw.join(' ') : (posRaw[0] ?? '');

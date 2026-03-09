@@ -2,14 +2,14 @@ const KEY = 'voc-path';
 
 export function loadPath(): string[] {
   try {
-    return JSON.parse(sessionStorage.getItem(KEY) || '[]');
+    return JSON.parse(localStorage.getItem(KEY) || '[]');
   } catch {
     return [];
   }
 }
 
 export function savePath(path: string[]): void {
-  sessionStorage.setItem(KEY, JSON.stringify(path));
+  localStorage.setItem(KEY, JSON.stringify(path));
 }
 
 /** 成功搜索词后更新路径：若词已在栈中则截断到该位置，否则 push 到末尾 */

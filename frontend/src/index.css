@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
+}
+
 body {
   margin: 0;
   overflow: hidden;
@@ -34,5 +39,17 @@ code {
       0 0 4px 2px rgba(255, 255, 255, 0.82),
       0 0 16px 6px rgba(255, 255, 255, 0.32),
       0 0 32px 12px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* 非 center 气泡的微弱脉动（loading 时） */
+@keyframes bubblePulse {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: scale(0.97);
   }
 }

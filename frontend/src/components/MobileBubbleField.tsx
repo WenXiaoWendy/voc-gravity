@@ -1,12 +1,10 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
-import { layoutBubblesMobile } from '../utils/mobileLayout';
+import { getOuterRadius, layoutBubblesMobile } from '../utils/mobileLayout';
 import { Bubble } from './Bubble';
 
 // 顶部区域预留给下拉搜索手势，不启动拖动
 const PULL_DOWN_ZONE = 120;
-// 拖动边界：最多偏移半个视口
-const PAN_LIMIT_RATIO = 0.5;
 
 interface MobileBubbleFieldProps {
   items: BubbleItem[];
@@ -26,18 +24,13 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
   isLoading = false, loadingItemId = null,
   isRelationPending = false, recallMode = false,
 }) => {
-  const [viewport, setViewport] = useState({
+  // viewport 只取一次，不监听 resize（避免地址栏伸缩触发 D3 重算）
+  const [viewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 390,
     height: typeof window !== 'undefined' ? window.innerHeight : 844,
   });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const touchRef = useRef<{ startX: number; startY: number; startPanX: number; startPanY: number; moved: boolean } | null>(null);
-
-  React.useEffect(() => {
-    const handleResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // 新词搜索时重置偏移
   const prevCenterWord = useRef<string | undefined>();
@@ -59,13 +52,18 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsKey, viewport]);
 
-  const maxPanX = viewport.width * PAN_LIMIT_RATIO;
-  const maxPanY = viewport.height * PAN_LIMIT_RATIO;
+  // 椭圆 pan 边界：允许把 center 偏移半个 outerR，聚焦边缘气泡但不露大片黑边
+  const outerR = useMemo(() => getOuterRadius(viewport), [viewport]);
+  const panRx = outerR * 0.5;
+  const panRy = outerR * 0.4;
 
-  const clampPan = useCallback((x: number, y: number) => ({
-    x: Math.max(-maxPanX, Math.min(maxPanX, x)),
-    y: Math.max(-maxPanY, Math.min(maxPanY, y)),
-  }), [maxPanX, maxPanY]);
+  const clampPan = useCallback((x: number, y: number) => {
+    const d = (x / panRx) ** 2 + (y / panRy) ** 2;
+    if (d <= 1) return { x, y };
+    // 投影到椭圆边缘
+    const s = 1 / Math.sqrt(d);
+    return { x: x * s, y: y * s };
+  }, [panRx, panRy]);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -105,9 +103,16 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
     onSelectItem(item);
   }, [onSelectItem]);
 
+  // 渐变淡出遮罩
+  const maskStyle: React.CSSProperties = {
+    WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at center, black 60%, transparent 100%)',
+    maskImage: 'radial-gradient(ellipse 85% 80% at center, black 60%, transparent 100%)',
+  };
+
   return (
     <div
-      className="relative w-full h-screen overflow-hidden bg-black"
+      className="relative w-full overflow-hidden bg-black"
+      style={{ height: '100dvh', touchAction: 'none', ...maskStyle }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

@@ -7,14 +7,12 @@ interface BreadcrumbPathProps {
   compact?: boolean;
 }
 
-const FOLD_THRESHOLD = 8; // 超过此数量才折叠
-const MAX_VISIBLE = FOLD_THRESHOLD - 1; // 折叠时显示最后 N 个词
+const MAX_VISIBLE = 8;
 
 const BreadcrumbPath: React.FC<BreadcrumbPathProps> = ({ pathStack, onNavigateTo, isLoading = false, compact = false }) => {
   if (pathStack.length < 2) return null;
 
-  const hasHidden = pathStack.length > FOLD_THRESHOLD;
-  const visibleItems = hasHidden ? pathStack.slice(-MAX_VISIBLE) : pathStack;
+  const visibleItems = pathStack.slice(-MAX_VISIBLE);
   const textSize = compact ? 'text-xs' : 'text-sm';
 
   return (
@@ -22,24 +20,15 @@ const BreadcrumbPath: React.FC<BreadcrumbPathProps> = ({ pathStack, onNavigateTo
       style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
       <div className={`flex items-center overflow-x-auto scrollbar-none min-w-0 ${compact ? 'gap-0.5 px-3 py-1.5' : 'gap-1 px-6 py-2.5'}`}>
-        {/* 若有隐藏词，显示第一个词 + 省略号 */}
-        {hasHidden && (
+        {pathStack.length > MAX_VISIBLE && (
           <>
-            <button
-              onClick={() => !isLoading && onNavigateTo(pathStack[0])}
-              className={`${textSize} shrink-0 whitespace-nowrap transition-colors ${isLoading ? 'text-white/25 cursor-default' : 'text-white/40 hover:text-white/65 cursor-pointer'}`}
-            >
-              {pathStack[0]}
-            </button>
-            <span className={`text-white/20 ${textSize} shrink-0 select-none mx-0.5`}>···</span>
+            <span className={`text-white/25 ${textSize} shrink-0 select-none`}>···</span>
             <span className={`text-white/20 ${textSize} shrink-0 select-none`}>›</span>
           </>
         )}
-
-        {/* 可见词列表 */}
         {visibleItems.map((word, i) => {
           const isLast = i === visibleItems.length - 1;
-          const globalIdx = hasHidden ? pathStack.length - MAX_VISIBLE + i : i;
+          const globalIdx = pathStack.length - visibleItems.length + i;
           return (
             <React.Fragment key={`${word}-${globalIdx}`}>
               {i > 0 && (

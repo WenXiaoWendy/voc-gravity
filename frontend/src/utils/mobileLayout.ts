@@ -17,25 +17,35 @@ interface ForceNode {
   targetRadius: number;
 }
 
+// 布局常量
+const MARGIN_TOP = 58;   // navbar 高度
+const MARGIN_BOTTOM = 60; // handle bar 高度
+
+/** 返回 outer 层轨道半径（用于 pan 边界计算） */
+export const getOuterRadius = (viewport: { width: number; height: number }) => {
+  const available = viewport.height - MARGIN_TOP - MARGIN_BOTTOM;
+  const scale = Math.min(1, available / 800);
+  return Math.round(280 * scale);
+};
+
 export const layoutBubblesMobile = (items: any[], viewport: { width: number; height: number }) => {
   const layoutMap = new Map<string, any>();
-  const MARGIN_TOP = 80;
-  const MARGIN_BOTTOM = 80;
-  const MARGIN_X = 8;
   const centerX = viewport.width / 2;
+  // 中心点：navbar 和 handlebar 之间的视觉中心
   const centerY = (MARGIN_TOP + viewport.height - MARGIN_BOTTOM) / 2;
-  const GAP = 6;
+  const GAP = 4;
 
-  const available = Math.min(viewport.width - MARGIN_X * 2, viewport.height - MARGIN_TOP - MARGIN_BOTTOM);
-  const scale = Math.min(1, available / 700);
+  // 用高度驱动 scale，允许外层气泡超出视口宽度（靠 pan 查看）
+  const available = viewport.height - MARGIN_TOP - MARGIN_BOTTOM;
+  const scale = Math.min(1, available / 800);
 
   const bubbleConfig = {
     sizes: { center: 52, inner: 44, middle: 36, outer: 28 },
     baseRadii: {
       center: 0,
-      inner: Math.round(140 * scale),
-      middle: Math.round(240 * scale),
-      outer: Math.round(340 * scale),
+      inner: Math.round(120 * scale),
+      middle: Math.round(200 * scale),
+      outer: Math.round(280 * scale),
     },
     maxCount: { center: 1, inner: 7, middle: 16, outer: 32 },
   };
@@ -81,17 +91,18 @@ export const layoutBubblesMobile = (items: any[], viewport: { width: number; hei
     };
   });
 
-  // 软边界力
+  // 软边界力 — 仅防止气泡跑到屏幕极端外侧，不限制在视口内
   function boundaryForce() {
     let _nodes: ForceNode[];
+    const softTop = MARGIN_TOP - 20;
+    const softBottom = viewport.height - MARGIN_BOTTOM + 20;
     function force() {
       for (const node of _nodes) {
         if (node.isCenter) continue;
-        const k = 0.6;
-        if (node.y < MARGIN_TOP) node.vy += (MARGIN_TOP - node.y) * k;
-        if (node.y > viewport.height - MARGIN_BOTTOM) node.vy += (viewport.height - MARGIN_BOTTOM - node.y) * k;
-        if (node.x < MARGIN_X) node.vx += (MARGIN_X - node.x) * k;
-        if (node.x > viewport.width - MARGIN_X) node.vx += (viewport.width - MARGIN_X - node.x) * k;
+        const k = 0.4;
+        if (node.y < softTop) node.vy += (softTop - node.y) * k;
+        if (node.y > softBottom) node.vy += (softBottom - node.y) * k;
+        // 水平方向不约束，让外层气泡自然扩展（通过 pan 查看）
       }
     }
     force.initialize = (n: ForceNode[]) => { _nodes = n; };

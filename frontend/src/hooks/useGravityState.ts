@@ -121,6 +121,7 @@ export function useGravityState() {
     if (currentQueryRef.current === query && includeAnalysisParam === undefined) return;
 
     setIsLoading(true);
+    setLoadingItemId('center');
     clearError();
     currentQueryRef.current = query;
     const shouldIncludeAnalysis = includeAnalysisParam ?? includeAnalysis;
@@ -299,9 +300,11 @@ export function useGravityState() {
     }
   }, [handleSearch, includeAnalysis]);
 
-  // 组件挂载后触发默认搜索
+  // 组件挂载后触发默认搜索：恢复上次路径末尾词，否则搜 abandon
   useEffect(() => {
-    handleSearch('abandon');
+    const saved = loadPath();
+    const lastWord = saved.length > 0 ? saved[saved.length - 1] : 'abandon';
+    handleSearch(lastWord);
   }, []);
 
   return {
