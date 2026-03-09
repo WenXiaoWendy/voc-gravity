@@ -52,6 +52,7 @@ export const VocabularyGravityScreen: React.FC = () => {
         onModeChange={handleModeChange}
         onRecallModeChange={setRecallMode}
         isLoading={isLoading}
+        includeAnalysis={includeAnalysis}
       />
 
       {/* 错误提示 */}

@@ -64,8 +64,8 @@ export function ConfirmDialog({ isOpen, word, originalWord, pos, chineseMeaning,
           <button
             onClick={onConfirm}
             disabled={isGenerating}
-            className="px-4 py-1.5 border border-white/10 text-white/80 text-sm rounded-xl transition-all duration-200 flex items-center gap-2 min-w-[100px] justify-center disabled:cursor-not-allowed"
-            style={{ backgroundColor: isGenerating ? 'rgba(127,168,184,0.15)' : 'rgba(127,168,184,0.2)' }}
+            className="px-4 py-1.5 text-white/80 text-sm rounded-xl transition-all duration-200 flex items-center gap-2 min-w-[100px] justify-center disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ ...GLASS_CARD_STYLE, opacity: isGenerating ? 0.7 : 1 }}
           >
             {isGenerating ? (
               <>

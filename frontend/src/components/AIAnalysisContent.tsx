@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface AIAnalysisContentProps {
   isStreaming?: boolean;
@@ -44,10 +44,19 @@ const formatReason = (reason: string) => {
 };
 
 export const AIAnalysisContent: React.FC<AIAnalysisContentProps> = ({ isStreaming, streamingReason }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 流式输出时自动滚到底部
+  useEffect(() => {
+    if (isStreaming && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [streamingReason, isStreaming]);
+
   return (
     <div className="h-full flex flex-col px-5 py-4">
-      <h4 className="text-xs font-medium text-white/60 mb-3 flex-shrink-0">AI 语义分析 ( 可点击上方关系类型筛选后对照查看讲解 )</h4>
-      <div className="flex-1 overflow-y-auto">
+      <h4 className="text-xs font-medium text-white/60 mb-3 flex-shrink-0">AI 语义分析 ( 可进行关系类型筛选后对照查看讲解 )</h4>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {isStreaming && !streamingReason ? (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <p className="text-white/60 text-sm text-center leading-relaxed">

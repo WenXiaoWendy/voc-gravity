@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { getOuterRadius, layoutBubblesMobile } from '../utils/mobileLayout';
 import { Bubble } from './Bubble';
@@ -16,6 +16,7 @@ interface MobileBubbleFieldProps {
   loadingItemId?: string | null;
   isRelationPending?: boolean;
   recallMode?: boolean;
+  isDetailOpen?: boolean;
 }
 
 export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
@@ -23,6 +24,7 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
   selectedRelationTypes = [], includeAnalysis = false,
   isLoading = false, loadingItemId = null,
   isRelationPending = false, recallMode = false,
+  isDetailOpen = false,
 }) => {
   // viewport 只取一次，不监听 resize（避免地址栏伸缩触发 D3 重算）
   const [viewport] = useState({
@@ -33,14 +35,10 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
   const touchRef = useRef<{ startX: number; startY: number; startPanX: number; startPanY: number; moved: boolean } | null>(null);
 
   // 新词搜索时重置偏移
-  const prevCenterWord = useRef<string | undefined>();
   const centerWord = items.find(i => i.layer === 'center')?.word;
-  if (centerWord !== prevCenterWord.current) {
-    prevCenterWord.current = centerWord;
-    if (panOffset.x !== 0 || panOffset.y !== 0) {
-      setPanOffset({ x: 0, y: 0 });
-    }
-  }
+  useEffect(() => {
+    setPanOffset({ x: 0, y: 0 });
+  }, [centerWord]);
 
   const itemsKey = useMemo(
     () => items.map(i => `${i.word}:${i.id}:${i.score.toFixed(4)}`).join('|'),
@@ -109,6 +107,10 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
     maskImage: 'radial-gradient(ellipse 85% 80% at center, black 60%, transparent 100%)',
   };
 
+  // 面板展开时将气泡中心上移至上半屏中心
+  // current center ≈ vh/2，target = (58 + vh*0.45)/2 → shift = 30 - vh*0.275
+  const panelShiftY = isDetailOpen ? (30 - viewport.height * 0.275) : 0;
+
   return (
     <div
       className="relative w-full overflow-hidden bg-black"
@@ -118,6 +120,8 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
       onTouchEnd={onTouchEnd}
       onClick={handleDoubleTap}
     >
+      {/* 面板偏移层：带 transition，不影响触摸拖拽响应速度 */}
+      <div style={{ transform: `translateY(${panelShiftY}px)`, transition: 'transform 0.3s ease-out', willChange: 'transform' }}>
       <div style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)`, willChange: 'transform' }}>
         {items.map(item => {
           const layout = layouts.get(item.id);
@@ -147,6 +151,7 @@ export const MobileBubbleField = React.memo<MobileBubbleFieldProps>(({
             />
           );
         })}
+      </div>
       </div>
     </div>
   );

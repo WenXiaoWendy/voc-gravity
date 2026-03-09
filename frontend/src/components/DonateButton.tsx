@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { GLASS_CARD_STYLE } from '../utils/theme';
 
 export const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -17,7 +18,7 @@ export const DonateModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="relative bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl w-96 text-center">
+      <div className="relative rounded-2xl p-8 w-96 text-center" style={GLASS_CARD_STYLE}>
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-white/30 hover:text-white/70 transition-colors"

@@ -29,8 +29,7 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
   };
 
   return (
-    <div className={`${className} ${!includeAnalysis ? 'pointer-events-none' : ''}`}>
-      <div className={`bg-black/30 backdrop-blur-xl rounded-lg shadow-xl p-2 w-full ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
+    <div className={`${className} ${!includeAnalysis ? 'pointer-events-none' : ''} ${!includeAnalysis ? 'blur-[0.5px]' : ''}`}>
         <div className="grid grid-cols-2 gap-1.5">
           {Object.entries(relationTypeChineseMap).map(([key, chinese]) => {
             const isSelected = selectedRelationTypes.includes(key);
@@ -86,7 +85,6 @@ const RelationLegend: React.FC<RelationLegendProps> = ({
             : '切换到 AI 深度解析以进行关系筛选'
           }
         </div>
-      </div>
     </div>
   );
 };

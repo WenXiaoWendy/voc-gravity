@@ -129,11 +129,18 @@ export function useGravityState() {
     try {
       const cachedBubbleItems = bubbleCache.current.get(query);
       if (cachedBubbleItems) {
+        const hasCachedAnalysis = cachedBubbleItems.some(item => item.reason);
+        if (shouldIncludeAnalysis && !hasCachedAnalysis) {
+          // Cache exists but without analysis — auto-switch to fast mode, no re-fetch
+          setIncludeAnalysis(false);
+          setShowRelationColors(false);
+          setSelectedRelationTypes([]);
+        }
         setCurrentWords(cachedBubbleItems);
         setSelectedItem(cachedBubbleItems[0]);
         updatePath(query);
         setLoadingItemId(null);
-        if (shouldIncludeAnalysis) setShowRelationColors(true);
+        if (shouldIncludeAnalysis && hasCachedAnalysis) setShowRelationColors(true);
         return;
       }
 

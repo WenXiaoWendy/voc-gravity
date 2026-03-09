@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGravityState } from '../hooks/useGravityState';
 import { BACKGROUND_COLOR } from '../utils/theme';
 import BreadcrumbPath from './BreadcrumbPath';
@@ -34,6 +34,13 @@ const MobileGravityScreen: React.FC = () => {
 
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+
+  // AI 流式输出开始时自动展开详情面板（MobileDetailPanel 内部会自动跳第2页）
+  useEffect(() => {
+    if (isStreaming) {
+      setIsDetailOpen(true);
+    }
+  }, [isStreaming]);
   const pullDownRef = useRef<{ startY: number; startTime: number } | null>(null);
 
   // 移动端点击气泡：仅选中，不触发搜索
@@ -46,8 +53,9 @@ const MobileGravityScreen: React.FC = () => {
     handleSearch(word, includeAnalysis);
   }, [handleSearch, includeAnalysis]);
 
-  // 下拉手势检测：起点 y < 150 且 deltaY > 60 时展示搜索
+  // 下拉手势检测：起点 y < 150 且 deltaY > 60 时展示搜索；详情面板打开时不拦截
   const onTouchStart = (e: React.TouchEvent) => {
+    if (isDetailOpen) return;
     const y = e.touches[0].clientY;
     if (y < 150) {
       pullDownRef.current = { startY: y, startTime: Date.now() };
@@ -73,6 +81,7 @@ const MobileGravityScreen: React.FC = () => {
         onModeChange={handleModeChange}
         onRecallModeChange={setRecallMode}
         isLoading={isLoading}
+        includeAnalysis={includeAnalysis}
         hideSearch
       />
 
@@ -117,6 +126,7 @@ const MobileGravityScreen: React.FC = () => {
         loadingItemId={loadingItemId}
         isRelationPending={isRelationPending}
         recallMode={recallMode}
+        isDetailOpen={isDetailOpen}
       />
 
       {/* AI 关系筛选浮动按钮 */}

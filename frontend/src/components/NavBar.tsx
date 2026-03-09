@@ -93,6 +93,7 @@ interface NavBarProps {
   className?: string;
   isLoading?: boolean;
   hideSearch?: boolean;
+  includeAnalysis?: boolean;
 }
 
 const NavBar: React.FC<NavBarProps> = ({
@@ -102,8 +103,11 @@ const NavBar: React.FC<NavBarProps> = ({
   className = '',
   isLoading = false,
   hideSearch = false,
+  includeAnalysis: includeAnalysisProp,
 }) => {
-  const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
+  const [includeAnalysisLocal, setIncludeAnalysisLocal] = React.useState(false);
+  const isControlled = includeAnalysisProp !== undefined;
+  const includeAnalysis = isControlled ? includeAnalysisProp! : includeAnalysisLocal;
   const [recallMode, setRecallMode] = React.useState(false);
   const [showFavorites, setShowFavorites] = React.useState(false);
   const [showDonate, setShowDonate] = React.useState(false);
@@ -117,7 +121,7 @@ const NavBar: React.FC<NavBarProps> = ({
   const handleModeToggle = () => {
     if (isLoading) return;
     const newMode = !includeAnalysis;
-    setIncludeAnalysis(newMode);
+    if (!isControlled) setIncludeAnalysisLocal(newMode);
     onModeChange?.(newMode);
   };
 
