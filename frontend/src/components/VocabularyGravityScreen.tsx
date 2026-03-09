@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { retrieveSimilarWords, retrieveWithSSE, validateWord } from '../api/retrieve';
 import { useErrorMessage } from '../hooks/useErrorMessage';
 import { useVocabularyDB } from '../hooks/useVocabularyDB';
 import { BubbleItem } from '../types/bubble';
@@ -12,75 +13,6 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { HoverBubbleCard } from './HoverBubbleCard';
 import NavBar from './NavBar';
 import RelationLegend from './RelationLegend';
-
-// API基础URL
-const API_BASE_URL = '/api';
-
-const retrieveSimilarWords = async (query: string, bookKey: string = 'ielts', includeAnalysis: boolean = false): Promise<{ words: string[], analysis?: any, wordDetails?: Record<string, any> }> => {
-  const response = await fetch(`${API_BASE_URL}/retrieve`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      book_key: bookKey,
-      k: 56,
-      include_analysis: includeAnalysis
-    })
-  });
-
-  if (!response.ok) {
-    if (response.status === 429) {
-      const data = await response.json();
-      throw new Error(data.message || '请求过于频繁，请稍后再试');
-    }
-    throw new Error(`服务器错误 (${response.status})`);
-  }
-
-  const data = await response.json();
-
-  if (data.success) {
-    return {
-      words: data.words || [],
-      analysis: data.analysis,
-      wordDetails: data.word_details,
-    };
-  } else {
-    throw new Error(data.error || '检索失败');
-  }
-};
-
-// SSE 流式获取（AI 模式专用），yield 每个事件对象
-async function* retrieveWithSSE(query: string, bookKey: string) {
-  const response = await fetch('/api/retrieve-stream', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, book_key: bookKey, k: 56 }),
-  });
-  if (!response.ok || !response.body) {
-    if (response.status === 429) {
-      const data = await response.json();
-      throw new Error(data.message || '请求过于频繁，请稍后再试');
-    }
-    throw new Error(`SSE 请求失败 (${response.status})`);
-  }
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    const parts = buf.split('\n\n');
-    buf = parts.pop()!;
-    for (const part of parts) {
-      if (part.startsWith('data: ')) {
-        try { yield JSON.parse(part.slice(6)); } catch { /* 跳过格式异常事件 */ }
-      }
-    }
-  }
-}
 
 // 主屏幕组件 - Apple Health / iOS 17 风格
 // 莫兰迪低饱和渐变彩质感
@@ -349,11 +281,7 @@ export const VocabularyGravityScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const validation = await fetch('/api/validate-word', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word: query }),
-      }).then(r => r.json());
+      const validation = await validateWord(query);
 
       if (!validation.valid) {
         showError(validation.error || '请输入正确的英文单词');

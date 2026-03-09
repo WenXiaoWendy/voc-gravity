@@ -212,8 +212,7 @@ const NavBar: React.FC<NavBarProps> = ({
         <div className="md:hidden flex flex-col gap-2 p-3">
           {/* 第一行 */}
           <div className="flex items-center justify-between gap-3">
-            {/* 左：缩略标题 */}
-            <h1 className="text-base font-semibold text-white/95 whitespace-nowrap shrink-0">VG</h1>
+            <h1 className="text-base font-semibold text-white/95 whitespace-nowrap shrink-0">Voc Gravity</h1>
 
             {/* 中：模式切换（紧凑） */}
             {modeSwitch(true)}
