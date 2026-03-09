@@ -10,10 +10,11 @@ const isValidWord = (val: string) => /^[a-zA-Z][a-zA-Z\s\-']*$/.test(val.trim())
 interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading?: boolean;
+  autoFocus?: boolean;
 }
 
 // 搜索组件
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = false }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = false, autoFocus = false }) => {
   const [query, setQuery] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
@@ -112,6 +113,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading = fals
             onFocus={handleFocus}
             placeholder="搜索词汇..."
             disabled={isLoading}
+            autoFocus={autoFocus}
             className="w-full pl-4 pr-[100px] py-2.5 bg-white/5 text-white/90 rounded-lg border border-white/20 focus:outline-none focus:border-[#7FA8B8]/80 placeholder:text-white/40 disabled:opacity-70 transition-colors duration-200"
           />
           {query && !isLoading && (

@@ -92,6 +92,7 @@ interface NavBarProps {
   onRecallModeChange?: (recallMode: boolean) => void;
   className?: string;
   isLoading?: boolean;
+  hideSearch?: boolean;
 }
 
 const NavBar: React.FC<NavBarProps> = ({
@@ -99,7 +100,8 @@ const NavBar: React.FC<NavBarProps> = ({
   onModeChange,
   onRecallModeChange,
   className = '',
-  isLoading = false
+  isLoading = false,
+  hideSearch = false,
 }) => {
   const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
   const [recallMode, setRecallMode] = React.useState(false);
@@ -223,8 +225,8 @@ const NavBar: React.FC<NavBarProps> = ({
             </div>
           </div>
 
-          {/* 第二行：搜索栏全宽 */}
-          <SearchBar onSearch={onSearch} isLoading={isLoading} />
+          {/* 第二行：搜索栏全宽（移动端可通过 hideSearch 隐藏） */}
+          {!hideSearch && <SearchBar onSearch={onSearch} isLoading={isLoading} />}
         </div>
       </div>
 

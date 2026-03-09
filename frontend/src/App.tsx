@@ -1,7 +1,10 @@
+import { useIsMobile } from './hooks/useIsMobile'
+import MobileGravityScreen from './components/MobileGravityScreen'
 import VocabularyGravityScreen from './components/VocabularyGravityScreen'
 
 function App() {
-  return <VocabularyGravityScreen />
+  const isMobile = useIsMobile()
+  return isMobile ? <MobileGravityScreen /> : <VocabularyGravityScreen />
 }
 
 export default App
