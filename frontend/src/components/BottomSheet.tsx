@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BubbleItem } from '../types/bubble';
 import { isFavorited, toggleFavorite } from '../utils/favorites';
 import { wordFormChineseMap } from '../utils/wordForms';
+import { GLASS_CARD_STYLE } from '../utils/theme';
 import { PronunciationButton } from './PronunciationButton';
 
 interface BottomSheetProps {
@@ -97,11 +98,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({ selectedItem, includeA
     <div
       className={`
         h-full w-full flex flex-col
-        bg-white/10 backdrop-blur-xl rounded-2xl
-        border border-white/10 shadow-2xl
+        rounded-2xl shadow-2xl
         transition-opacity duration-300
         ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
       `}
+      style={GLASS_CARD_STYLE}
       aria-hidden={!isVisible}
     >
       {/* 分页指示器 */}
