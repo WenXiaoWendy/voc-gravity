@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-→_Try_it-blue)](http://43.156.159.38/)
 
-**在线体验 →** http://43.156.159.38/ &nbsp;*(域名申请中)*
+**在线体验 →** https://abysslumina.com/vocgravity
 
 ---
 
